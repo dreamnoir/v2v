@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\manhattan\manhattan.net.xml" />
+	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\manhattan\manhattan_h.rou.xml" />
+	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\manhattan\sumo.sumo.cfg" type="config" />
+</launch>
+

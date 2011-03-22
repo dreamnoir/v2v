@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+
+<!-- generated on 03/20/11 15:58:33 by SUMO duarouter Version 0.12.2
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="small.net.xml"/>
+        <trip-defs value="trips.trips.xml"/>
+    </input>
+
+    <output>
+        <output-file value="small.rou.xml"/>
+    </output>
+
+</configuration>
+-->
+
+<routes>
+    <vehicle id="t0" depart="0.00">
+        <route edges="C1C0 C0B0 B0A0 A0A1 A1A0"/>
+    </vehicle>
+    <vehicle id="t1" depart="1.00">
+        <route edges="C1B1 B1B0 B0C0 C0C1"/>
+    </vehicle>
+    <vehicle id="t2" depart="2.00">
+        <route edges="B1A1 A1A0 A0B0 B0C0"/>
+    </vehicle>
+    <vehicle id="t3" depart="3.00">
+        <route edges="B0A0 A0A1 A1A2 A2A1"/>
+    </vehicle>
+    <vehicle id="t4" depart="4.00">
+        <route edges="A2A1 A1A0"/>
+    </vehicle>
+    <vehicle id="t5" depart="5.00">
+        <route edges="B2C2 C2C1"/>
+    </vehicle>
+    <vehicle id="t6" depart="6.00">
+        <route edges="B1A1 A1A2 A2B2"/>
+    </vehicle>
+    <vehicle id="t7" depart="7.00">
+        <route edges="A1B1 B1B2 B2C2 C2B2"/>
+    </vehicle>
+    <vehicle id="t8" depart="8.00">
+        <route edges="C0B0 B0C0 C0C1"/>
+    </vehicle>
+    <vehicle id="t9" depart="9.00">
+        <route edges="C2C1 C1C0 C0C1"/>
+    </vehicle>
+</routes>
