@@ -17,6 +17,9 @@ INCLUDE_PATH = \
     -I../mixim-sommer/base/connectionManager \
     -I../mixim-sommer/base/phyLayer \
     -I. \
+    -Imessages \
+    -Imessages/application \
+    -Imessages/netw \
     -Imodules \
     -Imodules/application \
     -Imodules/netw \
@@ -42,10 +45,12 @@ PROJECTRELATIVE_PATH =
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
-OBJS = $O/modules/application/TimedApplLayer.o $O/modules/netw/WSMNetwLayer.o
+OBJS = $O/modules/application/TimedApplLayer.o $O/modules/netw/WSMNetwLayer.o $O/messages/application/CCWSApplPkt_m.o $O/messages/netw/WSMPkt_m.o
 
 # Message files
-MSGFILES =
+MSGFILES = \
+    messages/application/CCWSApplPkt.msg \
+    messages/netw/WSMPkt.msg
 
 # Other makefile variables (-K)
 MIXIM_SOMMER_PROJ=../mixim-sommer
@@ -111,6 +116,9 @@ clean:
 	-rm -rf $O
 	-rm -f v2v v2v.exe libv2v.so libv2v.a libv2v.dll libv2v.dylib
 	-rm -f ./*_m.cc ./*_m.h
+	-rm -f messages/*_m.cc messages/*_m.h
+	-rm -f messages/application/*_m.cc messages/application/*_m.h
+	-rm -f messages/netw/*_m.cc messages/netw/*_m.h
 	-rm -f modules/*_m.cc modules/*_m.h
 	-rm -f modules/application/*_m.cc modules/application/*_m.h
 	-rm -f modules/netw/*_m.cc modules/netw/*_m.h
@@ -127,16 +135,47 @@ cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc modules/*.cc modules/application/*.cc modules/netw/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/netw/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+$O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
+	messages/application/CCWSApplPkt_m.h
+$O/messages/netw/WSMPkt_m.o: messages/netw/WSMPkt_m.cc \
+	messages/netw/WSMPkt_m.h
 $O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
-	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/TestApplLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseApplLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/PassedMessage.h \
+	modules/application/TimedApplLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h
-$O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h
+$O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/ArpInterface.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/SimpleAddress.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/NetwPkt_m.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/PassedMessage.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseNetwLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
+	modules/netw/WSMNetwLayer.h
 
