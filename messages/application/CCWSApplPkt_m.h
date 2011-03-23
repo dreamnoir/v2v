@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 #ifndef _CCWSAPPLPKT_M_H_
@@ -16,7 +16,7 @@
 
 
 /**
- * Class generated from <tt>messages/application/CCWSApplPkt.msg</tt> by opp_msgc.
+ * Class generated from <tt>CCWSApplPkt.msg</tt> by opp_msgc.
  * <pre>
  * packet CCWSAppPkt {
  *     int id;
@@ -24,6 +24,7 @@
  *     double y;
  *     double speed;
  *     double angle;
+ *     double accel;
  *     double width;
  *     double length;
  *     double utc;
@@ -38,6 +39,7 @@ class CCWSAppPkt : public ::cPacket
     double y_var;
     double speed_var;
     double angle_var;
+    double accel_var;
     double width_var;
     double length_var;
     double utc_var;
@@ -65,6 +67,8 @@ class CCWSAppPkt : public ::cPacket
     virtual void setSpeed(double speed_var);
     virtual double getAngle() const;
     virtual void setAngle(double angle_var);
+    virtual double getAccel() const;
+    virtual void setAccel(double accel_var);
     virtual double getWidth() const;
     virtual void setWidth(double width_var);
     virtual double getLength() const;

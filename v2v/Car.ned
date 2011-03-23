@@ -34,11 +34,11 @@ module Car
     submodules:
         utility: BaseUtility {
             parameters:
-                @display("p=130,38,rect;b=24,24,,black,,");
+                @display("p=130,38;rect;b=24,24,,black,,");
         }
         arp: BaseArp {
             parameters:
-                @display("p=130,84,rect;b=24,24,,blue,,");
+                @display("p=130,84;rect;b=24,24,,blue,,");
         }
         mobility: <mobType> like IBaseMobility {
             parameters:

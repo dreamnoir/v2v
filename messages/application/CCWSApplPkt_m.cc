@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -39,6 +39,7 @@ CCWSAppPkt::CCWSAppPkt(const char *name, int kind) : cPacket(name,kind)
     this->y_var = 0;
     this->speed_var = 0;
     this->angle_var = 0;
+    this->accel_var = 0;
     this->width_var = 0;
     this->length_var = 0;
     this->utc_var = 0;
@@ -63,6 +64,7 @@ CCWSAppPkt& CCWSAppPkt::operator=(const CCWSAppPkt& other)
     this->y_var = other.y_var;
     this->speed_var = other.speed_var;
     this->angle_var = other.angle_var;
+    this->accel_var = other.accel_var;
     this->width_var = other.width_var;
     this->length_var = other.length_var;
     this->utc_var = other.utc_var;
@@ -77,6 +79,7 @@ void CCWSAppPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->y_var);
     doPacking(b,this->speed_var);
     doPacking(b,this->angle_var);
+    doPacking(b,this->accel_var);
     doPacking(b,this->width_var);
     doPacking(b,this->length_var);
     doPacking(b,this->utc_var);
@@ -90,6 +93,7 @@ void CCWSAppPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->y_var);
     doUnpacking(b,this->speed_var);
     doUnpacking(b,this->angle_var);
+    doUnpacking(b,this->accel_var);
     doUnpacking(b,this->width_var);
     doUnpacking(b,this->length_var);
     doUnpacking(b,this->utc_var);
@@ -143,6 +147,16 @@ double CCWSAppPkt::getAngle() const
 void CCWSAppPkt::setAngle(double angle_var)
 {
     this->angle_var = angle_var;
+}
+
+double CCWSAppPkt::getAccel() const
+{
+    return accel_var;
+}
+
+void CCWSAppPkt::setAccel(double accel_var)
+{
+    this->accel_var = accel_var;
 }
 
 double CCWSAppPkt::getWidth() const
@@ -222,7 +236,7 @@ const char *CCWSAppPktDescriptor::getProperty(const char *propertyname) const
 int CCWSAppPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 8+basedesc->getFieldCount(object) : 8;
+    return basedesc ? 9+basedesc->getFieldCount(object) : 9;
 }
 
 unsigned int CCWSAppPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -242,8 +256,9 @@ unsigned int CCWSAppPktDescriptor::getFieldTypeFlags(void *object, int field) co
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<8) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
 const char *CCWSAppPktDescriptor::getFieldName(void *object, int field) const
@@ -260,11 +275,12 @@ const char *CCWSAppPktDescriptor::getFieldName(void *object, int field) const
         "y",
         "speed",
         "angle",
+        "accel",
         "width",
         "length",
         "utc",
     };
-    return (field>=0 && field<8) ? fieldNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldNames[field] : NULL;
 }
 
 int CCWSAppPktDescriptor::findField(void *object, const char *fieldName) const
@@ -276,9 +292,10 @@ int CCWSAppPktDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='y' && strcmp(fieldName, "y")==0) return base+2;
     if (fieldName[0]=='s' && strcmp(fieldName, "speed")==0) return base+3;
     if (fieldName[0]=='a' && strcmp(fieldName, "angle")==0) return base+4;
-    if (fieldName[0]=='w' && strcmp(fieldName, "width")==0) return base+5;
-    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+6;
-    if (fieldName[0]=='u' && strcmp(fieldName, "utc")==0) return base+7;
+    if (fieldName[0]=='a' && strcmp(fieldName, "accel")==0) return base+5;
+    if (fieldName[0]=='w' && strcmp(fieldName, "width")==0) return base+6;
+    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+7;
+    if (fieldName[0]=='u' && strcmp(fieldName, "utc")==0) return base+8;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -299,8 +316,9 @@ const char *CCWSAppPktDescriptor::getFieldTypeString(void *object, int field) co
         "double",
         "double",
         "double",
+        "double",
     };
-    return (field>=0 && field<8) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *CCWSAppPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -345,9 +363,10 @@ std::string CCWSAppPktDescriptor::getFieldAsString(void *object, int field, int 
         case 2: return double2string(pp->getY());
         case 3: return double2string(pp->getSpeed());
         case 4: return double2string(pp->getAngle());
-        case 5: return double2string(pp->getWidth());
-        case 6: return double2string(pp->getLength());
-        case 7: return double2string(pp->getUtc());
+        case 5: return double2string(pp->getAccel());
+        case 6: return double2string(pp->getWidth());
+        case 7: return double2string(pp->getLength());
+        case 8: return double2string(pp->getUtc());
         default: return "";
     }
 }
@@ -367,9 +386,10 @@ bool CCWSAppPktDescriptor::setFieldAsString(void *object, int field, int i, cons
         case 2: pp->setY(string2double(value)); return true;
         case 3: pp->setSpeed(string2double(value)); return true;
         case 4: pp->setAngle(string2double(value)); return true;
-        case 5: pp->setWidth(string2double(value)); return true;
-        case 6: pp->setLength(string2double(value)); return true;
-        case 7: pp->setUtc(string2double(value)); return true;
+        case 5: pp->setAccel(string2double(value)); return true;
+        case 6: pp->setWidth(string2double(value)); return true;
+        case 7: pp->setLength(string2double(value)); return true;
+        case 8: pp->setUtc(string2double(value)); return true;
         default: return false;
     }
 }
@@ -391,8 +411,9 @@ const char *CCWSAppPktDescriptor::getFieldStructName(void *object, int field) co
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<8) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
 }
 
 void *CCWSAppPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

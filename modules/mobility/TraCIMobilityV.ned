@@ -13,17 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-//
-// TODO generated message class
-//
-packet CCWSAppPkt {
-    int id;
-    double x;
-    double y;
-    double speed;
-    double angle;
-    double accel;
-    double width;
-    double length;
-    double utc;
+package v2v.modules.mobility;
+
+import org.mixim.modules.mobility.traci.TraCIMobility;
+
+simple TraCIMobilityV extends TraCIMobility
+{
+	parameters:
+		@class(TraCIMobilityV);
+		bool vision = default(false);
 }

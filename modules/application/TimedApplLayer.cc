@@ -6,7 +6,7 @@
  */
 
 #include "TimedApplLayer.h"
-#include "Move.h"
+#include "DetailedMove.h"
 
 Define_Module(TimedApplLayer);
 
@@ -26,7 +26,7 @@ void TimedApplLayer::initialize(int stage)
 
 		tVec.setName("transmissions");
 		delay = par("delay").doubleValue();
-		Move moveBBItem;
+		DetailedMove moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
 	}
 	else if(stage==1)
@@ -48,10 +48,8 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
 	if(category == catMove)
 	{
-		const Move* m = static_cast<const Move*>(details);
+		const DetailedMove* m = static_cast<const DetailedMove*>(details);
 
-		double speed = m->getSpeed();
-
-		ev << " application layer received move going " << speed << " speed." << endl;
+		ev << " application layer received move going " << m->info() << endl;
 	}
 }
