@@ -15,6 +15,8 @@ class WSMNetwLayer : public BaseNetwLayer
 {
 public:
 	void initialize(int stage);
+	virtual void handleLowerControl(cMessage* msg);
+	virtual NetwPkt* encapsMsg(cPacket*);
 };
 
 #endif /* WSMNETWLAYER_H_ */

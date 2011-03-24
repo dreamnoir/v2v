@@ -25,6 +25,8 @@ void TimedApplLayer::initialize(int stage)
 		TestApplLayer::initialize(stage);
 
 		tVec.setName("transmissions");
+		recVec.setName("received");
+		failedVec.setName("failed");
 		delay = par("delay").doubleValue();
 		DetailedMove moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
@@ -33,6 +35,26 @@ void TimedApplLayer::initialize(int stage)
 	{
 		scheduleAt(simTime() + delay + dblrand(), delayTimer);
 	}
+}
+
+void TimedApplLayer::handleLowerMsg(cMessage* msg)
+{
+    ApplPkt *m;
+    switch( msg->getKind() ){
+    case BROADCAST_MESSAGE:
+        m = static_cast<ApplPkt *>(msg);
+        EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
+        recVec.record(simTime());
+        break;
+    case BROADCAST_REPLY_MESSAGE:
+        m = static_cast<ApplPkt *>(msg);
+        EV << "Received reply from host["<<m->getSrcAddr()<<"]; delete msg\n";
+        delete msg;
+	break;
+    default:
+	EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
+        delete msg;
+    }
 }
 
 void TimedApplLayer::handleSelfMsg(cMessage *msg)

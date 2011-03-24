@@ -20,7 +20,11 @@ package v2v.v2v;
 
 import org.mixim.base.modules.*;
 import org.mixim.modules.nic.*;
-import v2v.modules.*;
+import v2v.modules.application.*;
+import v2v.modules.mac.*;
+import v2v.modules.mobility.*;
+import v2v.modules.netw.*;
+import v2v.modules.nic.*;
 
 module Car
 {
@@ -52,7 +56,7 @@ module Car
             parameters:
                 @display("p=60,108;i=prot1");
         }
-        nic: Nic80211 {
+        nic: Nic80211p {
             parameters:
                 @display("p=60,166;i=iface");
         }

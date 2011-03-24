@@ -1,7 +1,2 @@
 # Partial Tkenv config file -- see $HOME/.tkenvrc as well
-inspector "scenario" "scenario" "2" "1920x1018+25+25:normal"
-inspector "simulation.scheduled-events.BROADCAST_MESSAGE" "AirFrame" "1" "460x312+175+175:normal"
-inspector "simulation.scheduled-events.BROADCAST_MESSAGE" "AirFrame" "1" "460x312+175+175:normal"
-inspector "simulation.scheduled-events.BROADCAST_MESSAGE" "AirFrame" "1" "460x312+175+175:normal"
-inspector "simulation.scheduled-events.BROADCAST_MESSAGE" "AirFrame" "1" "460x312+175+175:normal"
 

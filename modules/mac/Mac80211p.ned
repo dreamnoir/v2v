@@ -13,20 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-//
-// TODO generated message class
-//
+package v2v.modules.mac;
 
-class NetwPkt;
+import org.mixim.modules.mac.Mac80211;
 
-cplusplus {{
-#include "NetwPkt_m.h"
-}};
+simple Mac80211p extends Mac80211
+{
+	parameters:
+		@class(Mac80211p);
 
-packet WSMPkt extends NetwPkt {
-    int chNum;
-    int dataRate;
-    int appPSI;
-    int txPower;
-	int length;
 }

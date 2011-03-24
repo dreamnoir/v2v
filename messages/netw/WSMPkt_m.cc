@@ -32,7 +32,7 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 Register_Class(WSMPkt);
 
-WSMPkt::WSMPkt(const char *name, int kind) : cPacket(name,kind)
+WSMPkt::WSMPkt(const char *name, int kind) : NetwPkt(name,kind)
 {
     this->chNum_var = 0;
     this->dataRate_var = 0;
@@ -41,7 +41,7 @@ WSMPkt::WSMPkt(const char *name, int kind) : cPacket(name,kind)
     this->length_var = 0;
 }
 
-WSMPkt::WSMPkt(const WSMPkt& other) : cPacket()
+WSMPkt::WSMPkt(const WSMPkt& other) : NetwPkt()
 {
     setName(other.getName());
     operator=(other);
@@ -54,7 +54,7 @@ WSMPkt::~WSMPkt()
 WSMPkt& WSMPkt::operator=(const WSMPkt& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    NetwPkt::operator=(other);
     this->chNum_var = other.chNum_var;
     this->dataRate_var = other.dataRate_var;
     this->appPSI_var = other.appPSI_var;
@@ -65,7 +65,7 @@ WSMPkt& WSMPkt::operator=(const WSMPkt& other)
 
 void WSMPkt::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    NetwPkt::parsimPack(b);
     doPacking(b,this->chNum_var);
     doPacking(b,this->dataRate_var);
     doPacking(b,this->appPSI_var);
@@ -75,7 +75,7 @@ void WSMPkt::parsimPack(cCommBuffer *b)
 
 void WSMPkt::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    NetwPkt::parsimUnpack(b);
     doUnpacking(b,this->chNum_var);
     doUnpacking(b,this->dataRate_var);
     doUnpacking(b,this->appPSI_var);
@@ -158,7 +158,7 @@ class WSMPktDescriptor : public cClassDescriptor
 
 Register_ClassDescriptor(WSMPktDescriptor);
 
-WSMPktDescriptor::WSMPktDescriptor() : cClassDescriptor("WSMPkt", "cPacket")
+WSMPktDescriptor::WSMPktDescriptor() : cClassDescriptor("WSMPkt", "NetwPkt")
 {
 }
 

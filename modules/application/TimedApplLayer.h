@@ -27,7 +27,7 @@ public:
 	};
 /** @brief Initialize module parameters*/
   virtual void initialize(int);
-
+  virtual void handleLowerMsg(cMessage* msg);
   virtual void receiveBBItem(int category, const BBItem *details, int scopeModuleId);
 
 protected:
@@ -35,7 +35,8 @@ protected:
   virtual void handleSelfMsg(cMessage*);
   int catMove;
   cOutVector tVec;
-
+  cOutVector recVec;
+  cOutVector failedVec;
 
 };
 
