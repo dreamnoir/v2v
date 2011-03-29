@@ -6,7 +6,11 @@
  */
 
 #include "TimedApplLayer.h"
-#include "DetailedMove.h"
+#include "Move.h"
+#include "CCWSApplPkt_m.h"
+#include "NetwControlInfo.h"
+#include "Coord.h"
+#include <SimpleAddress.h>
 
 Define_Module(TimedApplLayer);
 
@@ -16,19 +20,29 @@ void TimedApplLayer::Statistics::initialize()
 	receivedUpdates = 0;
 }
 
+void TimedApplLayer::Statistics::recordScalars(cSimpleModule& module)
+{
+	module.recordScalar("Sent Updates", sentUpdates);
+	module.recordScalar("Received Updates", receivedUpdates);
+}
+
+void TimedApplLayer::finish()
+{
+	stats.recordScalars(*this);
+}
+
 void TimedApplLayer::initialize(int stage)
 {
 
+    BaseApplLayer::initialize(stage);
 
 	if(stage == 0)
 	{
-		TestApplLayer::initialize(stage);
-
-		tVec.setName("transmissions");
-		recVec.setName("received");
-		failedVec.setName("failed");
+		stats.initialize();
+		delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
+		errorVec.setName("spe error");
 		delay = par("delay").doubleValue();
-		DetailedMove moveBBItem;
+		Move moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
 	}
 	else if(stage==1)
@@ -39,17 +53,15 @@ void TimedApplLayer::initialize(int stage)
 
 void TimedApplLayer::handleLowerMsg(cMessage* msg)
 {
-    ApplPkt *m;
+    CCWSApplPkt *m;
     switch( msg->getKind() ){
     case BROADCAST_MESSAGE:
-        m = static_cast<ApplPkt *>(msg);
+        m = static_cast<CCWSApplPkt *>(msg);
         EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
-        recVec.record(simTime());
+        ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angle=" << m->getAngle() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
+
+        stats.receivedUpdates++;
         break;
-    case BROADCAST_REPLY_MESSAGE:
-        m = static_cast<ApplPkt *>(msg);
-        EV << "Received reply from host["<<m->getSrcAddr()<<"]; delete msg\n";
-        delete msg;
 	break;
     default:
 	EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
@@ -59,10 +71,34 @@ void TimedApplLayer::handleLowerMsg(cMessage* msg)
 
 void TimedApplLayer::handleSelfMsg(cMessage *msg)
 {
-	TestApplLayer::sendBroadcast();
+	sendBroadcast();
 	delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
-	tVec.record(simTime());
 	scheduleAt(simTime() + delay, delayTimer);
+}
+
+void TimedApplLayer::sendBroadcast()
+{
+	CCWSApplPkt *pkt = new CCWSApplPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
+    pkt->setDestAddr(-1);
+    // we use the host modules getIndex() as a appl address
+    pkt->setSrcAddr( myApplAddr() );
+    pkt->setBitLength(headerLength);
+
+    pkt->setAccel(spe.getAcceleration());
+    //pkt->setX(this->x);
+    //pkt->setY(this->y);
+    pkt->setSpeed(spe.getSpeed());
+    //pkt->setAngle(this->angle);
+
+    // set the control info to tell the network layer the layer 3
+    // address;
+    pkt->setControlInfo( new NetwControlInfo(L3BROADCAST) );
+
+    EV << "Sending broadcast location packet!   " << simTime() << endl ;
+
+    stats.sentUpdates++;
+
+    sendDown( pkt );
 }
 
 void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
@@ -70,8 +106,18 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
 	if(category == catMove)
 	{
-		const DetailedMove* m = static_cast<const DetailedMove*>(details);
+		const Move* m = static_cast<const Move*>(details);
+		Coord estimate = spe.getCurrentPosition(simTime());
+		double diff = estimate.distance(m->getStartPos());
+		ev << "difference in position is " << diff << endl;
 
-		ev << " application layer received move going " << m->info() << endl;
+		errorVec.record(diff);
+
+		spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 	}
+}
+
+TimedApplLayer::~TimedApplLayer()
+{
+	cancelAndDelete(delayTimer);
 }

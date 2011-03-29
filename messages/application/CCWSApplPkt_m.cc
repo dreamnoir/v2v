@@ -30,9 +30,9 @@ void doUnpacking(cCommBuffer *, T& t) {
 
 
 
-Register_Class(CCWSAppPkt);
+Register_Class(CCWSApplPkt);
 
-CCWSAppPkt::CCWSAppPkt(const char *name, int kind) : cPacket(name,kind)
+CCWSApplPkt::CCWSApplPkt(const char *name, int kind) : ApplPkt(name,kind)
 {
     this->id_var = 0;
     this->x_var = 0;
@@ -45,20 +45,20 @@ CCWSAppPkt::CCWSAppPkt(const char *name, int kind) : cPacket(name,kind)
     this->utc_var = 0;
 }
 
-CCWSAppPkt::CCWSAppPkt(const CCWSAppPkt& other) : cPacket()
+CCWSApplPkt::CCWSApplPkt(const CCWSApplPkt& other) : ApplPkt()
 {
     setName(other.getName());
     operator=(other);
 }
 
-CCWSAppPkt::~CCWSAppPkt()
+CCWSApplPkt::~CCWSApplPkt()
 {
 }
 
-CCWSAppPkt& CCWSAppPkt::operator=(const CCWSAppPkt& other)
+CCWSApplPkt& CCWSApplPkt::operator=(const CCWSApplPkt& other)
 {
     if (this==&other) return *this;
-    cPacket::operator=(other);
+    ApplPkt::operator=(other);
     this->id_var = other.id_var;
     this->x_var = other.x_var;
     this->y_var = other.y_var;
@@ -71,9 +71,9 @@ CCWSAppPkt& CCWSAppPkt::operator=(const CCWSAppPkt& other)
     return *this;
 }
 
-void CCWSAppPkt::parsimPack(cCommBuffer *b)
+void CCWSApplPkt::parsimPack(cCommBuffer *b)
 {
-    cPacket::parsimPack(b);
+    ApplPkt::parsimPack(b);
     doPacking(b,this->id_var);
     doPacking(b,this->x_var);
     doPacking(b,this->y_var);
@@ -85,9 +85,9 @@ void CCWSAppPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->utc_var);
 }
 
-void CCWSAppPkt::parsimUnpack(cCommBuffer *b)
+void CCWSApplPkt::parsimUnpack(cCommBuffer *b)
 {
-    cPacket::parsimUnpack(b);
+    ApplPkt::parsimUnpack(b);
     doUnpacking(b,this->id_var);
     doUnpacking(b,this->x_var);
     doUnpacking(b,this->y_var);
@@ -99,101 +99,101 @@ void CCWSAppPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->utc_var);
 }
 
-int CCWSAppPkt::getId() const
+int CCWSApplPkt::getId() const
 {
     return id_var;
 }
 
-void CCWSAppPkt::setId(int id_var)
+void CCWSApplPkt::setId(int id_var)
 {
     this->id_var = id_var;
 }
 
-double CCWSAppPkt::getX() const
+double CCWSApplPkt::getX() const
 {
     return x_var;
 }
 
-void CCWSAppPkt::setX(double x_var)
+void CCWSApplPkt::setX(double x_var)
 {
     this->x_var = x_var;
 }
 
-double CCWSAppPkt::getY() const
+double CCWSApplPkt::getY() const
 {
     return y_var;
 }
 
-void CCWSAppPkt::setY(double y_var)
+void CCWSApplPkt::setY(double y_var)
 {
     this->y_var = y_var;
 }
 
-double CCWSAppPkt::getSpeed() const
+double CCWSApplPkt::getSpeed() const
 {
     return speed_var;
 }
 
-void CCWSAppPkt::setSpeed(double speed_var)
+void CCWSApplPkt::setSpeed(double speed_var)
 {
     this->speed_var = speed_var;
 }
 
-double CCWSAppPkt::getAngle() const
+double CCWSApplPkt::getAngle() const
 {
     return angle_var;
 }
 
-void CCWSAppPkt::setAngle(double angle_var)
+void CCWSApplPkt::setAngle(double angle_var)
 {
     this->angle_var = angle_var;
 }
 
-double CCWSAppPkt::getAccel() const
+double CCWSApplPkt::getAccel() const
 {
     return accel_var;
 }
 
-void CCWSAppPkt::setAccel(double accel_var)
+void CCWSApplPkt::setAccel(double accel_var)
 {
     this->accel_var = accel_var;
 }
 
-double CCWSAppPkt::getWidth() const
+double CCWSApplPkt::getWidth() const
 {
     return width_var;
 }
 
-void CCWSAppPkt::setWidth(double width_var)
+void CCWSApplPkt::setWidth(double width_var)
 {
     this->width_var = width_var;
 }
 
-double CCWSAppPkt::getLength() const
+double CCWSApplPkt::getLength() const
 {
     return length_var;
 }
 
-void CCWSAppPkt::setLength(double length_var)
+void CCWSApplPkt::setLength(double length_var)
 {
     this->length_var = length_var;
 }
 
-double CCWSAppPkt::getUtc() const
+double CCWSApplPkt::getUtc() const
 {
     return utc_var;
 }
 
-void CCWSAppPkt::setUtc(double utc_var)
+void CCWSApplPkt::setUtc(double utc_var)
 {
     this->utc_var = utc_var;
 }
 
-class CCWSAppPktDescriptor : public cClassDescriptor
+class CCWSApplPktDescriptor : public cClassDescriptor
 {
   public:
-    CCWSAppPktDescriptor();
-    virtual ~CCWSAppPktDescriptor();
+    CCWSApplPktDescriptor();
+    virtual ~CCWSApplPktDescriptor();
 
     virtual bool doesSupport(cObject *obj) const;
     virtual const char *getProperty(const char *propertyname) const;
@@ -212,34 +212,34 @@ class CCWSAppPktDescriptor : public cClassDescriptor
     virtual void *getFieldStructPointer(void *object, int field, int i) const;
 };
 
-Register_ClassDescriptor(CCWSAppPktDescriptor);
+Register_ClassDescriptor(CCWSApplPktDescriptor);
 
-CCWSAppPktDescriptor::CCWSAppPktDescriptor() : cClassDescriptor("CCWSAppPkt", "cPacket")
+CCWSApplPktDescriptor::CCWSApplPktDescriptor() : cClassDescriptor("CCWSApplPkt", "ApplPkt")
 {
 }
 
-CCWSAppPktDescriptor::~CCWSAppPktDescriptor()
+CCWSApplPktDescriptor::~CCWSApplPktDescriptor()
 {
 }
 
-bool CCWSAppPktDescriptor::doesSupport(cObject *obj) const
+bool CCWSApplPktDescriptor::doesSupport(cObject *obj) const
 {
-    return dynamic_cast<CCWSAppPkt *>(obj)!=NULL;
+    return dynamic_cast<CCWSApplPkt *>(obj)!=NULL;
 }
 
-const char *CCWSAppPktDescriptor::getProperty(const char *propertyname) const
+const char *CCWSApplPktDescriptor::getProperty(const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : NULL;
 }
 
-int CCWSAppPktDescriptor::getFieldCount(void *object) const
+int CCWSApplPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? 9+basedesc->getFieldCount(object) : 9;
 }
 
-unsigned int CCWSAppPktDescriptor::getFieldTypeFlags(void *object, int field) const
+unsigned int CCWSApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -261,7 +261,7 @@ unsigned int CCWSAppPktDescriptor::getFieldTypeFlags(void *object, int field) co
     return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
-const char *CCWSAppPktDescriptor::getFieldName(void *object, int field) const
+const char *CCWSApplPktDescriptor::getFieldName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -283,7 +283,7 @@ const char *CCWSAppPktDescriptor::getFieldName(void *object, int field) const
     return (field>=0 && field<9) ? fieldNames[field] : NULL;
 }
 
-int CCWSAppPktDescriptor::findField(void *object, const char *fieldName) const
+int CCWSApplPktDescriptor::findField(void *object, const char *fieldName) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount(object) : 0;
@@ -299,7 +299,7 @@ int CCWSAppPktDescriptor::findField(void *object, const char *fieldName) const
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
-const char *CCWSAppPktDescriptor::getFieldTypeString(void *object, int field) const
+const char *CCWSApplPktDescriptor::getFieldTypeString(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -321,7 +321,7 @@ const char *CCWSAppPktDescriptor::getFieldTypeString(void *object, int field) co
     return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
 }
 
-const char *CCWSAppPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
+const char *CCWSApplPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -334,7 +334,7 @@ const char *CCWSAppPktDescriptor::getFieldProperty(void *object, int field, cons
     }
 }
 
-int CCWSAppPktDescriptor::getArraySize(void *object, int field) const
+int CCWSApplPktDescriptor::getArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -342,13 +342,13 @@ int CCWSAppPktDescriptor::getArraySize(void *object, int field) const
             return basedesc->getArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    CCWSAppPkt *pp = (CCWSAppPkt *)object; (void)pp;
+    CCWSApplPkt *pp = (CCWSApplPkt *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-std::string CCWSAppPktDescriptor::getFieldAsString(void *object, int field, int i) const
+std::string CCWSApplPktDescriptor::getFieldAsString(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -356,7 +356,7 @@ std::string CCWSAppPktDescriptor::getFieldAsString(void *object, int field, int 
             return basedesc->getFieldAsString(object,field,i);
         field -= basedesc->getFieldCount(object);
     }
-    CCWSAppPkt *pp = (CCWSAppPkt *)object; (void)pp;
+    CCWSApplPkt *pp = (CCWSApplPkt *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getId());
         case 1: return double2string(pp->getX());
@@ -371,7 +371,7 @@ std::string CCWSAppPktDescriptor::getFieldAsString(void *object, int field, int 
     }
 }
 
-bool CCWSAppPktDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
+bool CCWSApplPktDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -379,7 +379,7 @@ bool CCWSAppPktDescriptor::setFieldAsString(void *object, int field, int i, cons
             return basedesc->setFieldAsString(object,field,i,value);
         field -= basedesc->getFieldCount(object);
     }
-    CCWSAppPkt *pp = (CCWSAppPkt *)object; (void)pp;
+    CCWSApplPkt *pp = (CCWSApplPkt *)object; (void)pp;
     switch (field) {
         case 0: pp->setId(string2long(value)); return true;
         case 1: pp->setX(string2double(value)); return true;
@@ -394,7 +394,7 @@ bool CCWSAppPktDescriptor::setFieldAsString(void *object, int field, int i, cons
     }
 }
 
-const char *CCWSAppPktDescriptor::getFieldStructName(void *object, int field) const
+const char *CCWSApplPktDescriptor::getFieldStructName(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -416,7 +416,7 @@ const char *CCWSAppPktDescriptor::getFieldStructName(void *object, int field) co
     return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
 }
 
-void *CCWSAppPktDescriptor::getFieldStructPointer(void *object, int field, int i) const
+void *CCWSApplPktDescriptor::getFieldStructPointer(void *object, int field, int i) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -424,7 +424,7 @@ void *CCWSAppPktDescriptor::getFieldStructPointer(void *object, int field, int i
             return basedesc->getFieldStructPointer(object, field, i);
         field -= basedesc->getFieldCount(object);
     }
-    CCWSAppPkt *pp = (CCWSAppPkt *)object; (void)pp;
+    CCWSApplPkt *pp = (CCWSApplPkt *)object; (void)pp;
     switch (field) {
         default: return NULL;
     }

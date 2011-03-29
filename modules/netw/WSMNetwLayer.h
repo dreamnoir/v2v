@@ -14,6 +14,11 @@
 class WSMNetwLayer : public BaseNetwLayer
 {
 public:
+
+	enum WSMMessageKinds
+	{
+		CCWS_MESSAGE_KIND = BaseNetwLayer::LAST_BASE_NETW_MESSAGE_KIND,
+	};
 	void initialize(int stage);
 	virtual void handleLowerControl(cMessage* msg);
 	virtual NetwPkt* encapsMsg(cPacket*);

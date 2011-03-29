@@ -13,24 +13,31 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-//
-// TODO generated message class
-//
+#ifndef POSITIONESTIMATOR_H_
+#define POSITIONESTIMATOR_H_
 
-class ApplPkt;
+#include "Coord.h"
 
-cplusplus {{
-#include "ApplPkt_m.h"
-}};
+class PositionEstimator : public cObject{
+public:
+	PositionEstimator();
 
-packet CCWSApplPkt extends ApplPkt {
-    int id;
-    double x;
-    double y;
-    double speed;
-    double angle;
-    double accel;
-    double width;
-    double length;
-    double utc;
-}
+	//gets estimate of current position
+	Coord getCurrentPosition(simtime_t time);
+
+	//update position information
+	void updatePosition(const Coord& position, double speed, const Coord& angle);
+
+	double getSpeed();
+	double getAcceleration() {return this->acceleration;}
+	const Coord& getAngle() {return this->angle;}
+
+protected:
+	Coord position;
+	double speed;
+	double acceleration;
+	Coord angle;
+	simtime_t lastUpdated;
+};
+
+#endif /* POSITIONESTIMATOR_H_ */

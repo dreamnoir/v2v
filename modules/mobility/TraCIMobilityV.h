@@ -9,13 +9,10 @@
 #define TRACIMOBILITYV_H_
 
 #include "TraCIMobility.h"
-#include "DetailedMove.h"
+#include "Move.h"
 
 class TraCIMobilityV : public TraCIMobility{
 
-	protected:
-		int	detailedMoveCategory;
-		DetailedMove location;
 	public:
 		virtual void initialize(int stage);
 		virtual void changePosition();

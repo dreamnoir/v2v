@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for libv2v
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep --make-so -O out -I../mixim-sommer/base -I../mixim-sommer/base/utils -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -lmixim -lmiximbase -lmiximmodules -lmiximtestUtils -KMIXIM_SOMMER_PROJ=../mixim-sommer
+#  opp_makemake -f --deep --make-so -O out -I../mixim-sommer/base/utils -I../mixim-sommer/base -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -lmixim -lmiximbase -lmiximmodules -lmiximtestUtils -KMIXIM_SOMMER_PROJ=../mixim-sommer
 #
 
 # Name of target to be created (-o option)
@@ -10,8 +10,8 @@ TARGET = libv2v$(SHARED_LIB_SUFFIX)
 
 # C++ include paths (with -I)
 INCLUDE_PATH = \
-    -I../mixim-sommer/base \
     -I../mixim-sommer/base/utils \
+    -I../mixim-sommer/base \
     -I../mixim-sommer/base/messages \
     -I../mixim-sommer/base/modules \
     -I../mixim-sommer/base/connectionManager \
@@ -62,6 +62,7 @@ OBJS = \
     $O/modules/mac/Mac80211p.o \
     $O/modules/mobility/TraCIMobilityV.o \
     $O/modules/netw/WSMNetwLayer.o \
+    $O/modules/utils/PositionEstimator.o \
     $O/messages/application/CCWSApplPkt_m.o \
     $O/messages/netw/WSMPkt_m.o
 
@@ -161,6 +162,7 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
+	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
 	messages/application/CCWSApplPkt_m.h
 $O/messages/netw/WSMPkt_m.o: messages/netw/WSMPkt_m.cc \
 	$(MIXIM_SOMMER_PROJ)/base/messages/NetwPkt_m.h \
@@ -168,10 +170,11 @@ $O/messages/netw/WSMPkt_m.o: messages/netw/WSMPkt_m.cc \
 $O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
-	modules/utils/DetailedMove.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/TestApplLayer.h \
+	messages/application/CCWSApplPkt_m.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/SimpleAddress.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseApplLayer.h \
@@ -180,6 +183,7 @@ $O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/PassedMessage.h \
 	modules/application/TimedApplLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	modules/utils/PositionEstimator.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
@@ -232,10 +236,9 @@ $O/modules/mobility/TraCIMobilityV.o: modules/mobility/TraCIMobilityV.cc \
 	$(MIXIM_SOMMER_PROJ)/base/connectionManager/BaseConnectionManager.h \
 	$(MIXIM_SOMMER_PROJ)/modules/mobility/traci/TraCIMobility.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
-	modules/utils/DetailedMove.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
 	modules/mobility/TraCIMobilityV.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
@@ -277,4 +280,8 @@ $O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Interpolation.h
+$O/modules/utils/PositionEstimator.o: modules/utils/PositionEstimator.cc \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	modules/utils/PositionEstimator.h
 
