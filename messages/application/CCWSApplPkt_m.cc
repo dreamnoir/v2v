@@ -38,7 +38,8 @@ CCWSApplPkt::CCWSApplPkt(const char *name, int kind) : ApplPkt(name,kind)
     this->x_var = 0;
     this->y_var = 0;
     this->speed_var = 0;
-    this->angle_var = 0;
+    this->angleX_var = 0;
+    this->angleY_var = 0;
     this->accel_var = 0;
     this->width_var = 0;
     this->length_var = 0;
@@ -63,7 +64,8 @@ CCWSApplPkt& CCWSApplPkt::operator=(const CCWSApplPkt& other)
     this->x_var = other.x_var;
     this->y_var = other.y_var;
     this->speed_var = other.speed_var;
-    this->angle_var = other.angle_var;
+    this->angleX_var = other.angleX_var;
+    this->angleY_var = other.angleY_var;
     this->accel_var = other.accel_var;
     this->width_var = other.width_var;
     this->length_var = other.length_var;
@@ -78,7 +80,8 @@ void CCWSApplPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->x_var);
     doPacking(b,this->y_var);
     doPacking(b,this->speed_var);
-    doPacking(b,this->angle_var);
+    doPacking(b,this->angleX_var);
+    doPacking(b,this->angleY_var);
     doPacking(b,this->accel_var);
     doPacking(b,this->width_var);
     doPacking(b,this->length_var);
@@ -92,7 +95,8 @@ void CCWSApplPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->x_var);
     doUnpacking(b,this->y_var);
     doUnpacking(b,this->speed_var);
-    doUnpacking(b,this->angle_var);
+    doUnpacking(b,this->angleX_var);
+    doUnpacking(b,this->angleY_var);
     doUnpacking(b,this->accel_var);
     doUnpacking(b,this->width_var);
     doUnpacking(b,this->length_var);
@@ -139,14 +143,24 @@ void CCWSApplPkt::setSpeed(double speed_var)
     this->speed_var = speed_var;
 }
 
-double CCWSApplPkt::getAngle() const
+double CCWSApplPkt::getAngleX() const
 {
-    return angle_var;
+    return angleX_var;
 }
 
-void CCWSApplPkt::setAngle(double angle_var)
+void CCWSApplPkt::setAngleX(double angleX_var)
 {
-    this->angle_var = angle_var;
+    this->angleX_var = angleX_var;
+}
+
+double CCWSApplPkt::getAngleY() const
+{
+    return angleY_var;
+}
+
+void CCWSApplPkt::setAngleY(double angleY_var)
+{
+    this->angleY_var = angleY_var;
 }
 
 double CCWSApplPkt::getAccel() const
@@ -236,7 +250,7 @@ const char *CCWSApplPktDescriptor::getProperty(const char *propertyname) const
 int CCWSApplPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 9+basedesc->getFieldCount(object) : 9;
+    return basedesc ? 10+basedesc->getFieldCount(object) : 10;
 }
 
 unsigned int CCWSApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -257,8 +271,9 @@ unsigned int CCWSApplPktDescriptor::getFieldTypeFlags(void *object, int field) c
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<10) ? fieldTypeFlags[field] : 0;
 }
 
 const char *CCWSApplPktDescriptor::getFieldName(void *object, int field) const
@@ -274,13 +289,14 @@ const char *CCWSApplPktDescriptor::getFieldName(void *object, int field) const
         "x",
         "y",
         "speed",
-        "angle",
+        "angleX",
+        "angleY",
         "accel",
         "width",
         "length",
         "utc",
     };
-    return (field>=0 && field<9) ? fieldNames[field] : NULL;
+    return (field>=0 && field<10) ? fieldNames[field] : NULL;
 }
 
 int CCWSApplPktDescriptor::findField(void *object, const char *fieldName) const
@@ -291,11 +307,12 @@ int CCWSApplPktDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='x' && strcmp(fieldName, "x")==0) return base+1;
     if (fieldName[0]=='y' && strcmp(fieldName, "y")==0) return base+2;
     if (fieldName[0]=='s' && strcmp(fieldName, "speed")==0) return base+3;
-    if (fieldName[0]=='a' && strcmp(fieldName, "angle")==0) return base+4;
-    if (fieldName[0]=='a' && strcmp(fieldName, "accel")==0) return base+5;
-    if (fieldName[0]=='w' && strcmp(fieldName, "width")==0) return base+6;
-    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+7;
-    if (fieldName[0]=='u' && strcmp(fieldName, "utc")==0) return base+8;
+    if (fieldName[0]=='a' && strcmp(fieldName, "angleX")==0) return base+4;
+    if (fieldName[0]=='a' && strcmp(fieldName, "angleY")==0) return base+5;
+    if (fieldName[0]=='a' && strcmp(fieldName, "accel")==0) return base+6;
+    if (fieldName[0]=='w' && strcmp(fieldName, "width")==0) return base+7;
+    if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+8;
+    if (fieldName[0]=='u' && strcmp(fieldName, "utc")==0) return base+9;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -317,8 +334,9 @@ const char *CCWSApplPktDescriptor::getFieldTypeString(void *object, int field) c
         "double",
         "double",
         "double",
+        "double",
     };
-    return (field>=0 && field<9) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<10) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *CCWSApplPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -362,11 +380,12 @@ std::string CCWSApplPktDescriptor::getFieldAsString(void *object, int field, int
         case 1: return double2string(pp->getX());
         case 2: return double2string(pp->getY());
         case 3: return double2string(pp->getSpeed());
-        case 4: return double2string(pp->getAngle());
-        case 5: return double2string(pp->getAccel());
-        case 6: return double2string(pp->getWidth());
-        case 7: return double2string(pp->getLength());
-        case 8: return double2string(pp->getUtc());
+        case 4: return double2string(pp->getAngleX());
+        case 5: return double2string(pp->getAngleY());
+        case 6: return double2string(pp->getAccel());
+        case 7: return double2string(pp->getWidth());
+        case 8: return double2string(pp->getLength());
+        case 9: return double2string(pp->getUtc());
         default: return "";
     }
 }
@@ -385,11 +404,12 @@ bool CCWSApplPktDescriptor::setFieldAsString(void *object, int field, int i, con
         case 1: pp->setX(string2double(value)); return true;
         case 2: pp->setY(string2double(value)); return true;
         case 3: pp->setSpeed(string2double(value)); return true;
-        case 4: pp->setAngle(string2double(value)); return true;
-        case 5: pp->setAccel(string2double(value)); return true;
-        case 6: pp->setWidth(string2double(value)); return true;
-        case 7: pp->setLength(string2double(value)); return true;
-        case 8: pp->setUtc(string2double(value)); return true;
+        case 4: pp->setAngleX(string2double(value)); return true;
+        case 5: pp->setAngleY(string2double(value)); return true;
+        case 6: pp->setAccel(string2double(value)); return true;
+        case 7: pp->setWidth(string2double(value)); return true;
+        case 8: pp->setLength(string2double(value)); return true;
+        case 9: pp->setUtc(string2double(value)); return true;
         default: return false;
     }
 }
@@ -412,8 +432,9 @@ const char *CCWSApplPktDescriptor::getFieldStructName(void *object, int field) c
         NULL,
         NULL,
         NULL,
+        NULL,
     };
-    return (field>=0 && field<9) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<10) ? fieldStructNames[field] : NULL;
 }
 
 void *CCWSApplPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

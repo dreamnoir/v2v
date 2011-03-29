@@ -35,6 +35,7 @@ INCLUDE_PATH = \
     -Imodules/netw \
     -Imodules/nic \
     -Imodules/utils \
+    -Imodules/vision \
     -Inetworks \
     -Inetworks/highway \
     -Inetworks/london \
@@ -63,6 +64,7 @@ OBJS = \
     $O/modules/mobility/TraCIMobilityV.o \
     $O/modules/netw/WSMNetwLayer.o \
     $O/modules/utils/PositionEstimator.o \
+    $O/modules/vision/VisionManager.o \
     $O/messages/application/CCWSApplPkt_m.o \
     $O/messages/netw/WSMPkt_m.o
 
@@ -145,6 +147,7 @@ clean:
 	-rm -f modules/netw/*_m.cc modules/netw/*_m.h
 	-rm -f modules/nic/*_m.cc modules/nic/*_m.h
 	-rm -f modules/utils/*_m.cc modules/utils/*_m.h
+	-rm -f modules/vision/*_m.cc modules/vision/*_m.h
 	-rm -f networks/*_m.cc networks/*_m.h
 	-rm -f networks/highway/*_m.cc networks/highway/*_m.h
 	-rm -f networks/london/*_m.cc networks/london/*_m.h
@@ -158,7 +161,7 @@ cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/utils/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
@@ -284,4 +287,10 @@ $O/modules/utils/PositionEstimator.o: modules/utils/PositionEstimator.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	modules/utils/PositionEstimator.h
+$O/modules/vision/VisionManager.o: modules/vision/VisionManager.cc \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	$(MIXIM_SOMMER_PROJ)/base/connectionManager/NicEntry.h \
+	$(MIXIM_SOMMER_PROJ)/base/connectionManager/BaseConnectionManager.h \
+	modules/vision/VisionManager.h
 

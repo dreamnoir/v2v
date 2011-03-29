@@ -28,7 +28,8 @@ packet CCWSApplPkt extends ApplPkt {
     double x;
     double y;
     double speed;
-    double angle;
+    double angleX;
+    double angleY;
     double accel;
     double width;
     double length;

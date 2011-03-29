@@ -27,7 +27,8 @@
  *     double x;
  *     double y;
  *     double speed;
- *     double angle;
+ *     double angleX;
+ *     double angleY;
  *     double accel;
  *     double width;
  *     double length;
@@ -42,7 +43,8 @@ class CCWSApplPkt : public ::ApplPkt
     double x_var;
     double y_var;
     double speed_var;
-    double angle_var;
+    double angleX_var;
+    double angleY_var;
     double accel_var;
     double width_var;
     double length_var;
@@ -69,8 +71,10 @@ class CCWSApplPkt : public ::ApplPkt
     virtual void setY(double y_var);
     virtual double getSpeed() const;
     virtual void setSpeed(double speed_var);
-    virtual double getAngle() const;
-    virtual void setAngle(double angle_var);
+    virtual double getAngleX() const;
+    virtual void setAngleX(double angleX_var);
+    virtual double getAngleY() const;
+    virtual void setAngleY(double angleY_var);
     virtual double getAccel() const;
     virtual void setAccel(double accel_var);
     virtual double getWidth() const;

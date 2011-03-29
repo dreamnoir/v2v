@@ -67,6 +67,10 @@ protected:
 	int catMove;
 
 	cOutVector errorVec;
+	cOutVector nerrorVec;
+
+	int maxVehicles;
+	PositionEstimator** nve;
 
 };
 

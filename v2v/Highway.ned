@@ -21,6 +21,7 @@ package v2v.v2v;
 import org.mixim.base.connectionManager.ConnectionManager;
 import org.mixim.base.modules.BaseWorldUtility;
 import org.mixim.modules.mobility.traci.TraCIScenarioManagerLaunchd;
+import v2v.modules.vision.VisionManager;
 
 module Highway
 {
@@ -33,6 +34,10 @@ module Highway
         connectionManager: ConnectionManager {
          	parameters:
                 @display("p=5000,250;b=42,42;rect,green,,;i=abstract/multicast");   
+        }
+        vision: VisionManager {
+        	parameters:
+        		 @display("p=5000,1000;b=42,42;rect,green,,;i=abstract/multicast");   
         }
         world: BaseWorldUtility {
             parameters:

@@ -41,30 +41,56 @@ void TimedApplLayer::initialize(int stage)
 		stats.initialize();
 		delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
 		errorVec.setName("spe error");
+		nerrorVec.setName("nve error");
 		delay = par("delay").doubleValue();
+		maxVehicles = (int) par("maxVehicles").doubleValue();
 		Move moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
 	}
 	else if(stage==1)
 	{
+		nve = new PositionEstimator*[maxVehicles];
+		for (int i=0; i<maxVehicles; i++)
+			nve[i] = 0;
 		scheduleAt(simTime() + delay + dblrand(), delayTimer);
 	}
 }
 
 void TimedApplLayer::handleLowerMsg(cMessage* msg)
 {
+	int from;
+	Coord estimate, now;
+	double diff;
     CCWSApplPkt *m;
     switch( msg->getKind() ){
     case BROADCAST_MESSAGE:
         m = static_cast<CCWSApplPkt *>(msg);
-        EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
-        ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angle=" << m->getAngle() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
+        if (debug) EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
+        if (debug) ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angleX=" << m->getAngleX() << "| angleY=" << m->getAngleY() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
 
         stats.receivedUpdates++;
+
+        from = m->getSrcAddr();
+
+        if (nve[from] == 0)
+        	nve[from] = new PositionEstimator;
+
+        if (m->getCreationTime() - nve[from]->getLastUpdated() < 5)
+        {
+			estimate = nve[from]->getCurrentPosition(simTime());
+			now.setX(m->getX());
+			now.setY(m->getY());
+			diff = estimate.distance(now);
+			if (debug) ev << "difference in position is " << diff << endl;
+
+			if (diff > 0)
+				nerrorVec.record(diff);
+        }
+        nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
+
         break;
-	break;
     default:
-	EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
+    	if (debug) EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
         delete msg;
     }
 }
@@ -85,16 +111,17 @@ void TimedApplLayer::sendBroadcast()
     pkt->setBitLength(headerLength);
 
     pkt->setAccel(spe.getAcceleration());
-    //pkt->setX(this->x);
-    //pkt->setY(this->y);
+    pkt->setX(spe.getCurrentPosition(simTime()).getX());
+    pkt->setY(spe.getCurrentPosition(simTime()).getY());
     pkt->setSpeed(spe.getSpeed());
-    //pkt->setAngle(this->angle);
+    pkt->setAngleX(spe.getAngle().getX());
+    pkt->setAngleY(spe.getAngle().getY());
 
     // set the control info to tell the network layer the layer 3
     // address;
     pkt->setControlInfo( new NetwControlInfo(L3BROADCAST) );
 
-    EV << "Sending broadcast location packet!   " << simTime() << endl ;
+    if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
 
     stats.sentUpdates++;
 
@@ -109,9 +136,10 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 		const Move* m = static_cast<const Move*>(details);
 		Coord estimate = spe.getCurrentPosition(simTime());
 		double diff = estimate.distance(m->getStartPos());
-		ev << "difference in position is " << diff << endl;
+		if (debug) ev << "difference in position is " << diff << endl;
 
-		errorVec.record(diff);
+		if (diff > 0)
+			errorVec.record(diff);
 
 		spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 	}

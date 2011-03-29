@@ -22,6 +22,7 @@ simple TimedApplLayer like IBaseApplLayer
     parameters:
     	double delay;
     	bool debug; // debug switch
+    	int maxVehicles;
     	int headerLength @unit("bit"); // length of the application message header (in bits)
     gates:
     	input lowerGateIn; // from network layer
