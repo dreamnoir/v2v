@@ -17,7 +17,9 @@ void TraCIMobilityV::initialize(int stage)
 
 void TraCIMobilityV::changePosition()
 {
-	Coord vangle = new Coord(cos(this->angle), sin(this->angle));
+
+	//fix this, must be a radian issue?
+	Coord vangle = new Coord(-1*cos(this->angle), -1*sin(this->angle));
 
 	move.setSpeed(this->speed);
 	move.setDirectionByVector(vangle);

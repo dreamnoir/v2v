@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from WSMPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from messages/netw/WSMPkt.msg.
 //
 
 #ifndef _WSMPKT_M_H_
@@ -20,7 +20,7 @@
 
 
 /**
- * Class generated from <tt>WSMPkt.msg</tt> by opp_msgc.
+ * Class generated from <tt>messages/netw/WSMPkt.msg</tt> by opp_msgc.
  * <pre>
  * packet WSMPkt extends NetwPkt {
  *     int chNum;

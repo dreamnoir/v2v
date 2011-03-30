@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from WSMPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from messages/netw/WSMPkt.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:

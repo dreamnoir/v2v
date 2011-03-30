@@ -3,6 +3,6 @@
 <launch>
 	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\highway\highway.net.xml" />
 	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\highway\highway.rou.xml" />
-	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\highway\sumo.sumo.cfg" type="config" />
+	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\highway\highway.sumo.cfg" type="config" />
 </launch>
 

@@ -19,6 +19,7 @@ public:
 		public:
 			double sentUpdates; /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
 			double receivedUpdates;
+			int shortDelay;
 
 			void initialize();
 			//void watch(cSimpleModule& module);
@@ -26,8 +27,6 @@ public:
 	};
 
 	virtual ~TimedApplLayer();
-
-
 
 	/** @brief Initialization of the module and some variables*/
 	virtual void initialize(int);
@@ -37,9 +36,8 @@ public:
     /** @brief Message kinds used by this layer.*/
     enum TestApplMessageKinds{
 		SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND,
-		BROADCAST_MESSAGE,
-		BROADCAST_REPLY_MESSAGE,
-		LAST_TEST_APPL_MESSAGE_KIND
+		CHECK_POSITION_UPDATE,
+		BROADCAST_MESSAGE
     };
 
 protected:
@@ -50,33 +48,57 @@ protected:
     virtual void handleLowerMsg(cMessage*);
 
     /** @brief send a broadcast packet to all connected neighbors */
-    void sendBroadcast();
-
-    /** @brief send a reply to a broadcast message */
-    void sendReply(ApplPkt *msg);
+    void sendLocationUpdate();
 
     virtual void receiveBBItem(int category, const BBItem *details, int scopeModuleId);
 
-	/** @brief Timer message for scheduling next message.*/
-	cMessage *delayTimer;
+	// General purpose timer
+	cMessage *timer;
 
+	// handles vision tasks
 	VisionManager* vm;
 
+	// handles statistics collection
 	Statistics stats;
+
+	// is the class registered with the VisionManager
 	bool isRegistered;
+
+	// self position estimator
 	PositionEstimator spe;
 
+	// remote position estimator
+	PositionEstimator rpe;
+
+	// array of NVE for any neighbours that come within range
+	PositionEstimator** nve;
+
+	// delay between messages in timed mode
 	double delay;
+
+	// timed mode or threshold mode
+	bool thresholdMode;
+
+	// error threshold between SPE and RPE before new message is sent
+	double thresholdSize;
+
+	// category of Move class notices
 	int catMove;
 
+	// SPE error between position updates
 	cOutVector errorVec;
+
+	// NVE error between position updates
 	cOutVector nerrorVec;
 
-	//vehicles in range of vision technically
+	// vehicles in range of vision technically
 	cOutVector visibleVec;
 
+	// time between threshold communication
+	cOutVector thresholdVec;
+
+	// max number of vehicles in simulation
 	int maxVehicles;
-	PositionEstimator** nve;
 
 };
 

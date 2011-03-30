@@ -1,16 +1,10 @@
-/*
- * TimedApplLayer.cpp
- *
- *  Created on: 2011-02-24
- *      Author: Kyle
- */
+#include <SimpleAddress.h>
 
 #include "TimedApplLayer.h"
 #include "Move.h"
 #include "CCWSApplPkt_m.h"
 #include "NetwControlInfo.h"
 #include "Coord.h"
-#include <SimpleAddress.h>
 
 Define_Module(TimedApplLayer);
 
@@ -18,12 +12,14 @@ void TimedApplLayer::Statistics::initialize()
 {
 	sentUpdates = 0;
 	receivedUpdates = 0;
+	shortDelay = 0;
 }
 
 void TimedApplLayer::Statistics::recordScalars(cSimpleModule& module)
 {
 	module.recordScalar("Sent Updates", sentUpdates);
 	module.recordScalar("Received Updates", receivedUpdates);
+	module.recordScalar("Short Delay Intervals", shortDelay);
 }
 
 void TimedApplLayer::finish()
@@ -38,29 +34,49 @@ void TimedApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
-		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
-		isRegistered = false;
-		stats.initialize();
-		delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
-
-
-		errorVec.setName("spe error");
-		nerrorVec.setName("nve error");
-
-		visibleVec.setName("visible");
-
+		// get parameters
 		delay = par("delay").doubleValue();
 		maxVehicles = (int) par("maxVehicles").doubleValue();
+		thresholdMode = par("thresholdMode").boolValue();
+		thresholdSize = par("thresholdSize").doubleValue();
+
+		// find vision manager
+		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
+
+		// not registered with vision manager yet
+		isRegistered = false;
+
+		// initialize statics module
+		stats.initialize();
+
+		// setup vector staticis
+		errorVec.setName("spe error");
+		nerrorVec.setName("nve error");
+		visibleVec.setName("visible");
+		thresholdVec.setName("Threshold Error");
+
+		// subscribe to movement updates
 		Move moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
 
 	}
 	else if(stage==1)
 	{
+		// create and initialise empty array of NVE
 		nve = new PositionEstimator*[maxVehicles];
 		for (int i=0; i<maxVehicles; i++)
 			nve[i] = 0;
-		scheduleAt(simTime() + delay + dblrand(), delayTimer);
+
+		if (!thresholdMode)
+		{
+			timer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER);
+			scheduleAt(simTime() + delay + dblrand(), timer);
+		}
+		else
+		{
+			timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
+			scheduleAt(simTime() + delay + dblrand(), timer);
+		}
 
 	}
 }
@@ -71,50 +87,86 @@ void TimedApplLayer::handleLowerMsg(cMessage* msg)
 	Coord estimate, now;
 	double diff;
     CCWSApplPkt *m;
-    switch( msg->getKind() ){
-    case BROADCAST_MESSAGE:
-        m = static_cast<CCWSApplPkt *>(msg);
-        if (debug) EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
-        if (debug) ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angleX=" << m->getAngleX() << "| angleY=" << m->getAngleY() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
 
-        stats.receivedUpdates++;
+    switch( msg->getKind() )
+    {
+		case BROADCAST_MESSAGE:
+			m = static_cast<CCWSApplPkt *>(msg);
+			if (debug) EV << "Received a broadcast packet from host["<<m->getSrcAddr()<<"] -> sending reply\n";
+			if (debug) ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angleX=" << m->getAngleX() << "| angleY=" << m->getAngleY() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
 
-        from = m->getSrcAddr();
+			stats.receivedUpdates++;
 
-        if (nve[from] == 0)
-        	nve[from] = new PositionEstimator;
+			from = m->getSrcAddr();
 
-        if (m->getCreationTime() - nve[from]->getLastUpdated() < 5)
-        {
-			estimate = nve[from]->getCurrentPosition(simTime());
-			now.setX(m->getX());
-			now.setY(m->getY());
-			diff = estimate.distance(now);
-			if (debug) ev << "difference in position is " << diff << endl;
+			if (nve[from] == 0)
+				nve[from] = new PositionEstimator;
 
-			if (diff > 0)
-				nerrorVec.record(diff);
-        }
-        nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
+			if (m->getCreationTime() - nve[from]->getLastUpdated() < 2.0)
+			{
+				diff = nve[from]->positionError(Coord(m->getX(), m->getY()), m->getCreationTime());
+				if (debug) ev << "difference in position is " << diff << endl;
 
-        break;
-    default:
-    	if (debug) EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
-        delete msg;
+				if (diff >= 0)
+					nerrorVec.record(diff);
+			}
+			nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
+
+			break;
+		default:
+			if (debug) EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
+
     }
+    delete msg;
 }
 
 void TimedApplLayer::handleSelfMsg(cMessage *msg)
 {
-	sendBroadcast();
-	delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
-	scheduleAt(simTime() + delay, delayTimer);
+	double errorSize, delayTime;
+	Coord current;
+
+	switch(msg->getKind())
+	{
+	    case SEND_BROADCAST_TIMER:
+			sendLocationUpdate();
+			timer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
+			scheduleAt(simTime() + delay, timer);
+			break;
+
+	    case CHECK_POSITION_UPDATE:
+
+	    	delayTime = delay;
+	    	current = spe.getCurrentPosition(simTime());
+	    	errorSize = rpe.positionError(current, simTime());
+
+			if (errorSize > thresholdSize)
+			{
+				thresholdVec.record(errorSize);
+				sendLocationUpdate();
+			}
+			else if (errorSize > 0.75*thresholdSize)
+			{
+				delayTime /= 10;
+				stats.shortDelay++;
+			}
+
+			timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
+			scheduleAt(simTime() + delayTime, timer);
+
+	    	break;
+
+	    default:
+	    	ev << "CCWSApplLayer unknown self message" << endl;
+	}
+
+	delete msg;
 }
 
-void TimedApplLayer::sendBroadcast()
+void TimedApplLayer::sendLocationUpdate()
 {
 	CCWSApplPkt *pkt = new CCWSApplPkt("BROADCAST_MESSAGE", BROADCAST_MESSAGE);
     pkt->setDestAddr(-1);
+
     // we use the host modules getIndex() as a appl address
     pkt->setSrcAddr( myApplAddr() );
     pkt->setBitLength(headerLength);
@@ -134,6 +186,9 @@ void TimedApplLayer::sendBroadcast()
 
     stats.sentUpdates++;
 
+    // update remote rpe
+    rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());
+
     sendDown( pkt );
 }
 
@@ -142,36 +197,44 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
 	if(category == catMove)
 	{
+		// get movement information
 		const Move* m = static_cast<const Move*>(details);
-		Coord estimate = spe.getCurrentPosition(simTime());
-		double diff = estimate.distance(m->getStartPos());
-		if (debug) ev << "difference in position is " << diff << endl;
 
-		if (diff > 0)
-			errorVec.record(diff);
+		if (m->getStartPos().getX() != 0 && m->getStartPos().getY() != 0)
+		{
+			double diff = spe.positionError(m->getStartPos(), simTime());
+			if (diff >= 0)
+				errorVec.record(diff);
 
-		spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
+			// update SPE
+			spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 
-		if(isRegistered) {
-			vm->updateNicPos(this->getId(), &(m->getStartPos()));
+			// vision updates
+			if (isRegistered)
+			{
+				vm->updateNicPos(this->getId(), &(m->getStartPos()));
+			}
+			else
+			{
+				vm->registerNic(this, &(m->getStartPos()));
+				isRegistered = true;
+			}
+
+			visibleVec.record(vm->inRange(this->getId()));
 		}
-		else {
-			// register the nic with ConnectionManager
-			// returns true, if sendDirect is used
-			vm->registerNic(this, &(m->getStartPos()));
-			isRegistered = true;
-		}
-
-		visibleVec.record(vm->inRange(this->getId()));
 	}
 }
 
 TimedApplLayer::~TimedApplLayer()
 {
+	// unregister from VisionManager
 	if (isRegistered)
 		vm->unregisterNic(this);
 
+	// delete array of NVEs
 	delete [] nve;
 
-	cancelAndDelete(delayTimer);
+	// cancel any timers
+	if (timer != 0)
+		cancelAndDelete(timer);
 }

@@ -18,8 +18,6 @@
 #include "FindModule.h"
 #include <cassert>
 
-
-
 Define_Module(VisionManager);
 
 void VisionManager::initialize(int stage)
@@ -39,14 +37,13 @@ void VisionManager::initialize(int stage)
 		playgroundSize = world->getPgs();
 		useTorus = world->useTorus();
 
-		maxInterferenceDistance = calcInterfDist();
-		maxDistSquared = maxInterferenceDistance * maxInterferenceDistance;
+		maxDistSquared = maxDistance * maxDistance;
 
 		//----initialize node grid-----
 		//step 1 - calculate dimension of grid
-		//one cell should have at least the size of maxInterferenceDistance
+		//one cell should have at least the size of maxDistance
 		//but also should divide the playground in equal parts
-		Coord dim((*playgroundSize) / maxInterferenceDistance);
+		Coord dim((*playgroundSize) / maxDistance);
 		gridDim = GridCoord(dim);
 
 		//A grid smaller or equal to 3x3 whould mean that every cell has every other cell as direct
@@ -87,9 +84,9 @@ void VisionManager::initialize(int stage)
 		if (gridDim.x == 1 &&												//if we use a 1x1 grid
 			gridDim.y == 1 &&												//every coordinate is
 			gridDim.z == 1) {									 			//mapped to (0,0, 0)
-			findDistance = Coord(std::max(playgroundSize->getX(), maxInterferenceDistance),
-								 std::max(playgroundSize->getY(), maxInterferenceDistance),
-								 std::max(playgroundSize->getZ(), maxInterferenceDistance));
+			findDistance = Coord(std::max(playgroundSize->getX(), maxDistance),
+								 std::max(playgroundSize->getY(), maxDistance),
+								 std::max(playgroundSize->getZ(), maxDistance));
 		} else {
 			findDistance = Coord(playgroundSize->getX() / gridDim.x,		//otherwise the factor is our
 								 playgroundSize->getY() / gridDim.y,		//playground divided by the
@@ -104,9 +101,9 @@ void VisionManager::initialize(int stage)
 		findDistance += Coord(EPSILON, EPSILON, EPSILON);
 
 		//findDistance (equals cell size) has to be greater or equal maxInt-distance
-		assert(findDistance.getX() >= maxInterferenceDistance);
-		assert(findDistance.getY() >= maxInterferenceDistance);
-		assert(world->use2D() || findDistance.getZ() >= maxInterferenceDistance);
+		assert(findDistance.getX() >= maxDistance);
+		assert(findDistance.getY() >= maxDistance);
+		assert(world->use2D() || findDistance.getZ() >= maxDistance);
 
 		//playGroundSize has to be part of the playGround
 		assert(GridCoord(*playgroundSize, findDistance).x == gridDim.x - 1);
@@ -114,11 +111,6 @@ void VisionManager::initialize(int stage)
 		assert(GridCoord(*playgroundSize, findDistance).z == gridDim.z - 1);
 		ev << "findDistance is " << findDistance.info() << endl;
 	}
-}
-
-double VisionManager::calcInterfDist()
-{
-	return maxDistance;
 }
 
 VisionManager::GridCoord VisionManager::getCellForCoordinate(const Coord& c) {

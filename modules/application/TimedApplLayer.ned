@@ -20,9 +20,11 @@ import org.mixim.base.modules.IBaseApplLayer;
 simple TimedApplLayer like IBaseApplLayer
 {
     parameters:
-    	double delay;
-    	bool debug; // debug switch
+    	double delay @unit("s") = default(0.5s);
+    	double thresholdSize @unit("m") = default(1m);
     	int maxVehicles;
+    	bool thresholdMode = default(false);
+    	bool debug; // debug switch
     	int headerLength @unit("bit"); // length of the application message header (in bits)
     gates:
     	input lowerGateIn; // from network layer

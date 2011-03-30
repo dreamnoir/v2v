@@ -20,7 +20,7 @@ PositionEstimator::PositionEstimator()
 {
 	this->speed = 0;
 	this->acceleration = 0;
-	this->lastUpdated = simTime();
+	this->lastUpdated = 0;
 }
 
 Coord PositionEstimator::getCurrentPosition(simtime_t time)
@@ -29,10 +29,10 @@ Coord PositionEstimator::getCurrentPosition(simtime_t time)
 	double distance;
 
 	//time interval since position updated
-	interval = SIMTIME_DBL(simTime()) - SIMTIME_DBL(this->lastUpdated);
+	interval = SIMTIME_DBL(simTime() - this->lastUpdated);
 
 	//distance travelled during time interval
-	distance = this->speed * interval + 0.5 * this->acceleration * pow(interval, 2);
+	distance = this->speed * interval + 0.5 * this->acceleration * interval*interval;
 
 	return this->position + this->angle*distance;
 }
@@ -61,6 +61,11 @@ void PositionEstimator::updatePosition(double x, double y, double speed, double 
 	this->angle.setX(angleX);
 	this->angle.setY(angleY);
 	this->lastUpdated = simTime();
+}
+
+double PositionEstimator::positionError(const Coord& newPosition, simtime_t time)
+{
+	return newPosition.distance(this->getCurrentPosition(time));
 }
 
 double PositionEstimator::getSpeed()

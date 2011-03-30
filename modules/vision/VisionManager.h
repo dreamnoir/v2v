@@ -20,13 +20,6 @@
 
 class VisionManager : public cSimpleModule
 {
-	public:
-		void initialize(int stage);
-	protected:
-		virtual double calcInterfDist();
-
-		double maxDistance;
-
 private:
 	/**
 	 * @brief Represents a position inside a grid.
@@ -217,8 +210,8 @@ protected:
 	/** @brief Stores the size of the playground.*/
 	const Coord* playgroundSize;
 
-	/** @brief the biggest interference distance in the network.*/
-	double maxInterferenceDistance;
+	/** @brief the biggest vision distance for any camera*/
+	double maxDistance;
 
 	/** @brief Square of maxInterferenceDistance cache a value that
 	 * is often used */
@@ -321,6 +314,8 @@ protected:
 public:
 
 	virtual ~VisionManager();
+
+	void initialize(int stage);
 
 	int inRange(int vehicleID);
 
