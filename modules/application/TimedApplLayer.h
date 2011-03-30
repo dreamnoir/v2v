@@ -10,6 +10,7 @@
 
 #include "BaseApplLayer.h"
 #include "PositionEstimator.h"
+#include "VisionManager.h"
 
 class TimedApplLayer  : public BaseApplLayer
 {
@@ -59,8 +60,10 @@ protected:
 	/** @brief Timer message for scheduling next message.*/
 	cMessage *delayTimer;
 
-	Statistics stats;
+	VisionManager* vm;
 
+	Statistics stats;
+	bool isRegistered;
 	PositionEstimator spe;
 
 	double delay;
@@ -68,6 +71,9 @@ protected:
 
 	cOutVector errorVec;
 	cOutVector nerrorVec;
+
+	//vehicles in range of vision technically
+	cOutVector visibleVec;
 
 	int maxVehicles;
 	PositionEstimator** nve;

@@ -38,14 +38,22 @@ void TimedApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
+		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
+		isRegistered = false;
 		stats.initialize();
 		delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
+
+
 		errorVec.setName("spe error");
 		nerrorVec.setName("nve error");
+
+		visibleVec.setName("visible");
+
 		delay = par("delay").doubleValue();
 		maxVehicles = (int) par("maxVehicles").doubleValue();
 		Move moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
+
 	}
 	else if(stage==1)
 	{
@@ -53,6 +61,7 @@ void TimedApplLayer::initialize(int stage)
 		for (int i=0; i<maxVehicles; i++)
 			nve[i] = 0;
 		scheduleAt(simTime() + delay + dblrand(), delayTimer);
+
 	}
 }
 
@@ -142,10 +151,27 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 			errorVec.record(diff);
 
 		spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
+
+		if(isRegistered) {
+			vm->updateNicPos(this->getId(), &(m->getStartPos()));
+		}
+		else {
+			// register the nic with ConnectionManager
+			// returns true, if sendDirect is used
+			vm->registerNic(this, &(m->getStartPos()));
+			isRegistered = true;
+		}
+
+		visibleVec.record(vm->inRange(this->getId()));
 	}
 }
 
 TimedApplLayer::~TimedApplLayer()
 {
+	if (isRegistered)
+		vm->unregisterNic(this);
+
+	delete [] nve;
+
 	cancelAndDelete(delayTimer);
 }

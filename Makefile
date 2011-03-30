@@ -64,6 +64,7 @@ OBJS = \
     $O/modules/mobility/TraCIMobilityV.o \
     $O/modules/netw/WSMNetwLayer.o \
     $O/modules/utils/PositionEstimator.o \
+    $O/modules/vision/VisionEntry.o \
     $O/modules/vision/VisionManager.o \
     $O/messages/application/CCWSApplPkt_m.o \
     $O/messages/netw/WSMPkt_m.o
@@ -188,9 +189,11 @@ $O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
 	modules/utils/PositionEstimator.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
+	modules/vision/VisionEntry.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h
+	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
+	modules/vision/VisionManager.h
 $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/AirFrame_m.h \
@@ -290,7 +293,14 @@ $O/modules/utils/PositionEstimator.o: modules/utils/PositionEstimator.cc \
 $O/modules/vision/VisionManager.o: modules/vision/VisionManager.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
-	$(MIXIM_SOMMER_PROJ)/base/connectionManager/NicEntry.h \
-	$(MIXIM_SOMMER_PROJ)/base/connectionManager/BaseConnectionManager.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseWorldUtility.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	modules/vision/VisionEntry.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
 	modules/vision/VisionManager.h
+$O/modules/vision/VisionEntry.o: modules/vision/VisionEntry.cc \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	modules/vision/VisionEntry.h
 

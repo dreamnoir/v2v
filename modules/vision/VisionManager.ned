@@ -18,5 +18,5 @@ package v2v.modules.vision;
 simple VisionManager
 {
 	parameters:
-		double maxDistance;
+		double maxDistance @unit("m");
 }

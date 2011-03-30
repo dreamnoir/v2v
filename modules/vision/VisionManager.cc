@@ -14,6 +14,11 @@
 // 
 
 #include "VisionManager.h"
+#include "BaseWorldUtility.h"
+#include "FindModule.h"
+#include <cassert>
+
+
 
 Define_Module(VisionManager);
 
@@ -23,9 +28,351 @@ void VisionManager::initialize(int stage)
 	{
 		maxDistance = par("maxDistance").doubleValue();
 	}
+	else if (stage == 1)
+	{
+		ev <<"initializing VisionManager\n";
+
+		BaseWorldUtility* world = FindModule<BaseWorldUtility*>::findGlobalModule();
+
+		assert(world != 0);
+
+		playgroundSize = world->getPgs();
+		useTorus = world->useTorus();
+
+		maxInterferenceDistance = calcInterfDist();
+		maxDistSquared = maxInterferenceDistance * maxInterferenceDistance;
+
+		//----initialize node grid-----
+		//step 1 - calculate dimension of grid
+		//one cell should have at least the size of maxInterferenceDistance
+		//but also should divide the playground in equal parts
+		Coord dim((*playgroundSize) / maxInterferenceDistance);
+		gridDim = GridCoord(dim);
+
+		//A grid smaller or equal to 3x3 whould mean that every cell has every other cell as direct
+		//neighbor (if our playground is a torus, even if not the most of the cells are direct
+		//neighbors of each other. So we reduce the grid size to 1x1.
+		if((gridDim.x <= 3) && (gridDim.y <= 3) && (gridDim.z <= 3))
+		{
+			gridDim.x = 1;
+			gridDim.y = 1;
+			gridDim.z = 1;
+		} else {
+			gridDim.x = std::max(1, gridDim.x);
+			gridDim.y = std::max(1, gridDim.y);
+			gridDim.z = std::max(1, gridDim.z);
+		}
+
+		//step 2 - initialize the matrix which represents our grid
+		VisionEntries entries;
+		RowVector row;
+		VisionMatrix matrix;
+
+		for (int i = 0; i < gridDim.z; ++i) {
+			row.push_back(entries);					//copy empty NicEntries to RowVector
+		}
+		for (int i = 0; i < gridDim.y; ++i) {	//fill the ColVector with copies of
+			matrix.push_back(row);					//the RowVector.
+		}
+		for (int i = 0; i < gridDim.x; ++i) {	//fill the grid with copies of
+			nicGrid.push_back(matrix);				//the matrix.
+		}
+		ev << " using " << gridDim.x << "x" <<
+							 gridDim.y << "x" <<
+							 gridDim.z << " grid" << endl;
+
+		//step 3 -	calculate the factor which maps the coordinate of a node
+		//			to the grid cell
+
+		if (gridDim.x == 1 &&												//if we use a 1x1 grid
+			gridDim.y == 1 &&												//every coordinate is
+			gridDim.z == 1) {									 			//mapped to (0,0, 0)
+			findDistance = Coord(std::max(playgroundSize->getX(), maxInterferenceDistance),
+								 std::max(playgroundSize->getY(), maxInterferenceDistance),
+								 std::max(playgroundSize->getZ(), maxInterferenceDistance));
+		} else {
+			findDistance = Coord(playgroundSize->getX() / gridDim.x,		//otherwise the factor is our
+								 playgroundSize->getY() / gridDim.y,		//playground divided by the
+								 playgroundSize->getZ() / gridDim.z);		//number of cells
+		}
+
+		//since the upper playground borders (at pg-size) are part of the
+		//playground we have to assure that they are mapped to a valid
+		//(the last) grid cell we do this by increasing the find distance
+		//by a small value.
+		//This also assures that findDistance is never zero.
+		findDistance += Coord(EPSILON, EPSILON, EPSILON);
+
+		//findDistance (equals cell size) has to be greater or equal maxInt-distance
+		assert(findDistance.getX() >= maxInterferenceDistance);
+		assert(findDistance.getY() >= maxInterferenceDistance);
+		assert(world->use2D() || findDistance.getZ() >= maxInterferenceDistance);
+
+		//playGroundSize has to be part of the playGround
+		assert(GridCoord(*playgroundSize, findDistance).x == gridDim.x - 1);
+		assert(GridCoord(*playgroundSize, findDistance).y == gridDim.y - 1);
+		assert(GridCoord(*playgroundSize, findDistance).z == gridDim.z - 1);
+		ev << "findDistance is " << findDistance.info() << endl;
+	}
 }
 
 double VisionManager::calcInterfDist()
 {
 	return maxDistance;
+}
+
+VisionManager::GridCoord VisionManager::getCellForCoordinate(const Coord& c) {
+    return GridCoord(c, findDistance);
+}
+
+void VisionManager::updateConnections(int nicID, const Coord* oldPos, const Coord* newPos)
+{
+	GridCoord oldCell = getCellForCoordinate(*oldPos);
+    GridCoord newCell = getCellForCoordinate(*newPos);
+
+	checkGrid(oldCell, newCell, nicID );
+}
+
+VisionManager::VisionEntries& VisionManager::getCellEntries(VisionManager::GridCoord& cell) {
+    return nicGrid[cell.x][cell.y][cell.z];
+}
+
+void VisionManager::registerNicExt(int nicID)
+{
+	VisionEntry* VisionEntry = nics[nicID];
+
+	GridCoord cell = getCellForCoordinate(VisionEntry->pos);
+
+	ev <<" registering (ext) nic at loc " << cell.info() << std::endl;
+
+	// add to matrix
+	VisionEntries& cellEntries = getCellEntries(cell);
+    cellEntries[nicID] = VisionEntry;
+}
+
+void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
+                                      VisionManager::GridCoord& newCell,
+                                      int id)
+
+{
+
+	// how many vehicles in vision range
+	int visible;
+
+    // structure to find union of grid squares
+    CoordSet gridUnion(74);
+
+    // find nic at old position
+    VisionEntries& oldCellEntries = getCellEntries(oldCell);
+    VisionEntries::iterator it = oldCellEntries.find(id);
+    VisionEntry *nic = it->second;
+
+
+    // move nic to a new position in matrix
+    if(oldCell != newCell) {
+    	oldCellEntries.erase(it);
+    	getCellEntries(newCell)[id] = nic;
+    }
+
+	if((gridDim.x == 1) && (gridDim.y == 1) && (gridDim.z == 1)) {
+		gridUnion.add(oldCell);
+    } else {
+		//add grid around oldPos
+		fillUnionWithNeighbors(gridUnion, oldCell);
+
+
+        if(oldCell != newCell) {
+            //add grid around newPos
+            fillUnionWithNeighbors(gridUnion, newCell);
+        }
+    }
+
+    GridCoord* c = gridUnion.next();
+    while(c != 0) {
+		ev << "Update cons in [" << c->info() << "]" << endl;
+		visible += updateNicConnections(getCellEntries(*c), nic);
+		c = gridUnion.next();
+    }
+
+    ev << "visible by " << id << " are " << visible << " vehicles" << endl;
+    nic->inRange = visible;
+}
+
+int VisionManager::wrapIfTorus(int value, int max) {
+	if(value < 0) {
+		if(useTorus) {
+			return max + value;
+		} else {
+			return -1;
+		}
+	} else if(value >= max) {
+		if(useTorus) {
+			return value - max;
+		} else {
+			return -1;
+		}
+	} else {
+		return value;
+	}
+}
+
+void VisionManager::fillUnionWithNeighbors(CoordSet& gridUnion, GridCoord cell) {
+	for(int iz = (int)cell.z - 1; iz <= (int)cell.z + 1; iz++) {
+		if(iz != cell.z && cell.use2D) {
+			continue;
+		}
+		int cz = wrapIfTorus(iz, gridDim.z);
+		if(cz == -1) {
+			continue;
+		}
+		for(int ix = (int)cell.x - 1; ix <= (int)cell.x + 1; ix++) {
+			int cx = wrapIfTorus(ix, gridDim.x);
+			if(cx == -1) {
+				continue;
+			}
+			for(int iy = (int)cell.y - 1; iy <= (int)cell.y + 1; iy++) {
+				int cy = wrapIfTorus(iy, gridDim.y);
+				if(cy != -1) {
+					if(cell.use2D) {
+						gridUnion.add(GridCoord(cx, cy));
+					} else {
+						gridUnion.add(GridCoord(cx, cy, cz));
+					}
+				}
+			}
+		}
+	}
+}
+
+int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
+{
+    int id = nic->vehicleId;
+    int visible = 0;
+
+    for(VisionEntries::iterator i = nmap.begin(); i != nmap.end(); ++i)
+    {
+		VisionEntry* nic_i = i->second;
+
+        // no recursive connections
+        if ( nic_i->vehicleId == id ) continue;
+
+		double distance;
+
+        if(useTorus)
+        {
+        	distance = nic->pos.sqrTorusDist(nic_i->pos, playgroundSize);
+        } else {
+        	distance = nic->pos.sqrdist(nic_i->pos);
+        }
+
+        bool inRange = (distance <= maxDistSquared);
+
+
+        if (inRange)
+        {
+        	visible++;
+            ev << "nic #" << id << " and #" << nic_i->vehicleId << " are in range" << endl;
+        }
+    }
+
+
+    return visible;
+}
+
+bool VisionManager::registerNic(cModule* nic, const Coord* nicPos)
+{
+	assert(nic != 0);
+
+	int nicID = nic->getId();
+
+	// create new VisionEntry
+	VisionEntry *visionEntry;
+
+	visionEntry = new VisionEntry();
+
+	// fill VisionEntry
+	visionEntry->appPtr = nic;
+	visionEntry->vehicleId = nicID;
+	visionEntry->pos = nicPos;
+
+	// add to map
+	nics[nicID] = visionEntry;
+
+	registerNicExt(nicID);
+
+	updateConnections(nicID, nicPos, nicPos);
+
+	return true;
+}
+
+bool VisionManager::unregisterNic(cModule* nicModule)
+{
+	VisionEntry* other;
+	assert(nicModule != 0);
+
+	// find VisionEntry
+	int nicID = nicModule->getId();
+	ev << " unregistering nic #" << nicID << endl;
+
+	//we assume that the module was previously registered with this CM
+	//TODO: maybe change this to an omnet-error instead of an assertion
+	assert(nics.find(nicID) != nics.end());
+	VisionEntry* visionEntry = nics[nicID];
+
+	// get all affected grid squares
+	CoordSet gridUnion(74);
+	GridCoord cell = getCellForCoordinate(visionEntry->pos);
+	if((gridDim.x == 1) && (gridDim.y == 1) && (gridDim.z == 1)) {
+		gridUnion.add(cell);
+	} else {
+		fillUnionWithNeighbors(gridUnion, cell);
+	}
+
+	// disconnect from all NICs in these grid squares
+	GridCoord* c = gridUnion.next();
+	while(c != 0) {
+		ev << "Update cons in [" << c->info() << "]" << endl;
+		VisionEntries& nmap = getCellEntries(*c);
+		for(VisionEntries::iterator i = nmap.begin(); i != nmap.end(); ++i) {
+			other = i->second;
+			if (other == visionEntry) continue;
+			if (!other->isConnected(visionEntry)) continue;
+			other->disconnectFrom(visionEntry);
+		}
+		c = gridUnion.next();
+	}
+
+	// erase from grid
+	VisionEntries& cellEntries = getCellEntries(cell);
+	cellEntries.erase(nicID);
+
+	// erase from list of known nics
+	nics.erase(nicID);
+
+	return true;
+}
+
+void VisionManager::updateNicPos(int nicID, const Coord* newPos)
+{
+	VisionEntry* VisionEntry = nics[nicID];
+	if(VisionEntry == 0)
+		error("No nic with this ID is registered with this ConnectionManager.");
+
+    Coord oldPos = VisionEntry->pos;
+    VisionEntry->pos = newPos;
+
+	updateConnections(nicID, &oldPos, newPos);
+}
+
+int VisionManager::inRange(int vehicleID)
+{
+	return nics[vehicleID]->inRange;
+}
+
+VisionManager::~VisionManager()
+{
+	for (VisionEntries::iterator ne = nics.begin(); ne != nics.end(); ne++)
+	{
+		delete ne->second;
+	}
 }
