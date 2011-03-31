@@ -212,11 +212,11 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 			// vision updates
 			if (isRegistered)
 			{
-				vm->updateNicPos(this->getId(), &(m->getStartPos()));
+				vm->updateNicPos(this->getId(), &(m->getStartPos()), &(m->getDirection()));
 			}
 			else
 			{
-				vm->registerNic(this, &(m->getStartPos()));
+				vm->registerNic(this, &(m->getStartPos()), &(m->getDirection()));
 				isRegistered = true;
 			}
 

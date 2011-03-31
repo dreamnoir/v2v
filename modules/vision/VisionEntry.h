@@ -26,16 +26,21 @@ public:
 
 	virtual bool isConnected(VisionEntry*) {return false;}
 
+	std::list<VisionEntry*> withinRange;
+
 	/** @brief module id of the nic for which information is stored*/
 	int vehicleId;
 
-	/** @brief Pointer to the NIC module */
+	/** @brief Pointer to the application module */
 	cModule *appPtr;
 
 	int inRange;
+	int visible;
 
 	/** @brief Geographic location of the nic*/
 	Coord pos;
+
+	Coord angle;
 
 };
 

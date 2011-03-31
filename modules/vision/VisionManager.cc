@@ -13,6 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
+#define RAD_TO_DEGREE 57.2957795
+
 #include "VisionManager.h"
 #include "BaseWorldUtility.h"
 #include "FindModule.h"
@@ -25,10 +27,11 @@ void VisionManager::initialize(int stage)
 	if (stage == 0)
 	{
 		maxDistance = par("maxDistance").doubleValue();
+		debug = par("debug").boolValue();
 	}
 	else if (stage == 1)
 	{
-		ev <<"initializing VisionManager\n";
+		if (debug) ev <<"initializing VisionManager\n";
 
 		BaseWorldUtility* world = FindModule<BaseWorldUtility*>::findGlobalModule();
 
@@ -74,7 +77,7 @@ void VisionManager::initialize(int stage)
 		for (int i = 0; i < gridDim.x; ++i) {	//fill the grid with copies of
 			nicGrid.push_back(matrix);				//the matrix.
 		}
-		ev << " using " << gridDim.x << "x" <<
+		if (debug) ev << " using " << gridDim.x << "x" <<
 							 gridDim.y << "x" <<
 							 gridDim.z << " grid" << endl;
 
@@ -109,7 +112,7 @@ void VisionManager::initialize(int stage)
 		assert(GridCoord(*playgroundSize, findDistance).x == gridDim.x - 1);
 		assert(GridCoord(*playgroundSize, findDistance).y == gridDim.y - 1);
 		assert(GridCoord(*playgroundSize, findDistance).z == gridDim.z - 1);
-		ev << "findDistance is " << findDistance.info() << endl;
+		if (debug) ev << "findDistance is " << findDistance.info() << endl;
 	}
 }
 
@@ -135,7 +138,7 @@ void VisionManager::registerNicExt(int nicID)
 
 	GridCoord cell = getCellForCoordinate(VisionEntry->pos);
 
-	ev <<" registering (ext) nic at loc " << cell.info() << std::endl;
+	if (debug) ev <<" registering (ext) nic at loc " << cell.info() << std::endl;
 
 	// add to matrix
 	VisionEntries& cellEntries = getCellEntries(cell);
@@ -179,14 +182,16 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
         }
     }
 
+	nic->withinRange.clear();
+
     GridCoord* c = gridUnion.next();
     while(c != 0) {
-		ev << "Update cons in [" << c->info() << "]" << endl;
+		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
 		visible += updateNicConnections(getCellEntries(*c), nic);
 		c = gridUnion.next();
     }
 
-    ev << "visible by " << id << " are " << visible << " vehicles" << endl;
+    if (debug) ev << "visible by " << id << " are " << visible << " vehicles" << endl;
     nic->inRange = visible;
 }
 
@@ -262,8 +267,55 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
 
         if (inRange)
         {
-        	visible++;
-            ev << "nic #" << id << " and #" << nic_i->vehicleId << " are in range" << endl;
+
+            Coord v1v2 = nic_i->pos - nic->pos;
+            v1v2 = v1v2 / v1v2.length();
+            double angle = acos(nic->angle.getX()*v1v2.getX() + nic->angle.getY()*v1v2.getY()) * RAD_TO_DEGREE;
+
+            if (debug) ev << "nic #" << id << "(" << nic->pos.info() << ") and #" << nic_i->vehicleId << "(" << nic_i->pos.info() << ") are in range ";
+			if (debug) ev << "represented by vector " << v1v2.info() << " with angle ";
+			if (debug) ev << angle << " between them." << endl;
+
+
+			bool vis = false;
+			double distances[] = {22500, 400, 225, 225, 225};
+
+            if (angle >= 345 || angle <= 15)
+            {
+            	// Zone A
+            	if (distance < distances[0])
+            		vis = true;
+            }
+            else if ((angle > 15 && angle <45) || (angle > 315 && angle < 345))
+            {
+            	//Zone B
+            	if (distance < distances[1])
+            		vis = true;
+            }
+            else if (angle >= 45 && angle <= 135)
+            {
+            	//Zone C
+            	if (distance < distances[2])
+            		vis = true;
+            }
+            else if (angle >135 && angle < 225)
+            {
+            	//Zone D
+            	if (distance < distances[3])
+            		vis = true;
+            }
+            else
+            {
+            	if (distance < distances[4])
+            		vis = true;
+            }
+
+            if (vis)
+            {
+            	visible++;
+            	nic->withinRange.push_front(nic_i);
+            }
+
         }
     }
 
@@ -271,7 +323,7 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
     return visible;
 }
 
-bool VisionManager::registerNic(cModule* nic, const Coord* nicPos)
+bool VisionManager::registerNic(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle)
 {
 	assert(nic != 0);
 
@@ -285,14 +337,15 @@ bool VisionManager::registerNic(cModule* nic, const Coord* nicPos)
 	// fill VisionEntry
 	visionEntry->appPtr = nic;
 	visionEntry->vehicleId = nicID;
-	visionEntry->pos = nicPos;
+	visionEntry->pos =  vehiclePos;
+	visionEntry->angle = vehicleAngle;
 
 	// add to map
 	nics[nicID] = visionEntry;
 
 	registerNicExt(nicID);
 
-	updateConnections(nicID, nicPos, nicPos);
+	updateConnections(nicID, vehiclePos, vehiclePos);
 
 	return true;
 }
@@ -304,7 +357,7 @@ bool VisionManager::unregisterNic(cModule* nicModule)
 
 	// find VisionEntry
 	int nicID = nicModule->getId();
-	ev << " unregistering nic #" << nicID << endl;
+	if (debug) ev << " unregistering nic #" << nicID << endl;
 
 	//we assume that the module was previously registered with this CM
 	//TODO: maybe change this to an omnet-error instead of an assertion
@@ -323,7 +376,7 @@ bool VisionManager::unregisterNic(cModule* nicModule)
 	// disconnect from all NICs in these grid squares
 	GridCoord* c = gridUnion.next();
 	while(c != 0) {
-		ev << "Update cons in [" << c->info() << "]" << endl;
+		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
 		VisionEntries& nmap = getCellEntries(*c);
 		for(VisionEntries::iterator i = nmap.begin(); i != nmap.end(); ++i) {
 			other = i->second;
@@ -344,7 +397,7 @@ bool VisionManager::unregisterNic(cModule* nicModule)
 	return true;
 }
 
-void VisionManager::updateNicPos(int nicID, const Coord* newPos)
+void VisionManager::updateNicPos(int nicID, const Coord* newPos, const Coord* newAngle)
 {
 	VisionEntry* VisionEntry = nics[nicID];
 	if(VisionEntry == 0)
@@ -352,6 +405,7 @@ void VisionManager::updateNicPos(int nicID, const Coord* newPos)
 
     Coord oldPos = VisionEntry->pos;
     VisionEntry->pos = newPos;
+    VisionEntry->angle = newAngle;
 
 	updateConnections(nicID, &oldPos, newPos);
 }

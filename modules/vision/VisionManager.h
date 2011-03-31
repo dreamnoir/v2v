@@ -248,6 +248,8 @@ protected:
     /** @brief The size of the grid */
     GridCoord gridDim;
 
+    bool debug;
+
 private:
 	/** @brief Manages the connections of a registered nic. */
     int updateNicConnections(VisionEntries& nmap, VisionEntry* nic);
@@ -330,7 +332,7 @@ public:
 	 * If you want to do your own stuff at the registration of a nic see
 	 * "registerNicExt()".
 	 */
-	bool registerNic(cModule* nic, const Coord* nicPos);
+	bool registerNic(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle);
 
 	/**
 	 * @brief Unregisters a NIC such that its connections aren't managed by the CM
@@ -347,7 +349,7 @@ public:
 	bool unregisterNic(cModule* nic);
 
 	/** @brief Updates the position information of a registered nic.*/
-	void updateNicPos(int nicID, const Coord* newPos);
+	void updateNicPos(int nicID, const Coord* newPos, const Coord* newAngle);
 
 };
 #endif /* VISIONMANAGER_H_ */

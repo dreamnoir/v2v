@@ -38,7 +38,7 @@ module Highway
         vision: VisionManager {
         	parameters:
         		 @display("p=5000,1000;b=42,42;rect,green,,;i=abstract/multicast");   
-        }
+        }	
         world: BaseWorldUtility {
             parameters:
                 playgroundSizeX = playgroundSizeX;
