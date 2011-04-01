@@ -319,7 +319,7 @@ public:
 
 	void initialize(int stage);
 
-	int inRange(int vehicleID);
+	int visible(int vehicleID);
 
 	/** @brief Needs two initialization stages.*/
 	virtual int numInitStages() const {

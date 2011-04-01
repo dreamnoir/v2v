@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#define RAD_TO_DEGREE 57.2957795
+
 
 #include "VisionManager.h"
 #include "BaseWorldUtility.h"
@@ -152,7 +152,7 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
 {
 
 	// how many vehicles in vision range
-	int visible;
+	int visible = 0;
 
     // structure to find union of grid squares
     CoordSet gridUnion(74);
@@ -191,8 +191,10 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
 		c = gridUnion.next();
     }
 
+    nic->pruneVisible();
+
     if (debug) ev << "visible by " << id << " are " << visible << " vehicles" << endl;
-    nic->inRange = visible;
+    nic->visible = visible;
 }
 
 int VisionManager::wrapIfTorus(int value, int max) {
@@ -267,14 +269,7 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
 
         if (inRange)
         {
-
-            Coord v1v2 = nic_i->pos - nic->pos;
-            v1v2 = v1v2 / v1v2.length();
-            double angle = acos(nic->angle.getX()*v1v2.getX() + nic->angle.getY()*v1v2.getY()) * RAD_TO_DEGREE;
-
-            if (debug) ev << "nic #" << id << "(" << nic->pos.info() << ") and #" << nic_i->vehicleId << "(" << nic_i->pos.info() << ") are in range ";
-			if (debug) ev << "represented by vector " << v1v2.info() << " with angle ";
-			if (debug) ev << angle << " between them." << endl;
+            double angle = nic->getAngleTo(nic_i);
 
 
 			bool vis = false;
@@ -313,12 +308,24 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
             if (vis)
             {
             	visible++;
-            	nic->withinRange.push_front(nic_i);
+            	MinMax angles = nic->getMinMaxAngles(nic_i);
+            	if (debug) ev << "Vehicle ID(" << nic->vehicleId << " can see ID" << nic_i->vehicleId << " at distance " << distance << " and at angle " << angle << " with angles to corners (" << angles.min << ", " << angles.max << ")" << endl;
+
+            	VehicleList::iterator ci = nic->withinRange.begin();
+
+            	int i=0;
+            	while (ci != nic->withinRange.end() && (*ci).distance < distance)
+            	{
+            		ci++;
+            		i++;
+            	}
+            	VisibleVehicle v = {nic_i, distance, false, angles};
+            	nic->withinRange.insert(ci, v);
+            	ev << "inserting in position: " << i << endl;
             }
 
         }
     }
-
 
     return visible;
 }
@@ -410,9 +417,9 @@ void VisionManager::updateNicPos(int nicID, const Coord* newPos, const Coord* ne
 	updateConnections(nicID, &oldPos, newPos);
 }
 
-int VisionManager::inRange(int vehicleID)
+int VisionManager::visible(int vehicleID)
 {
-	return nics[vehicleID]->inRange;
+	return nics[vehicleID]->visible;
 }
 
 VisionManager::~VisionManager()

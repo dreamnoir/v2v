@@ -37,7 +37,8 @@ public:
     enum TestApplMessageKinds{
 		SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND,
 		CHECK_POSITION_UPDATE,
-		BROADCAST_MESSAGE
+		RETRANSMIT_POSITION_UPDATE,
+		BROADCAST_MESSAGE,
     };
 
 protected:
@@ -82,6 +83,12 @@ protected:
 	// error threshold between SPE and RPE before new message is sent
 	double thresholdSize;
 
+	// retransmit position updates
+	bool retransmit;
+
+	// how long to wait before retransmit
+	double retransmitTime;
+
 	// category of Move class notices
 	int catMove;
 
@@ -91,14 +98,20 @@ protected:
 	// NVE error between position updates
 	cOutVector nerrorVec;
 
-	// vehicles in range of vision technically
+	// vehicles in range of vision
 	cOutVector visibleVec;
+
+	// vehicles tracked by nve
+	cOutVector nveVec;
 
 	// time between threshold communication
 	cOutVector thresholdVec;
 
 	// max number of vehicles in simulation
 	int maxVehicles;
+
+	simsignal_t nveSignalId;
+	simsignal_t testId;
 
 };
 

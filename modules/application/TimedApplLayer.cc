@@ -34,6 +34,9 @@ void TimedApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
+		nveSignalId = registerSignal("updaten");
+		testId = registerSignal("test");
+
 		// get parameters
 		delay = par("delay").doubleValue();
 		maxVehicles = (int) par("maxVehicles").doubleValue();
@@ -54,6 +57,7 @@ void TimedApplLayer::initialize(int stage)
 		nerrorVec.setName("nve error");
 		visibleVec.setName("visible");
 		thresholdVec.setName("Threshold Error");
+		nveVec.setName("nve tracked");
 
 		// subscribe to movement updates
 		Move moveBBItem;
@@ -88,6 +92,9 @@ void TimedApplLayer::handleLowerMsg(cMessage* msg)
 	double diff;
     CCWSApplPkt *m;
 
+    std::ostringstream sstream;
+    std::string cstr;
+
     switch( msg->getKind() )
     {
 		case BROADCAST_MESSAGE:
@@ -98,6 +105,12 @@ void TimedApplLayer::handleLowerMsg(cMessage* msg)
 			stats.receivedUpdates++;
 
 			from = m->getSrcAddr();
+
+			sstream << m->getSrcAddr() << "," << m->getX() << "," << m->getY() << "," << m->getSpeed() << "," << m->getAccel() << endl;
+			cstr = sstream.str();
+
+			emit(nveSignalId, cstr.c_str());
+			emit(testId, 20);
 
 			if (nve[from] == 0)
 				nve[from] = new PositionEstimator;
@@ -133,11 +146,18 @@ void TimedApplLayer::handleSelfMsg(cMessage *msg)
 			scheduleAt(simTime() + delay, timer);
 			break;
 
+	    case RETRANSMIT_POSITION_UPDATE:
+
+	    	break;
+
 	    case CHECK_POSITION_UPDATE:
 
 	    	delayTime = delay;
 	    	current = spe.getCurrentPosition(simTime());
 	    	errorSize = rpe.positionError(current, simTime());
+
+	    	if (simTime() - spe.getLastUpdated() > 1)
+	    		sendLocationUpdate();
 
 			if (errorSize > thresholdSize)
 			{
@@ -220,8 +240,27 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 				isRegistered = true;
 			}
 
-			visibleVec.record(vm->inRange(this->getId()));
+			visibleVec.record(vm->visible(this->getId()));
+			int count = 0;
+			for (int i=0; i<maxVehicles; i++)
+			{
+				if (nve[i] != 0)
+				{
+					if (simTime() - nve[i]->getLastUpdated() < 3)
+					{
+						count++;
+					}
+					else
+					{
+						delete (nve[i]);
+						nve[i] = (PositionEstimator*) 0;
+					}
+				}
+			}
+			nveVec.record(count);
+
 		}
+
 	}
 }
 

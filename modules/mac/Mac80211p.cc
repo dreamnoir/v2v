@@ -22,7 +22,7 @@ void Mac80211p::initialize(int stage)
 
 void Mac80211p::handleLowerMsg(cMessage *msg)
 {
-	recVec.record(simTime());
+	recVec.record(1);
 	Mac80211::handleLowerMsg(msg);
 }
 
@@ -30,7 +30,7 @@ void Mac80211p::handleLowerControl(cMessage* msg)
 {
 	if (msg->getKind() == Decider80211::BITERROR)
 	{
-		notRecVec.record(simTime());
+		notRecVec.record(1);
 		ev << "bit error at 802.11p mac layer sending up to network" << endl;
 		sendControlUp(msg->dup());
 	}
