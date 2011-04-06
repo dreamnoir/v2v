@@ -17,8 +17,8 @@ class TimedApplLayer  : public BaseApplLayer
 public:
 	class Statistics {
 		public:
-			double sentUpdates; /**< for statistics: number of first road we encountered (if road id can be expressed as a number) */
-			double receivedUpdates;
+			int sentUpdates;
+			int receivedUpdates;
 			int shortDelay;
 
 			void initialize();
@@ -100,6 +100,7 @@ protected:
 
 	// vehicles in range of vision
 	cOutVector visibleVec;
+	cOutVector mvisibleVec;
 
 	// vehicles tracked by nve
 	cOutVector nveVec;
@@ -107,11 +108,13 @@ protected:
 	// time between threshold communication
 	cOutVector thresholdVec;
 
+	cOutVector ndeletecVec;
+
+	// time before deleting unupdated nve estimator
+	int nveTimeout;
+
 	// max number of vehicles in simulation
 	int maxVehicles;
-
-	simsignal_t nveSignalId;
-	simsignal_t testId;
 
 };
 

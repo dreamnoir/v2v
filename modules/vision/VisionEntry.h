@@ -9,30 +9,12 @@
 #define VISIONENTRY_H_
 
 #include <omnetpp.h>
-#include <map>
 
 #include "Coord.h"
+#include "MinMax.h"
+#include "VisionMap.h"
 
 class VisionEntry;
-
-struct MinMax
-{
-	double min;
-	double max;
-
-	bool operator<(const MinMax &other)
-	{
-		return other.max < min;
-	}
-	bool operator>(const MinMax &other)
-	{
-		return other.min > max;
-	}
-	bool inside(const MinMax &other)
-	{
-		return ((min < other.min && other.min > max) || (min < other.max && other.max > max));
-	}
-};
 
 struct VisibleVehicle
 {
@@ -43,27 +25,18 @@ struct VisibleVehicle
 };
 
 typedef std::list<VisibleVehicle> VehicleList;
-typedef std::list<MinMax> MinMaxList;
 
 class VisionEntry
 {
 public:
 	VisionEntry();
 
-/** @brief Connect two nics */
-	virtual void connectTo(VisionEntry*) {}
-
-	/** @brief Disconnect two nics */
-	virtual void disconnectFrom(VisionEntry*) {}
-
-	virtual bool isConnected(VisionEntry*) {return false;}
-
 	double getAngleTo(VisionEntry* other);
 	double getAngleTo(const Coord& second);
 
     MinMax getMinMaxAngles(VisionEntry* other);
 
-    int pruneVisible();
+    void pruneVisible();
 
 	VehicleList withinRange;
 
@@ -73,6 +46,7 @@ public:
 	/** @brief Pointer to the application module */
 	cModule *appPtr;
 
+	int maybeVisible;
 	int visible;
 
 	/** @brief Geographic location of the nic*/

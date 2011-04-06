@@ -23,15 +23,14 @@ simple TimedApplLayer like IBaseApplLayer
     	double delay @unit("s") = default(0.5s);
     	double thresholdSize @unit("m") = default(1m);
     	int maxVehicles;
+    	int nveTimeout @unit("s") = default(3s);
     	bool thresholdMode = default(false);
     	bool debug; // debug switch
     	int headerLength @unit("bit"); // length of the application message header (in bits)
     	
-    	bool retransmit = default(false);
+    	bool retransmit = default(true);
     	double retransmitTime @unit("s") = default(0.05s);
     	   
-    	@statistic[nve_update1](source="updaten");
-    	@statistic[tes1t](source="test"; record=vector);
     gates:
     	input lowerGateIn; // from network layer
         output lowerGateOut; // to network layer

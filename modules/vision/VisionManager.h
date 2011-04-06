@@ -320,6 +320,7 @@ public:
 	void initialize(int stage);
 
 	int visible(int vehicleID);
+	int maybeVisible(int vehicleID);
 
 	/** @brief Needs two initialization stages.*/
 	virtual int numInitStages() const {

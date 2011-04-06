@@ -26,19 +26,27 @@ public:
 	Coord getCurrentPosition(simtime_t time);
 
 	//update position information
-	void updatePosition(const Coord& position, double speed, const Coord& angle);
-	void updatePosition(double x, double y, double speed, double angleX, double angleY, simtime_t time);
+	int updatePosition(const Coord& position, double speed, const Coord& angle);
+	int updatePosition(double x, double y, double speed, double angleX, double angleY, simtime_t time);
 
 	//get error between provided position and expected position
 	double positionError(const Coord& newPosition, simtime_t time);
 
+	//get current estimated speed
 	double getSpeed();
+
+	//get number of updates
+	int getNumberUpdates() {return updates;}
 
 	double getAcceleration() {return this->acceleration;}
 	const Coord& getAngle() {return this->angle;}
 	simtime_t getLastUpdated() {return this->lastUpdated;}
 
 protected:
+
+	// how many times has this been updated
+	int updates;
+
 	Coord position;
 	double speed;
 	double acceleration;

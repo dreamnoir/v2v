@@ -151,9 +151,6 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
 
 {
 
-	// how many vehicles in vision range
-	int visible = 0;
-
     // structure to find union of grid squares
     CoordSet gridUnion(74);
 
@@ -182,19 +179,26 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
         }
     }
 
+	// clear out vehicles in range
 	nic->withinRange.clear();
 
+	int visible = 0;
+
+	// update all vehicles in nearby grids to check fo rrange
     GridCoord* c = gridUnion.next();
     while(c != 0) {
 		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
 		visible += updateNicConnections(getCellEntries(*c), nic);
 		c = gridUnion.next();
     }
+    nic->maybeVisible = visible;
+
+    if (debug) ev << "visible by " << id << " are " << nic->maybeVisible << " vehicles" << endl;
+
 
     nic->pruneVisible();
 
-    if (debug) ev << "visible by " << id << " are " << visible << " vehicles" << endl;
-    nic->visible = visible;
+    if (debug) ev << "visible by " << id << " are now only " << nic->visible << " vehicles are visible after prune" << endl;
 }
 
 int VisionManager::wrapIfTorus(int value, int max) {
@@ -270,7 +274,6 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
         if (inRange)
         {
             double angle = nic->getAngleTo(nic_i);
-
 
 			bool vis = false;
 			double distances[] = {22500, 400, 225, 225, 225};
@@ -359,7 +362,6 @@ bool VisionManager::registerNic(cModule* nic, const Coord* vehiclePos, const Coo
 
 bool VisionManager::unregisterNic(cModule* nicModule)
 {
-	VisionEntry* other;
 	assert(nicModule != 0);
 
 	// find VisionEntry
@@ -378,20 +380,6 @@ bool VisionManager::unregisterNic(cModule* nicModule)
 		gridUnion.add(cell);
 	} else {
 		fillUnionWithNeighbors(gridUnion, cell);
-	}
-
-	// disconnect from all NICs in these grid squares
-	GridCoord* c = gridUnion.next();
-	while(c != 0) {
-		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
-		VisionEntries& nmap = getCellEntries(*c);
-		for(VisionEntries::iterator i = nmap.begin(); i != nmap.end(); ++i) {
-			other = i->second;
-			if (other == visionEntry) continue;
-			if (!other->isConnected(visionEntry)) continue;
-			other->disconnectFrom(visionEntry);
-		}
-		c = gridUnion.next();
 	}
 
 	// erase from grid
@@ -420,6 +408,11 @@ void VisionManager::updateNicPos(int nicID, const Coord* newPos, const Coord* ne
 int VisionManager::visible(int vehicleID)
 {
 	return nics[vehicleID]->visible;
+}
+
+int VisionManager::maybeVisible(int vehicleID)
+{
+	return nics[vehicleID]->maybeVisible;
 }
 
 VisionManager::~VisionManager()

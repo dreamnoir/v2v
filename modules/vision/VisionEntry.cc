@@ -58,16 +58,25 @@ MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 	return result;
 }
 
-int VisionEntry::pruneVisible()
+void VisionEntry::pruneVisible()
 {
-	MinMaxList list;
+	visible = 0;
+	VisionMap m(0.5, true);
+
 	for (VehicleList::iterator ci = withinRange.begin(); ci != withinRange.end(); ci++)
 	{
 
-		ev << "Visible: " << (*ci).vehicle->vehicleId << " at d=" << (*ci).distance << endl;
+		ev << "Visible: " << (*ci).vehicle->vehicleId << " at d=" << (*ci).distance << " and angle (" << (*ci).angles.min << "," << (*ci).angles.max << ")" << endl;
 
+		if (!m.visible((*ci).angles))
+		{
+			(*ci).visible = false;
+			ev << "Not actually visible" << endl;
+		}
+		else
+			visible++;
+
+		m.add((*ci).angles);
 	}
-
-	return visible;
 }
 

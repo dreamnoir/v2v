@@ -66,6 +66,7 @@ OBJS = \
     $O/modules/utils/PositionEstimator.o \
     $O/modules/vision/VisionEntry.o \
     $O/modules/vision/VisionManager.o \
+    $O/modules/vision/VisionMap.o \
     $O/messages/application/CCWSApplPkt_m.o \
     $O/messages/netw/WSMPkt_m.o
 
@@ -176,6 +177,8 @@ $O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
+	modules/utils/MinMax.h \
+	modules/vision/VisionMap.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
 	messages/application/CCWSApplPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/SimpleAddress.h \
@@ -296,11 +299,18 @@ $O/modules/vision/VisionManager.o: modules/vision/VisionManager.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseWorldUtility.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	modules/utils/MinMax.h \
+	modules/vision/VisionMap.h \
 	modules/vision/VisionEntry.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
 	modules/vision/VisionManager.h
 $O/modules/vision/VisionEntry.o: modules/vision/VisionEntry.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	modules/utils/MinMax.h \
+	modules/vision/VisionMap.h \
 	modules/vision/VisionEntry.h
+$O/modules/vision/VisionMap.o: modules/vision/VisionMap.cc \
+	modules/utils/MinMax.h \
+	modules/vision/VisionMap.h
 

@@ -34,14 +34,14 @@ void TimedApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
-		nveSignalId = registerSignal("updaten");
-		testId = registerSignal("test");
-
 		// get parameters
 		delay = par("delay").doubleValue();
 		maxVehicles = (int) par("maxVehicles").doubleValue();
 		thresholdMode = par("thresholdMode").boolValue();
 		thresholdSize = par("thresholdSize").doubleValue();
+		nveTimeout = (int) par("nveTimeout").doubleValue();
+		retransmit = par("retransmit").boolValue();
+		retransmitTime = par("retransmitTime").doubleValue();
 
 		// find vision manager
 		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
@@ -56,8 +56,10 @@ void TimedApplLayer::initialize(int stage)
 		errorVec.setName("spe error");
 		nerrorVec.setName("nve error");
 		visibleVec.setName("visible");
+		mvisibleVec.setName("mvisible");
 		thresholdVec.setName("Threshold Error");
 		nveVec.setName("nve tracked");
+		ndeletecVec.setName("nve deleted");
 
 		// subscribe to movement updates
 		Move moveBBItem;
@@ -109,18 +111,14 @@ void TimedApplLayer::handleLowerMsg(cMessage* msg)
 			sstream << m->getSrcAddr() << "," << m->getX() << "," << m->getY() << "," << m->getSpeed() << "," << m->getAccel() << endl;
 			cstr = sstream.str();
 
-			emit(nveSignalId, cstr.c_str());
-			emit(testId, 20);
-
 			if (nve[from] == 0)
 				nve[from] = new PositionEstimator;
 
-			if (m->getCreationTime() - nve[from]->getLastUpdated() < 2.0)
+			if (m->getCreationTime() - nve[from]->getLastUpdated() < nveTimeout)
 			{
 				diff = nve[from]->positionError(Coord(m->getX(), m->getY()), m->getCreationTime());
-				if (debug) ev << "difference in position is " << diff << endl;
 
-				if (diff >= 0)
+				if (nve[from]->getNumberUpdates() > 1)
 					nerrorVec.record(diff);
 			}
 			nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
@@ -137,6 +135,7 @@ void TimedApplLayer::handleSelfMsg(cMessage *msg)
 {
 	double errorSize, delayTime;
 	Coord current;
+	bool send = false;
 
 	switch(msg->getKind())
 	{
@@ -148,6 +147,10 @@ void TimedApplLayer::handleSelfMsg(cMessage *msg)
 
 	    case RETRANSMIT_POSITION_UPDATE:
 
+	    	sendLocationUpdate();
+	    	timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
+	    	scheduleAt(simTime() + delay, timer);
+
 	    	break;
 
 	    case CHECK_POSITION_UPDATE:
@@ -157,12 +160,12 @@ void TimedApplLayer::handleSelfMsg(cMessage *msg)
 	    	errorSize = rpe.positionError(current, simTime());
 
 	    	if (simTime() - spe.getLastUpdated() > 1)
-	    		sendLocationUpdate();
-
-			if (errorSize > thresholdSize)
+	    	{
+	    		send = true;
+	    	}
+	    	else if (errorSize > thresholdSize)
 			{
-				thresholdVec.record(errorSize);
-				sendLocationUpdate();
+				send = true;
 			}
 			else if (errorSize > 0.75*thresholdSize)
 			{
@@ -170,8 +173,29 @@ void TimedApplLayer::handleSelfMsg(cMessage *msg)
 				stats.shortDelay++;
 			}
 
-			timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
-			scheduleAt(simTime() + delayTime, timer);
+			if (send)
+			{
+				if (rpe.getNumberUpdates() > 1)
+					thresholdVec.record(errorSize);
+
+				sendLocationUpdate();
+
+				if (retransmit)
+				{
+					timer = new cMessage( "resend-timer", RETRANSMIT_POSITION_UPDATE);
+					scheduleAt(simTime() + retransmitTime, timer);
+				}
+				else
+				{
+					timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
+					scheduleAt(simTime() + delayTime, timer);
+				}
+			}
+			else
+			{
+				timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
+				scheduleAt(simTime() + delayTime, timer);
+			}
 
 	    	break;
 
@@ -223,7 +247,7 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 		if (m->getStartPos().getX() != 0 && m->getStartPos().getY() != 0)
 		{
 			double diff = spe.positionError(m->getStartPos(), simTime());
-			if (diff >= 0)
+			if (spe.getNumberUpdates() > 1)
 				errorVec.record(diff);
 
 			// update SPE
@@ -239,24 +263,28 @@ void TimedApplLayer::receiveBBItem(int category, const BBItem *details, int scop
 				vm->registerNic(this, &(m->getStartPos()), &(m->getDirection()));
 				isRegistered = true;
 			}
-
 			visibleVec.record(vm->visible(this->getId()));
+			mvisibleVec.record(vm->maybeVisible(this->getId()));
+
 			int count = 0;
+			int deleted = 0;
 			for (int i=0; i<maxVehicles; i++)
 			{
 				if (nve[i] != 0)
 				{
-					if (simTime() - nve[i]->getLastUpdated() < 3)
+					if (simTime() - nve[i]->getLastUpdated() < nveTimeout)
 					{
 						count++;
 					}
 					else
 					{
+						deleted++;
 						delete (nve[i]);
 						nve[i] = (PositionEstimator*) 0;
 					}
 				}
 			}
+			ndeletecVec.record(deleted);
 			nveVec.record(count);
 
 		}
