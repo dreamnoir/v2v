@@ -250,9 +250,12 @@ protected:
 
     bool debug;
 
+    // percentage of vehicle required to be visible
+    double visionCutoff;
+
 private:
 	/** @brief Manages the connections of a registered nic. */
-    int updateNicConnections(VisionEntries& nmap, VisionEntry* nic);
+    void updateNicConnections(VisionEntries& nmap, VisionEntry* nic);
 
     /**
      * @brief Check connections of a nic in the grid

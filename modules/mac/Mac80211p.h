@@ -16,6 +16,10 @@ class Mac80211p : public Mac80211
 		virtual void initialize(int stage);
 		virtual void handleLowerControl(cMessage* msg);
 		virtual void handleLowerMsg(cMessage *msg);
+
+	    /** @brief send broadcast frame */
+	    void sendBROADCASTframe();
+
 	protected:
 		cOutVector recVec;
 		cOutVector notRecVec;

@@ -1,12 +1,17 @@
 #
-# OMNeT++/OMNEST Makefile for libv2v
+# OMNeT++/OMNEST Makefile for v2v
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep --make-so -O out -I../mixim-sommer/base/utils -I../mixim-sommer/base -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -lmixim -lmiximbase -lmiximmodules -lmiximtestUtils -KMIXIM_SOMMER_PROJ=../mixim-sommer
+#  opp_makemake -f --deep -O out -I../mixim-sommer/base/utils -I../mixim-sommer/base -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -lmixim -lmiximbase -lmiximmodules -lmiximtestUtils -KMIXIM_SOMMER_PROJ=../mixim-sommer
 #
 
 # Name of target to be created (-o option)
-TARGET = libv2v$(SHARED_LIB_SUFFIX)
+TARGET = v2v$(EXE_SUFFIX)
+
+# User interface (uncomment one) (-u option)
+USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(CMDENV_LIBS)
+#USERIF_LIBS = $(CMDENV_LIBS)
+#USERIF_LIBS = $(TKENV_LIBS)
 
 # C++ include paths (with -I)
 INCLUDE_PATH = \
@@ -30,6 +35,7 @@ INCLUDE_PATH = \
     -Imessages/netw \
     -Imodules \
     -Imodules/application \
+    -Imodules/control \
     -Imodules/mac \
     -Imodules/mobility \
     -Imodules/netw \
@@ -59,7 +65,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc and .msg files
 OBJS = \
-    $O/modules/application/TimedApplLayer.o \
+    $O/modules/application/CCWSApplLayer.o \
     $O/modules/mac/Mac80211p.o \
     $O/modules/mobility/TraCIMobilityV.o \
     $O/modules/netw/WSMNetwLayer.o \
@@ -100,7 +106,7 @@ include $(CONFIGFILE)
 
 # Simulation kernel and user interface libraries
 OMNETPP_LIB_SUBDIR = $(OMNETPP_LIB_DIR)/$(TOOLCHAIN_NAME)
-OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" -loppenvir$D $(KERNEL_LIBS) $(SYS_LIBS)
+OMNETPP_LIBS = -L"$(OMNETPP_LIB_SUBDIR)" -L"$(OMNETPP_LIB_DIR)" $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 
 COPTS = $(CFLAGS)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)
 MSGCOPTS = $(INCLUDE_PATH)
@@ -119,8 +125,7 @@ $(TARGET) : $O/$(TARGET)
 
 $O/$(TARGET): $(OBJS)  $(wildcard $(EXTRA_OBJS)) Makefile
 	@$(MKPATH) $O
-	$(SHLIB_LD) -o $O/$(TARGET)  $(OBJS) $(EXTRA_OBJS) $(LIBS) $(OMNETPP_LIBS) $(LDFLAGS)
-	$(SHLIB_POSTPROCESS) $O/$(TARGET)
+	$(CXX) $(LDFLAGS) -o $O/$(TARGET)  $(OBJS) $(EXTRA_OBJS) $(WHOLE_ARCHIVE_ON) $(LIBS) $(WHOLE_ARCHIVE_OFF) $(OMNETPP_LIBS)
 
 .PHONY:
 
@@ -144,6 +149,7 @@ clean:
 	-rm -f messages/netw/*_m.cc messages/netw/*_m.h
 	-rm -f modules/*_m.cc modules/*_m.h
 	-rm -f modules/application/*_m.cc modules/application/*_m.h
+	-rm -f modules/control/*_m.cc modules/control/*_m.h
 	-rm -f modules/mac/*_m.cc modules/mac/*_m.h
 	-rm -f modules/mobility/*_m.cc modules/mobility/*_m.h
 	-rm -f modules/netw/*_m.cc modules/netw/*_m.h
@@ -163,7 +169,7 @@ cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
@@ -172,37 +178,39 @@ $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
 $O/messages/netw/WSMPkt_m.o: messages/netw/WSMPkt_m.cc \
 	$(MIXIM_SOMMER_PROJ)/base/messages/NetwPkt_m.h \
 	messages/netw/WSMPkt_m.h
-$O/modules/application/TimedApplLayer.o: modules/application/TimedApplLayer.cc \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
+$O/modules/application/CCWSApplLayer.o: modules/application/CCWSApplLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
+	modules/application/CCWSApplLayer.h \
+	messages/application/CCWSApplPkt_m.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseApplLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	modules/vision/VisionEntry.h \
+	modules/control/WAVEControlInfo.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
 	modules/utils/MinMax.h \
 	modules/vision/VisionMap.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
-	messages/application/CCWSApplPkt_m.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/SimpleAddress.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BaseApplLayer.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
+	modules/utils/WAVEAddress.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/PassedMessage.h \
-	modules/application/TimedApplLayer.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
 	modules/utils/PositionEstimator.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
-	modules/vision/VisionEntry.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
 	modules/vision/VisionManager.h
 $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
+	messages/netw/WSMPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/AirFrame_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
-	$(MIXIM_SOMMER_PROJ)/base/messages/MacPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyInterface.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/MacPkt_m.h \
 	modules/mac/Mac80211p.h \
 	$(MIXIM_SOMMER_PROJ)/modules/phy/Decider80211.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
@@ -218,12 +226,14 @@ $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/DeciderToPhyInterface.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Decider.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
+	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/connectionManager/NicEntry.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseWorldUtility.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/PhyUtils.h \
 	$(MIXIM_SOMMER_PROJ)/base/connectionManager/BaseConnectionManager.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/ChannelState.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/NetwPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseMacLayer.h \
 	$(MIXIM_SOMMER_PROJ)/modules/messages/Mac80211Pkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
@@ -232,8 +242,8 @@ $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/messages/ChannelSenseRequest_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
-	$(MIXIM_SOMMER_PROJ)/base/phyLayer/BaseDecider.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Interpolation.h \
+	$(MIXIM_SOMMER_PROJ)/base/phyLayer/BaseDecider.h \
 	$(MIXIM_SOMMER_PROJ)/modules/mac/Mac80211.h
 $O/modules/mobility/TraCIMobilityV.o: modules/mobility/TraCIMobilityV.cc \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
@@ -257,10 +267,10 @@ $O/modules/mobility/TraCIMobilityV.o: modules/mobility/TraCIMobilityV.cc \
 $O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
 	messages/netw/WSMPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
-	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyInterface.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/MacPkt_m.h \
+	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyInterface.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
@@ -269,6 +279,7 @@ $O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MappingUtils.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/AnalogueModel.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
+	modules/control/WAVEControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Mapping.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Signal_.h \
 	modules/netw/WSMNetwLayer.h \

@@ -19,5 +19,6 @@ simple VisionManager
 {
 	parameters:
 		double maxDistance @unit("m");
+		double visionCutoff = default(0.5);
 		bool debug = default(false);
 }

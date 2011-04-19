@@ -7,8 +7,7 @@
 
 #include "WSMNetwLayer.h"
 #include "BaseMacLayer.h"
-#include "WSMPkt_m.h"
-#include "NetwControlInfo.h"
+#include "WAVEControlInfo.h"
 #include "NetwToMacControlInfo.h"
 
 Define_Module(WSMNetwLayer);
@@ -27,13 +26,26 @@ NetwPkt* WSMNetwLayer::encapsMsg(cPacket *appPkt) {
     WSMPkt *pkt = new WSMPkt(appPkt->getName(), appPkt->getKind());
     pkt->setBitLength(headerLength);
 
-    appPkt->removeControlInfo();
+    WAVEControlInfo* control = (WAVEControlInfo*) appPkt->removeControlInfo();
 
-	netwAddr = L3BROADCAST;
-	macAddr = L2BROADCAST;
+    netwAddr = control->getNetwAddr();
 
+	if (netwAddr != L3BROADCAST)
+	{
+		error("Can't lookup network address!");
+	}
+	else
+	{
+		macAddr = L2BROADCAST;
+	}
+
+	pkt->setBitLength(this->headerLength);
     pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(netwAddr);
+    pkt->setChNum(control->getChannel());
+    pkt->setDataRate(control->getDataRate());
+    pkt->setTxPower(control->getTxPower());
+
     EV << " netw "<< myNetwAddr << " sending packet" <<endl;
 
     pkt->setControlInfo(new NetwToMacControlInfo(macAddr));
@@ -42,6 +54,16 @@ NetwPkt* WSMNetwLayer::encapsMsg(cPacket *appPkt) {
     pkt->encapsulate(appPkt);
     EV <<" pkt encapsulated\n";
     return pkt;
+}
+
+cMessage* WSMNetwLayer::decapsMsg(NetwPkt *msg)
+{
+    cMessage *m = msg->decapsulate();
+    WSMPkt* wmsg = (WSMPkt*) msg;
+    m->setControlInfo(new WAVEControlInfo(wmsg->getSrcAddr(), wmsg->getChNum(), wmsg->getDataRate(), wmsg->getTxPower()));
+    // delete the netw packet
+    delete msg;
+    return m;
 }
 
 void WSMNetwLayer::handleLowerControl(cMessage* msg)

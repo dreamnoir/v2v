@@ -22,7 +22,7 @@
         <route edges="C1C2 C2B2 B2A2 A2A1 A1A0 A0B0"/>
     </vehicle>
     <vehicle id="t1" depart="2.00">
-        <route edges="C0B0"/>
+        <route edges="C1C2 C2B2 B2A2 A2A1 A1A0 A0B0"/>
     </vehicle>
     <vehicle id="t2" depart="4.00">
         <route edges="C0B0 B0A0 A0B0"/>

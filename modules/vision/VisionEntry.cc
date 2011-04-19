@@ -58,10 +58,10 @@ MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 	return result;
 }
 
-void VisionEntry::pruneVisible()
+void VisionEntry::pruneVisible(int cutoff)
 {
 	visible = 0;
-	VisionMap m(0.5, true);
+	VisionMap m(cutoff, true);
 
 	for (VehicleList::iterator ci = withinRange.begin(); ci != withinRange.end(); ci++)
 	{

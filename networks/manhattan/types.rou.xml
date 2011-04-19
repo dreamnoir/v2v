@@ -1,0 +1,9 @@
+<routes>
+  <vtypeDistribution id="type">
+    <vtype id="p1" accel="0.7" decel="4.5" sigma="0.8" length="4" maxspeed="70" color="0,0,1" probability="0.25" />
+    <vtype id="p2" accel="1.4" decel="7.5" sigma="0.7" length="4" maxspeed="90" color="1,0,0" probability="0.2" />
+    <vtype id="p4" accel="0.9" decel="5" sigma="0.7" length="5" maxspeed="90" color="1,0,0" probability="0.2" />
+    <vtype id="p3" accel="0.7" decel="4" sigma="0.7" length="4" maxspeed="70" color="1,0,0" probability="0.25" />
+    <vtype id="t1" accel="0.5" decel="4" sigma="0.5" length="18" maxspeed="50" color="0,1,0" probability="0.1" />
+  </vtypeDistribution>
+</routes>

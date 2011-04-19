@@ -40,6 +40,7 @@ public:
 
 	double getAcceleration() {return this->acceleration;}
 	const Coord& getAngle() {return this->angle;}
+	const Coord& getPosition() {return this->position;}
 	simtime_t getLastUpdated() {return this->lastUpdated;}
 
 protected:

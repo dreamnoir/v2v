@@ -42,6 +42,7 @@ void VisionMap::addAngle(MinMax angles)
 		li++;
 	}
 
+	// no intersections
 	if (intersections.size() == 0)
 	{
 		if (debug) ev << "just insert" << endl;
@@ -127,7 +128,7 @@ bool VisionMap::visible(MinMax angles)
 {
 	double minToMax;
 
-	// check if angle range is crosses over 360% and treat appropriately
+	// check if angle range crosses over 360 degrees and treat appropriately
 	if (angles.min > angles.max)
 	{
 		MinMax low = {0, angles.max};

@@ -36,7 +36,7 @@ public:
 
     MinMax getMinMaxAngles(VisionEntry* other);
 
-    void pruneVisible();
+    void pruneVisible(int cutoff);
 
 	VehicleList withinRange;
 

@@ -29,7 +29,7 @@ module Highway
         double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
         double playgroundSizeY @unit(m); // y size of the area the nodes are in (in meters)
         double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
-        @display("bgb=$playgroundSizeX,$playgroundSizeY,white,,;bgp=0,0;bgs=0.25");
+        @display("bgb=$playgroundSizeX,$playgroundSizeY,white,,;bgp=0,250;bgi=london;bgs=.55,m");
     submodules:
         connectionManager: ConnectionManager {
          	parameters:

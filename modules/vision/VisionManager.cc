@@ -27,6 +27,7 @@ void VisionManager::initialize(int stage)
 	if (stage == 0)
 	{
 		maxDistance = par("maxDistance").doubleValue();
+		visionCutoff = par("visionCutoff").doubleValue();
 		debug = par("debug").boolValue();
 	}
 	else if (stage == 1)
@@ -182,23 +183,21 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
 	// clear out vehicles in range
 	nic->withinRange.clear();
 
-	int visible = 0;
+	// clear number of vehicles maybe visible
+	nic->maybeVisible = 0;
 
-	// update all vehicles in nearby grids to check fo rrange
+	// update all vehicles in nearby grids to check for range
     GridCoord* c = gridUnion.next();
     while(c != 0) {
 		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
-		visible += updateNicConnections(getCellEntries(*c), nic);
+		updateNicConnections(getCellEntries(*c), nic);
 		c = gridUnion.next();
     }
-    nic->maybeVisible = visible;
 
-    if (debug) ev << "visible by " << id << " are " << nic->maybeVisible << " vehicles" << endl;
+    // prune list of maybe visible vehicles
+    nic->pruneVisible(visionCutoff);
 
-
-    nic->pruneVisible();
-
-    if (debug) ev << "visible by " << id << " are now only " << nic->visible << " vehicles are visible after prune" << endl;
+    if (debug) ev << "visible by " << id << " are " << nic->visible << " of " << nic->maybeVisible << " vehicles." << endl;
 }
 
 int VisionManager::wrapIfTorus(int value, int max) {
@@ -247,10 +246,9 @@ void VisionManager::fillUnionWithNeighbors(CoordSet& gridUnion, GridCoord cell) 
 	}
 }
 
-int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
+void VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
 {
     int id = nic->vehicleId;
-    int visible = 0;
 
     for(VisionEntries::iterator i = nmap.begin(); i != nmap.end(); ++i)
     {
@@ -310,27 +308,23 @@ int VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
 
             if (vis)
             {
-            	visible++;
+
             	MinMax angles = nic->getMinMaxAngles(nic_i);
             	if (debug) ev << "Vehicle ID(" << nic->vehicleId << " can see ID" << nic_i->vehicleId << " at distance " << distance << " and at angle " << angle << " with angles to corners (" << angles.min << ", " << angles.max << ")" << endl;
 
-            	VehicleList::iterator ci = nic->withinRange.begin();
-
-            	int i=0;
-            	while (ci != nic->withinRange.end() && (*ci).distance < distance)
-            	{
-            		ci++;
-            		i++;
-            	}
+            	// create new visible vehicle holder
             	VisibleVehicle v = {nic_i, distance, false, angles};
-            	nic->withinRange.insert(ci, v);
-            	ev << "inserting in position: " << i << endl;
-            }
 
+            	// find correct position based on distance and insert into list
+            	VehicleList::iterator ci = nic->withinRange.begin();
+            	while (ci != nic->withinRange.end() && (*ci).distance < distance)
+            		ci++;
+            	nic->withinRange.insert(ci, v);
+
+            	nic->maybeVisible++;
+            }
         }
     }
-
-    return visible;
 }
 
 bool VisionManager::registerNic(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle)
