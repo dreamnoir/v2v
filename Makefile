@@ -271,6 +271,7 @@ $O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/NetwControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/messages/MacPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyInterface.h \
+	modules/control/NetwTo80211pControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
@@ -279,8 +280,8 @@ $O/modules/netw/WSMNetwLayer.o: modules/netw/WSMNetwLayer.cc \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MappingUtils.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/AnalogueModel.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
-	modules/control/WAVEControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Mapping.h \
+	modules/control/WAVEControlInfo.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Signal_.h \
 	modules/netw/WSMNetwLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \

@@ -29,6 +29,8 @@ simple CCWSApplLayer like IBaseApplLayer
     	bool debug; // debug switch			
     	int headerLength @unit("bit"); // length of the application message header (in bits)
     	
+    	int txPower @unit("W") = default(15000mW);
+    	
     	bool retransmit = default(true); // retransmit second time in threshold mode
     	double retransmitTime @unit("s") = default(0.05s); // time before second retransmit
     	   

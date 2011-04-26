@@ -127,6 +127,9 @@ protected:
 	// max number of vehicles in simulation
 	int maxVehicles;
 
+
+	// max tx power to use
+	int txPower;
 };
 
 #endif /* CCWSAPPLLAYER_H_ */

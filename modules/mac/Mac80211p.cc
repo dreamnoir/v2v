@@ -30,7 +30,7 @@ void Mac80211p::handleLowerMsg(cMessage *msg)
 
 void Mac80211p::handleLowerControl(cMessage* msg)
 {
-	if (msg->getKind() == Decider80211::BITERROR)
+	if (msg->getKind() == Decider80211::BITERROR || msg->getKind() == Decider80211::COLLISION)
 	{
 		notRecVec.record(1);
 		ev << "bit error at 802.11p mac layer sending up to network" << endl;
@@ -54,7 +54,7 @@ void Mac80211p::sendBROADCASTframe()
     txPowerPkt = inner->getTxPower();
     if (txPowerPkt == 0) txPowerPkt = txPower;
 
-    double br = retrieveBitrate(frame->getDestAddr());
+    double br = inner->getDataRate();
 
     simtime_t duration = packetDuration(frame->getBitLength(), br);
     Signal* signal = createSignal(simTime(), duration, txPowerPkt, br);

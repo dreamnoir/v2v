@@ -55,6 +55,7 @@ void CCWSApplLayer::initialize(int stage)
 		retransmit = par("retransmit").boolValue();
 		retransmitTime = par("retransmitTime").doubleValue();
 		autoRetransmitTime = par("autoRetransmitTime").doubleValue();
+		txPower = (int) par("txPower").doubleValue();
 
 		// find vision manager
 		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
@@ -240,7 +241,7 @@ void CCWSApplLayer::sendLocationUpdate()
 
     // set the control info to tell the network layer the layer 3
     // address;
-    pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, THREEMBS, 0) );
+    pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, SIXMBS, txPower) );
 
     if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
 

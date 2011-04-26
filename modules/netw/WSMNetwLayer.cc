@@ -8,7 +8,7 @@
 #include "WSMNetwLayer.h"
 #include "BaseMacLayer.h"
 #include "WAVEControlInfo.h"
-#include "NetwToMacControlInfo.h"
+#include "NetwTo80211pControlInfo.h"
 
 Define_Module(WSMNetwLayer);
 
@@ -48,7 +48,7 @@ NetwPkt* WSMNetwLayer::encapsMsg(cPacket *appPkt) {
 
     EV << " netw "<< myNetwAddr << " sending packet" <<endl;
 
-    pkt->setControlInfo(new NetwToMacControlInfo(macAddr));
+    pkt->setControlInfo(new NetwTo80211pControlInfo(macAddr, NetwTo80211pControlInfo::A2));
 
     //encapsulate the application packet
     pkt->encapsulate(appPkt);
