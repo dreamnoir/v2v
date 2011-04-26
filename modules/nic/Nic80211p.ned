@@ -16,7 +16,7 @@
 package v2v.modules.nic;
 
 import v2v.modules.mac.Mac80211p;
-import org.mixim.modules.phy.PhyLayer;
+import v2v.modules.phy.Phy80211pLayer;
 import org.mixim.modules.nic.INic;
 //
 // This NIC implements an 802.11 network interface card.
@@ -42,7 +42,7 @@ module Nic80211p like INic
             @display("p=96,87;i=block/layer");
         }
 
-        phy: PhyLayer {
+        phy: Phy80211pLayer {
             headerLength = 192bit;
             @display("p=96,158;i=block/process;is=n");
         }

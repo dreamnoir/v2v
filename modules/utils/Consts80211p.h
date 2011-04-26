@@ -4,10 +4,29 @@
 
 /** @brief Bit rates for 802.11b */
 const double BITRATES_80211[] = {
-    1000000,
-    2000000,
-    5500000,
-    11000000
+    3000000,
+    6000000,
+    9000000,
+    27000000
+};
+
+/** @brief Center frequencies for 802.11b */
+const double CENTER_FREQUENCIES[] = {
+	-1, 		//channel 0 does not exist
+    5.89e9,	// 1
+    2.417e9,	// 2
+    2.422e9,	// 3
+    2.427e9,	// 4
+    2.432e9,	// 5
+    2.437e9,	// 6
+    2.442e9,	// 7
+    2.447e9,	// 8
+    2.452e9,	// 9
+    2.457e9,	// 10
+    2.462e9,	// 11
+    2.467e9,	// 12
+    2.472e9,	// 13
+    2.484e9,	// 14
 };
 
 
@@ -44,15 +63,15 @@ const int MAC80211_HEADER_LENGTH = 272;
 /** @brief Standard time values
     @{ */
 /** @brief Slot time  */
-const const_simtime_t ST = 20E-6;
+const const_simtime_t ST = 13E-6;
 /** @brief Short interframe space
  *  between DATA and ACK
  */
-const const_simtime_t SIFS = 10E-6;
+const const_simtime_t SIFS = 32E-6;
 /** @brief Distributed interframe space
  * medium must be clear for this time in DCF
  */
-const const_simtime_t DIFS = 2*ST + SIFS;
+const const_simtime_t DIFS = 6*ST + SIFS;
 /** @brief extended interframe space
  *  whenever a corrupted frame is received, defer actions for this time
  */
@@ -73,10 +92,10 @@ const unsigned SHORT_RETRY_LIMIT = 7;
 /**
  * Minimum size (initial size) of contention window, assuming DS PHY
  */
-const unsigned CW_MIN = 31;
+const unsigned CW_MIN = 7;
 
 /** Maximum size of contention window, assuming DS PHY */
-const unsigned CW_MAX = 1023;
+const unsigned CW_MAX = 225;
 
 #endif
 

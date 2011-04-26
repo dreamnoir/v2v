@@ -15,11 +15,43 @@
 
 package v2v.modules.mac;
 
-import org.mixim.modules.mac.Mac80211;
+import org.mixim.base.modules.BaseMacLayer;
 
-simple Mac80211p extends Mac80211
+//
+// Implementation of the 802.11b MAC protocol. This module is intended
+// to be used in combination with the Decider80211 as decider for the 
+// physical layer.
+//
+// This module supports ad-hoc mode only (does not generate or handle
+// management frames), and does not support fragmentation, RTS threshold,
+// duplication detection and recovery.
+//
+simple Mac80211p extends BaseMacLayer
 {
-	parameters:
-		@class(Mac80211p);
+    parameters:
+        @class(Mac80211p);
+        
+        int queueLength;
+        // Number of bits in a packet before RTS/CTS is used. 
+        // Is currently not used.
+        int rtsCtsThreshold = default(-1); 
 
+        double bitrate @unit(bps);
+
+    	// auto bit rate selection support: specify borders at which
+        // to change modulation.	
+    	bool autoBitrate;         // use auto bit rate adaptation
+    	double snr2Mbit @unit(dB);  // threshold to use 2Mbit (in dB)
+    	double snr5Mbit @unit(dB);  // threshold to use 5.5Mbit (in dB)
+    	double snr11Mbit @unit(dB);  // threshold to use 11Mbit (in dB)
+
+    	// keep information on neighborhood
+    	int neighborhoodCacheSize;	
+    	// consider information in cache outdate if older than (in seconds)
+    	double neighborhoodCacheMaxAge @unit(s); 
+    	//the power to transmit packets with [mW]
+    	double txPower @unit(mW);
+    	
+    	headerLength = default(272bit);
 }
+
