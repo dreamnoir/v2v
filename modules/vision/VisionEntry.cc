@@ -30,6 +30,32 @@ double VisionEntry::getAngleTo(VisionEntry* other)
 	return getAngleTo(other->pos);
 }
 
+double VisionEntry::getDistanceTo(VisionEntry* other)
+{
+	Coord widthVec(other->angle.getY(), other->angle.getX());
+	widthVec *= (other->width/2);
+	Coord lengthVec = other->angle*(length/2);
+
+	double distances [] =  {this->pos.distance(other->pos+lengthVec),
+							this->pos.distance(other->pos-lengthVec),
+							this->pos.distance(other->pos+widthVec),
+							this->pos.distance(other->pos+widthVec),
+							this->pos.distance(other->pos+lengthVec+widthVec),
+							this->pos.distance(other->pos+lengthVec-widthVec),
+							this->pos.distance(other->pos-lengthVec+widthVec),
+							this->pos.distance(other->pos-length-widthVec)};
+
+	double min = 1000000;
+
+	for (int i=0; i<8; i++)
+	{
+		if (distances[i] < min)
+			min = distances[i];
+	}
+
+	return min;
+}
+
 MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 {
 	MinMax result = {10000, - 10000};

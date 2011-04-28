@@ -33,5 +33,5 @@ packet CCWSApplPkt extends ApplPkt {
     double accel;
     double width;
     double length;
-    double utc;
+    simtime_t utc;
 }

@@ -33,6 +33,8 @@ simple CCWSApplLayer like IBaseApplLayer
     	
     	bool retransmit = default(true); // retransmit second time in threshold mode
     	double retransmitTime @unit("s") = default(0.05s); // time before second retransmit
+    	
+    	double runUp @unit(s) = default(0s); // how long before network and vision simulation starts
     	   
     gates:
     	input lowerGateIn; // from network layer

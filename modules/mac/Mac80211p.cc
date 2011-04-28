@@ -71,10 +71,10 @@ void Mac80211p::initialize(int stage)
             	      "Please adjust your omnetpp.ini file accordingly.");
 
     	int channel = phy->getCurrentRadioChannel();
-    	if(!(1<=channel && channel<=14)) {
+    	if(!(1<=channel && channel<=7)) {
     		opp_error("Radio set to invalid channel %d. Please make sure the"
     				  " phy modules parameter \"initialRadioChannel\" is set to"
-    				  " a valid 802.11 channel (1 to 14)!", channel);
+    				  " a valid 802.11p channel (1 to 7)!", channel);
     	}
     	centerFreq = CENTER_FREQUENCIES[channel];
 

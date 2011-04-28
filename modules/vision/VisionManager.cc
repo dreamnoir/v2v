@@ -17,6 +17,7 @@
 
 #include "VisionManager.h"
 #include "BaseWorldUtility.h"
+#include "CCWSApplLayer.h"
 #include "FindModule.h"
 #include <cassert>
 
@@ -133,7 +134,7 @@ VisionManager::VisionEntries& VisionManager::getCellEntries(VisionManager::GridC
     return nicGrid[cell.x][cell.y][cell.z];
 }
 
-void VisionManager::registerNicExt(int nicID)
+void VisionManager::registerVehicleExt(int nicID)
 {
 	VisionEntry* VisionEntry = nics[nicID];
 
@@ -190,7 +191,7 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
     GridCoord* c = gridUnion.next();
     while(c != 0) {
 		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
-		updateNicConnections(getCellEntries(*c), nic);
+		updateVehicleVision(getCellEntries(*c), nic);
 		c = gridUnion.next();
     }
 
@@ -246,7 +247,7 @@ void VisionManager::fillUnionWithNeighbors(CoordSet& gridUnion, GridCoord cell) 
 	}
 }
 
-void VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
+void VisionManager::updateVehicleVision(VisionEntries& nmap, VisionEntry* nic)
 {
     int id = nic->vehicleId;
 
@@ -274,7 +275,10 @@ void VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
             double angle = nic->getAngleTo(nic_i);
 
 			bool vis = false;
-			double distances[] = {22500, 400, 225, 225, 225};
+
+			distance = nic->getDistanceTo(nic_i);
+
+			double distances[] = {150, 20, 15, 15, 15};
 
             if (angle >= 345 || angle <= 15)
             {
@@ -327,11 +331,11 @@ void VisionManager::updateNicConnections(VisionEntries& nmap, VisionEntry* nic)
     }
 }
 
-bool VisionManager::registerNic(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle)
+bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle)
 {
 	assert(nic != 0);
 
-	int nicID = nic->getId();
+	int nicID = nic->getParentModule()->getIndex();
 
 	// create new VisionEntry
 	VisionEntry *visionEntry;
@@ -347,19 +351,19 @@ bool VisionManager::registerNic(cModule* nic, const Coord* vehiclePos, const Coo
 	// add to map
 	nics[nicID] = visionEntry;
 
-	registerNicExt(nicID);
+	registerVehicleExt(nicID);
 
 	updateConnections(nicID, vehiclePos, vehiclePos);
 
 	return true;
 }
 
-bool VisionManager::unregisterNic(cModule* nicModule)
+bool VisionManager::unregisterVehicle(cModule* nicModule)
 {
 	assert(nicModule != 0);
 
 	// find VisionEntry
-	int nicID = nicModule->getId();
+	int nicID = nicModule->getParentModule()->getIndex();
 	if (debug) ev << " unregistering nic #" << nicID << endl;
 
 	//we assume that the module was previously registered with this CM
@@ -381,12 +385,15 @@ bool VisionManager::unregisterNic(cModule* nicModule)
 	cellEntries.erase(nicID);
 
 	// erase from list of known nics
-	nics.erase(nicID);
+	nics[nicID] = (VisionEntry*)0;
+
+	// delete the object
+	delete visionEntry;
 
 	return true;
 }
 
-void VisionManager::updateNicPos(int nicID, const Coord* newPos, const Coord* newAngle)
+void VisionManager::updateVehiclePos(int nicID, const Coord* newPos, const Coord* newAngle)
 {
 	VisionEntry* VisionEntry = nics[nicID];
 	if(VisionEntry == 0)
@@ -407,6 +414,21 @@ int VisionManager::visible(int vehicleID)
 int VisionManager::maybeVisible(int vehicleID)
 {
 	return nics[vehicleID]->maybeVisible;
+}
+
+Coord VisionManager::getVehiclePos(int vehicleID)
+{
+	CCWSApplLayer* v = (CCWSApplLayer*)nics[vehicleID];
+
+	if (v != 0)
+		return ((CCWSApplLayer*)nics[vehicleID]->appPtr)->getCurrentPos();
+	else
+		return new Coord();
+}
+
+bool VisionManager::vehicleExists(int vehicleID)
+{
+	return !((CCWSApplLayer*)nics[vehicleID] == 0);
 }
 
 VisionManager::~VisionManager()

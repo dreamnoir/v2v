@@ -38,6 +38,7 @@ public:
 
 			cOutVector nveErrorVec;			// NVE error between position updates
 			cOutVector nveDistanceVec;		// NVE distance to other vehicle
+			cOutVector nveLatencyVec;		// NVE latency to other vehicle
 
 			cOutVector visibleVec;			// vehicles in range of vision
 			cOutVector mvisibleVec;
@@ -56,6 +57,8 @@ public:
 	virtual void initialize(int);
 
 	virtual void finish();
+
+	Coord getCurrentPos();
 
     /** @brief Message kinds used by this layer.*/
     enum TestApplMessageKinds{
@@ -127,6 +130,8 @@ protected:
 	// max number of vehicles in simulation
 	int maxVehicles;
 
+	// how long before starting simulation
+	double runUp;
 
 	// max tx power to use
 	int txPower;

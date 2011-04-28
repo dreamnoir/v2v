@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -193,12 +193,12 @@ void CCWSApplPkt::setLength(double length_var)
     this->length_var = length_var;
 }
 
-double CCWSApplPkt::getUtc() const
+simtime_t CCWSApplPkt::getUtc() const
 {
     return utc_var;
 }
 
-void CCWSApplPkt::setUtc(double utc_var)
+void CCWSApplPkt::setUtc(simtime_t utc_var)
 {
     this->utc_var = utc_var;
 }
@@ -334,7 +334,7 @@ const char *CCWSApplPktDescriptor::getFieldTypeString(void *object, int field) c
         "double",
         "double",
         "double",
-        "double",
+        "simtime_t",
     };
     return (field>=0 && field<10) ? fieldTypeStrings[field] : NULL;
 }

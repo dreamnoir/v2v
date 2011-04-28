@@ -34,6 +34,8 @@ public:
 	double getAngleTo(VisionEntry* other);
 	double getAngleTo(const Coord& second);
 
+	double getDistanceTo(VisionEntry* other);
+
     MinMax getMinMaxAngles(VisionEntry* other);
 
     void pruneVisible(int cutoff);

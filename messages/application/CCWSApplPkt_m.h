@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 #ifndef _CCWSAPPLPKT_M_H_
@@ -20,7 +20,7 @@
 
 
 /**
- * Class generated from <tt>messages/application/CCWSApplPkt.msg</tt> by opp_msgc.
+ * Class generated from <tt>CCWSApplPkt.msg</tt> by opp_msgc.
  * <pre>
  * packet CCWSApplPkt extends ApplPkt {
  *     int id;
@@ -32,7 +32,7 @@
  *     double accel;
  *     double width;
  *     double length;
- *     double utc;
+ *     simtime_t utc;
  * }
  * </pre>
  */
@@ -48,7 +48,7 @@ class CCWSApplPkt : public ::ApplPkt
     double accel_var;
     double width_var;
     double length_var;
-    double utc_var;
+    simtime_t utc_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const CCWSApplPkt&);
@@ -81,8 +81,8 @@ class CCWSApplPkt : public ::ApplPkt
     virtual void setWidth(double width_var);
     virtual double getLength() const;
     virtual void setLength(double length_var);
-    virtual double getUtc() const;
-    virtual void setUtc(double utc_var);
+    virtual simtime_t getUtc() const;
+    virtual void setUtc(simtime_t utc_var);
 };
 
 inline void doPacking(cCommBuffer *b, CCWSApplPkt& obj) {obj.parsimPack(b);}

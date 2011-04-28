@@ -377,13 +377,24 @@ $O/modules/utils/PositionEstimator.o: modules/utils/PositionEstimator.cc \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
 	modules/utils/PositionEstimator.h
 $O/modules/vision/VisionManager.o: modules/vision/VisionManager.cc \
-	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseBattery.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FWMath.h \
-	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseWorldUtility.h \
-	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/HostState.h \
 	modules/utils/MinMax.h \
 	modules/vision/VisionMap.h \
+	modules/application/CCWSApplLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseUtility.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseApplLayer.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/ImNotifiable.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BatteryAccess.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
+	$(MIXIM_SOMMER_PROJ)/base/utils/PassedMessage.h \
+	modules/utils/PositionEstimator.h \
+	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
 	modules/vision/VisionEntry.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/FindModule.h \
 	modules/vision/VisionManager.h

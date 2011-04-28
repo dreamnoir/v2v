@@ -255,7 +255,7 @@ protected:
 
 private:
 	/** @brief Manages the connections of a registered nic. */
-    void updateNicConnections(VisionEntries& nmap, VisionEntry* nic);
+    void updateVehicleVision(VisionEntries& nmap, VisionEntry* nic);
 
     /**
      * @brief Check connections of a nic in the grid
@@ -300,7 +300,7 @@ protected:
 	 *
 	 * @param nicID - the id of the VisionEntry
 	 */
-	virtual void registerNicExt(int nicID);
+	virtual void registerVehicleExt(int nicID);
 
 	/**
 	 * @brief Updates the connections of the nic with "nicID".
@@ -336,7 +336,7 @@ public:
 	 * If you want to do your own stuff at the registration of a nic see
 	 * "registerNicExt()".
 	 */
-	bool registerNic(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle);
+	bool registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle);
 
 	/**
 	 * @brief Unregisters a NIC such that its connections aren't managed by the CM
@@ -350,10 +350,14 @@ public:
 	 * @param nic the NIC module to be unregistered
 	 * @return returns true if the NIC was unregistered successfully
 	 */
-	bool unregisterNic(cModule* nic);
+	bool unregisterVehicle(cModule* nic);
 
 	/** @brief Updates the position information of a registered nic.*/
-	void updateNicPos(int nicID, const Coord* newPos, const Coord* newAngle);
+	void updateVehiclePos(int nicID, const Coord* newPos, const Coord* newAngle);
+
+	Coord getVehiclePos(int vehicleID);
+
+	bool vehicleExists(int vehicleID);
 
 };
 #endif /* VISIONMANAGER_H_ */

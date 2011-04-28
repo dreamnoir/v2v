@@ -19,6 +19,7 @@ void CCWSApplLayer::Statistics::initialize()
 	speErrorVec.setName("SPE Error");
 	nveErrorVec.setName("NVE Error");
 	nveDistanceVec.setName("NVE Received Distance");
+	nveLatencyVec.setName("NVE Latency");
 	visibleVec.setName("Visible");
 	mvisibleVec.setName("Potentially Visible");
 	thresholdVec.setName("Threshold Error");
@@ -56,6 +57,7 @@ void CCWSApplLayer::initialize(int stage)
 		retransmitTime = par("retransmitTime").doubleValue();
 		autoRetransmitTime = par("autoRetransmitTime").doubleValue();
 		txPower = (int) par("txPower").doubleValue();
+		runUp = par("runUp").doubleValue();
 
 		// find vision manager
 		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
@@ -73,21 +75,26 @@ void CCWSApplLayer::initialize(int stage)
 	}
 	else if(stage==1)
 	{
+		double add = 0;
+
 		// create and initialise empty array of NVE
 		nve = new PositionEstimator*[maxVehicles];
 		for (int i=0; i<maxVehicles; i++)
 			nve[i] = 0;
 
+		if (runUp > SIMTIME_DBL(simTime()))
+			add = runUp - SIMTIME_DBL(simTime());
+
 		// start position update timer if in threshold mode otherwise start broadcast timer
 		if (!thresholdMode)
 		{
 			timer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER);
-			scheduleAt(simTime() + delay + dblrand(), timer);
+			scheduleAt(simTime() + delay + dblrand() + add, timer);
 		}
 		else
 		{
 			timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
-			scheduleAt(simTime() + delay + dblrand(), timer);
+			scheduleAt(simTime() + delay + dblrand() + add, timer);
 		}
 
 	}
@@ -97,7 +104,7 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 {
 	int from;
 	Coord estimate, now;
-	double diff, distance;
+	double distance;
     CCWSApplPkt *m;
     WAVEControlInfo* control;
 
@@ -124,12 +131,7 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 			if (nve[from] == 0)
 				nve[from] = new PositionEstimator;
 
-			// make sure this isn't the first update and record position error if not
-			if (nve[from]->getNumberUpdates() > 1)
-			{
-				diff = nve[from]->positionError(Coord(m->getX(), m->getY()), m->getCreationTime());
-				stats.nveErrorVec.record(diff);
-			}
+			stats.nveLatencyVec.record(simTime() - m->getUtc());
 
 			// update nve position
 			nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
@@ -224,33 +226,37 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 
 void CCWSApplLayer::sendLocationUpdate()
 {
-	CCWSApplPkt *pkt = new CCWSApplPkt("CCWS_MESSAGE", CCWS_MESSAGE);
-    pkt->setDestAddr(-1);
+	if (simTime() >= runUp)
+	{
+		CCWSApplPkt *pkt = new CCWSApplPkt("CCWS_MESSAGE", CCWS_MESSAGE);
+		pkt->setDestAddr(-1);
 
-    // we use the host modules getIndex() as a appl address
-    pkt->setSrcAddr( myApplAddr() );
-    pkt->setBitLength(headerLength);
+		// we use the host modules getIndex() as a appl address
+		pkt->setSrcAddr(myApplAddr());
+		pkt->setBitLength(headerLength);
 
-    pkt->setAccel(spe.getAcceleration());
-    pkt->setX(spe.getCurrentPosition(simTime()).getX());
-    pkt->setY(spe.getCurrentPosition(simTime()).getY());
-    pkt->setSpeed(spe.getSpeed());
-    pkt->setAngleX(spe.getAngle().getX());
-    pkt->setAngleY(spe.getAngle().getY());
-    pkt->setBitLength(headerLength);
+		pkt->setAccel(spe.getAcceleration());
+		pkt->setX(spe.getCurrentPosition(simTime()).getX());
+		pkt->setY(spe.getCurrentPosition(simTime()).getY());
+		pkt->setSpeed(spe.getSpeed());
+		pkt->setAngleX(spe.getAngle().getX());
+		pkt->setAngleY(spe.getAngle().getY());
+		pkt->setBitLength(headerLength);
+		pkt->setUtc(simTime());
 
-    // set the control info to tell the network layer the layer 3
-    // address;
-    pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, SIXMBS, txPower) );
+		// set the control info to tell the network layer the layer 3
+		// address;
+		pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, SIXMBS, txPower) );
 
-    if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
+		if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
 
-    stats.sentUpdates++;
+		stats.sentUpdates++;
 
-    // update remote rpe
-    rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());
+		// update remote rpe
+		rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());
 
-    sendDown( pkt );
+		sendDown( pkt );
+	}
 }
 
 void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
@@ -258,62 +264,79 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
 	if(category == catMove)
 	{
-		// get movement information
-		const Move* m = static_cast<const Move*>(details);
-
-		if (m->getStartPos().getX() != 0 && m->getStartPos().getY() != 0)
+		if (simTime() >= runUp)
 		{
-			double diff = spe.positionError(m->getStartPos(), simTime());
-			if (spe.getNumberUpdates() > 1)
-				stats.speErrorVec.record(diff);
+			// get movement information
+			const Move* m = static_cast<const Move*>(details);
 
-			// update SPE
-			spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
+			if (m->getStartPos().getX() != 0 && m->getStartPos().getY() != 0)
+			{
+				double diff = spe.positionError(m->getStartPos(), simTime());
+				if (spe.getNumberUpdates() > 1)
+					stats.speErrorVec.record(diff);
 
-			// vision updates
-			if (isRegistered)
-			{
-				vm->updateNicPos(this->getId(), &(m->getStartPos()), &(m->getDirection()));
-			}
-			else
-			{
-				vm->registerNic(this, &(m->getStartPos()), &(m->getDirection()));
-				isRegistered = true;
-			}
-			stats.visibleVec.record(vm->visible(this->getId()));
-			stats.mvisibleVec.record(vm->maybeVisible(this->getId()));
+				// update SPE
+				spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 
-			int count = 0;
-			int deleted = 0;
-			for (int i=0; i<maxVehicles; i++)
-			{
-				if (nve[i] != 0)
+				// vision updates
+				if (isRegistered)
 				{
-					if (simTime() - nve[i]->getLastUpdated() < nveTimeout)
+					vm->updateVehiclePos(myApplAddr(), &(m->getStartPos()), &(m->getDirection()));
+				}
+				else
+				{
+					vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
+					isRegistered = true;
+				}
+				stats.visibleVec.record(vm->visible(myApplAddr()));
+				stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
+
+				int count = 0;
+				int deleted = 0;
+				for (int i=0; i<maxVehicles; i++)
+				{
+					if (nve[i] != 0)
 					{
-						count++;
-					}
-					else
-					{
-						deleted++;
-						delete (nve[i]);
-						nve[i] = (PositionEstimator*) 0;
+						if (simTime() - nve[i]->getLastUpdated() < nveTimeout && vm->vehicleExists(i))
+						{
+							count++;
+
+							// make sure this isn't the first update and record position error if not
+							if (nve[i]->getNumberUpdates() > 1)
+							{
+								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
+								stats.nveErrorVec.record(diff);
+
+								if (diff > 20)
+									ev << "ERROR: Vehicle[" << myApplAddr() << "] to [" << i << "] is " << diff << " with last updated at " << (simTime()-nve[i]->getLastUpdated()) << endl;
+							}
+						}
+						else
+						{
+							deleted++;
+							delete (nve[i]);
+							nve[i] = (PositionEstimator*) 0;
+						}
 					}
 				}
+				stats.ndeletecVec.record(deleted);
+				stats.nveVec.record(count);
+
 			}
-			stats.ndeletecVec.record(deleted);
-			stats.nveVec.record(count);
-
 		}
-
 	}
+}
+
+Coord CCWSApplLayer::getCurrentPos()
+{
+	return spe.getCurrentPosition(simTime());
 }
 
 CCWSApplLayer::~CCWSApplLayer()
 {
 	// unregister from VisionManager
 	if (isRegistered)
-		vm->unregisterNic(this);
+		vm->unregisterVehicle(this);
 
 	// delete array of NVEs
 	delete [] nve;
