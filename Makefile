@@ -45,9 +45,11 @@ INCLUDE_PATH = \
     -Imodules/vision \
     -Inetworks \
     -Inetworks/highway \
+    -Inetworks/linux \
     -Inetworks/london \
     -Inetworks/manhattan \
     -Inetworks/small \
+    -Inetworks/windows \
     -Iv2v \
     -Iv2v/bitmaps \
     -Iv2v/results
@@ -162,9 +164,11 @@ clean:
 	-rm -f modules/vision/*_m.cc modules/vision/*_m.h
 	-rm -f networks/*_m.cc networks/*_m.h
 	-rm -f networks/highway/*_m.cc networks/highway/*_m.h
+	-rm -f networks/linux/*_m.cc networks/linux/*_m.h
 	-rm -f networks/london/*_m.cc networks/london/*_m.h
 	-rm -f networks/manhattan/*_m.cc networks/manhattan/*_m.h
 	-rm -f networks/small/*_m.cc networks/small/*_m.h
+	-rm -f networks/windows/*_m.cc networks/windows/*_m.h
 	-rm -f v2v/*_m.cc v2v/*_m.h
 	-rm -f v2v/bitmaps/*_m.cc v2v/bitmaps/*_m.h
 	-rm -f v2v/results/*_m.cc v2v/results/*_m.h
@@ -173,7 +177,7 @@ cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/linux/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc networks/windows/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
