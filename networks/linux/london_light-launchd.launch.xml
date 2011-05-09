@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<basedir path="/home/kcharbo/v2v/networks/london" />
+	<copy file="london.net.xml" />
+	<copy file="london_light.rou.xml" />
+	<copy file="types.rou.xml" />
+	<copy file="london_light.sumo.cfg" type="config" />
+</launch>
+

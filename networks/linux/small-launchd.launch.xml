@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<basedir path="/home/kcharbo/v2v/networks/small" />
+	<copy file="small.net.xml" />
+	<copy file="small.rou.xml" />
+	<copy file="small.sumo.cfg" type="config" />
+</launch>
+

@@ -135,6 +135,9 @@ protected:
 
 	// max tx power to use
 	int txPower;
+
+	bool visionOn;
+
 };
 
 #endif /* CCWSAPPLLAYER_H_ */

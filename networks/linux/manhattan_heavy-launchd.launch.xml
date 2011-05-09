@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<basedir path="/home/kcharbo/v2v/networks/manhattan" />
+	<copy file="manhattan.net.xml" />
+	<copy file="manhattan_heavy.rou.xml" />
+	<copy file="types.rou.xml" />
+	<copy file="manhattan_heavy.sumo.cfg" type="config" />
+</launch>
+

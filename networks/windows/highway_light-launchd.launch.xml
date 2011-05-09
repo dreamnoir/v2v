@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<basedir path="D:\sim\omnetpp-4.1\samples\v2v\networks\highway" />
+	<copy file="highway.net.xml" />
+	<copy file="highway.rou.xml" />
+	<copy file="vehicles_light.rou.xml" />
+	<copy file="types.rou.xml" />
+	<copy file="highway_light.sumo.cfg" type="config" />
+</launch>
+

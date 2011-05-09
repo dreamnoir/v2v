@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:

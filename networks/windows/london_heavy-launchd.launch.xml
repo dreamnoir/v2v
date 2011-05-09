@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<basedir path="D:\sim\omnetpp-4.1\samples\v2v\networks\london" />
+
+	<copy file="london.net.xml" />
+	<copy file="london_heavy.rou.xml" />
+	<copy file="types.rou.xml" />
+	<copy file="london_heavy.sumo.cfg" type="config" />
+</launch>
+

@@ -315,7 +315,8 @@ protected:
     /** sequence control -- to detect duplicates*/
     int fsc;
 
-	cOutVector notRecVec;
+	cOutVector bitErrorVec;
+	cOutVector collisionVec;
 };
 
 #endif /* MAC80211P_H_ */

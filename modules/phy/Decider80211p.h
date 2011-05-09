@@ -45,6 +45,8 @@ protected:
 	/** @brief The center frequency on which the decider listens for signals */
 	double centerFrequency;
 
+	char channelModel;
+
 protected:
 
 	/**

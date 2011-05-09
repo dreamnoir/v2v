@@ -5,8 +5,12 @@
 /** @brief Bit rates for 802.11b */
 const double BITRATES_80211[] = {
     3000000,
+    4500000,
     6000000,
     9000000,
+    12000000,
+    18000000,
+    24000000,
     27000000
 };
 
@@ -31,15 +35,31 @@ const double CENTER_FREQUENCIES[] = {
  * packet.
  */
 const double RED_PHY_HEADER_DURATION = 0.000020;
+/** @brief Preambule transmision delay */
+const double PLCP_PREAMBLE_DELAY = 20E-6;
+/** @brief Length of PLCP deader without SERVICE and Tail */
+const int PLCP_HEADER_LENGTH = 4 + 1 + 12 + 1 + 6;
+/** @brief SIGNAL delay */
+const double PLCP_SIGNAL_DELAY = 4E-6;
+/** @brief SYMBOL delay */
+const double T_SYM = 4E-6;
+
+// frame lengths in bits
+// XXX this is duplicate, it's already in Ieee80211Frame.msg
+
+/** @brief BasicBitrate with which the header is send */
+const double HEADER_BITRATE=3E+6;
+const int PHY_HEADER_LENGTH_A = 4 + 1 + 12 + 1 + 6 + 16 + 6;
+const int PHY_HEADER_LENGTH_B = 192;
+//const double PHY_HEADER_LENGTH_G = 26E-6;
+const int HEADER_WITHOUT_PREAMBLE = 48;
+const double BITRATE_HEADER = 1E+6;
+const double BANDWIDTH = 1E+6;
+
+// added all above from INETMANET
 
 /** @brief Length of PLCP header and Preamble */
 const double PHY_HEADER_LENGTH=192;
-/** @brief PLCP header */
-const double HEADER_WITHOUT_PREAMBLE=48;
-/** @brief Bitrate with which the header is send */
-const double BITRATE_HEADER=1E+6;
-/** @brief 3dB filter bandwidth -- channels overlap! */
-const double BANDWIDTH=10E+6;
 
 const int MAC_GENERATOR = 5;
 

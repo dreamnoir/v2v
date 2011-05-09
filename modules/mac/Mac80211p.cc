@@ -61,7 +61,8 @@ void Mac80211p::initialize(int stage)
 
         EV << "SIFS: " << SIFS << " DIFS: " << DIFS << " EIFS: " << EIFS << endl;
 
-        notRecVec.setName("failed");
+        bitErrorVec.setName("Bit Error Packets");
+        collisionVec.setName("Collision Packets");
     }
     else if(stage == 1) {
     	BaseConnectionManager* cc = getConnectionManager();
@@ -259,7 +260,10 @@ void Mac80211p::handleLowerControl(cMessage *msg)
     case Decider80211::COLLISION:
     case Decider80211::BITERROR:
     {
-    	notRecVec.record(1);
+    	if (msg->getKind() == Decider80211::COLLISION)
+    		collisionVec.record(1);
+    	else
+    		bitErrorVec.record(1);
     	int radioState = phy->getRadioState();
         if(radioState == Radio::RX) {
             if (contention->isScheduled()) {

@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
 //
 
 #ifndef _CCWSAPPLPKT_M_H_
@@ -20,7 +20,7 @@
 
 
 /**
- * Class generated from <tt>CCWSApplPkt.msg</tt> by opp_msgc.
+ * Class generated from <tt>messages/application/CCWSApplPkt.msg</tt> by opp_msgc.
  * <pre>
  * packet CCWSApplPkt extends ApplPkt {
  *     int id;

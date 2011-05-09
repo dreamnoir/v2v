@@ -58,6 +58,7 @@ void CCWSApplLayer::initialize(int stage)
 		autoRetransmitTime = par("autoRetransmitTime").doubleValue();
 		txPower = (int) par("txPower").doubleValue();
 		runUp = par("runUp").doubleValue();
+		visionOn = par("vision").boolValue();
 
 		// find vision manager
 		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
@@ -185,6 +186,11 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 			{
 				send = true;
 			}
+			else if (errorSize > 0.5*thresholdSize)
+			{
+				delayTime /= 5;
+				stats.shortDelay++;
+			}
 			else if (errorSize > 0.75*thresholdSize)
 			{
 				delayTime /= 10;
@@ -201,7 +207,7 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 				if (retransmit)
 				{
 					timer = new cMessage( "resend-timer", RETRANSMIT_POSITION_UPDATE);
-					scheduleAt(simTime() + retransmitTime, timer);
+					scheduleAt(simTime() + dblrand()*retransmitTime, timer);
 				}
 				else
 				{
@@ -255,7 +261,7 @@ void CCWSApplLayer::sendLocationUpdate()
 		// update remote rpe
 		rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());
 
-		sendDown( pkt );
+		sendDown(pkt);
 	}
 }
 
@@ -278,18 +284,21 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				// update SPE
 				spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 
-				// vision updates
-				if (isRegistered)
+				if (visionOn)
 				{
-					vm->updateVehiclePos(myApplAddr(), &(m->getStartPos()), &(m->getDirection()));
+					// vision updates
+					if (isRegistered)
+					{
+						vm->updateVehiclePos(myApplAddr(), &(m->getStartPos()), &(m->getDirection()));
+					}
+					else
+					{
+						vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
+						isRegistered = true;
+					}
+					stats.visibleVec.record(vm->visible(myApplAddr()));
+					stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
 				}
-				else
-				{
-					vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
-					isRegistered = true;
-				}
-				stats.visibleVec.record(vm->visible(myApplAddr()));
-				stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
 
 				int count = 0;
 				int deleted = 0;

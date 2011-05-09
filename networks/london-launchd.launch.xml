@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<!-- debug config -->
-<launch>
-	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\london\london.net.xml" />
-	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\london\london.rou.xml" />
-	<copy file="D:\sim\omnetpp-4.1\samples\v2v\networks\london\sumo.sumo.cfg" type="config" />
-</launch>
-
