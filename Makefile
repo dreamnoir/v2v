@@ -50,9 +50,9 @@ INCLUDE_PATH = \
     -Inetworks/manhattan \
     -Inetworks/small \
     -Inetworks/windows \
-    -Iv2v \
-    -Iv2v/bitmaps \
-    -Iv2v/results
+    -Isim \
+    -Isim/bitmaps \
+    -Isim/results
 
 # Additional object and library files to link with
 EXTRA_OBJS =
@@ -169,15 +169,15 @@ clean:
 	-rm -f networks/manhattan/*_m.cc networks/manhattan/*_m.h
 	-rm -f networks/small/*_m.cc networks/small/*_m.h
 	-rm -f networks/windows/*_m.cc networks/windows/*_m.h
-	-rm -f v2v/*_m.cc v2v/*_m.h
-	-rm -f v2v/bitmaps/*_m.cc v2v/bitmaps/*_m.h
-	-rm -f v2v/results/*_m.cc v2v/results/*_m.h
+	-rm -f sim/*_m.cc sim/*_m.h
+	-rm -f sim/bitmaps/*_m.cc sim/bitmaps/*_m.h
+	-rm -f sim/results/*_m.cc sim/results/*_m.h
 
 cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/linux/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc networks/windows/*.cc v2v/*.cc v2v/bitmaps/*.cc v2v/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/linux/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc networks/windows/*.cc sim/*.cc sim/bitmaps/*.cc sim/results/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
