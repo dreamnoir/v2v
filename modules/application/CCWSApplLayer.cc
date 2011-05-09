@@ -130,7 +130,7 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 			// if no NVE exists create one
 			from = m->getSrcAddr();
 			if (nve[from] == 0)
-				nve[from] = new PositionEstimator;
+				nve[from] = new PositionEstimator();
 
 			stats.nveLatencyVec.record(simTime() - m->getUtc());
 
@@ -315,16 +315,14 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 							{
 								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
 								stats.nveErrorVec.record(diff);
-
-								if (diff > 20)
-									ev << "ERROR: Vehicle[" << myApplAddr() << "] to [" << i << "] is " << diff << " with last updated at " << (simTime()-nve[i]->getLastUpdated()) << endl;
 							}
 						}
 						else
 						{
-							deleted++;
-							delete (nve[i]);
+							PositionEstimator* temp = nve[i];
 							nve[i] = (PositionEstimator*) 0;
+							delete (temp);
+							deleted++;
 						}
 					}
 				}
