@@ -26,7 +26,18 @@
 class  Mac80211p : public BaseMacLayer
 {
 public:
+	class Statistics {
+			public:
+				int sentPackets;
+				int receivedPackets;
+				int errorPackets;
 
+				cOutVector latencyVec;
+
+				void initialize();
+				//void watch(cSimpleModule& module);
+				void recordScalars(cSimpleModule& module);
+		};
 	/** @brief frame kinds */
 	enum Mac80211MessageKinds {
 	  //between MAC layers of two nodes
@@ -315,8 +326,7 @@ protected:
     /** sequence control -- to detect duplicates*/
     int fsc;
 
-	cOutVector bitErrorVec;
-	cOutVector collisionVec;
+    Statistics stats;
 };
 
 #endif /* MAC80211P_H_ */

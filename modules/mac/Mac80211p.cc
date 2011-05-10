@@ -18,9 +18,24 @@
 #include <BaseConnectionManager.h>
 
 #include "WSMPkt_m.h"
+#include "CCWSApplPkt_m.h"
 
 Define_Module(Mac80211p);
 
+void Mac80211p::Statistics::initialize()
+{
+	sentPackets = 0;
+	receivedPackets = 0;
+	errorPackets = 0;
+	latencyVec.setName("Sender Latency");
+}
+
+void Mac80211p::Statistics::recordScalars(cSimpleModule& module)
+{
+	module.recordScalar("Sent Packets", sentPackets);
+	module.recordScalar("Received Packets", receivedPackets);
+	module.recordScalar("Error Packets", errorPackets);
+}
 
 void Mac80211p::initialize(int stage)
 {
@@ -28,6 +43,8 @@ void Mac80211p::initialize(int stage)
 
     if (stage == 0)
     {
+    	stats.initialize();
+
         EV << "Initializing stage 0\n";
 
         switching = false;
@@ -61,8 +78,6 @@ void Mac80211p::initialize(int stage)
 
         EV << "SIFS: " << SIFS << " DIFS: " << DIFS << " EIFS: " << EIFS << endl;
 
-        bitErrorVec.setName("Bit Error Packets");
-        collisionVec.setName("Collision Packets");
     }
     else if(stage == 1) {
     	BaseConnectionManager* cc = getConnectionManager();
@@ -260,10 +275,8 @@ void Mac80211p::handleLowerControl(cMessage *msg)
     case Decider80211::COLLISION:
     case Decider80211::BITERROR:
     {
-    	if (msg->getKind() == Decider80211::COLLISION)
-    		collisionVec.record(1);
-    	else
-    		bitErrorVec.record(1);
+    	if (simTime() >= simulation.getWarmupPeriod())
+    		stats.errorPackets++;
     	int radioState = phy->getRadioState();
         if(radioState == Radio::RX) {
             if (contention->isScheduled()) {
@@ -567,6 +580,8 @@ void Mac80211p::handleCTSframe(Mac80211Pkt * af)
  */
 void Mac80211p::handleBroadcastMsg(Mac80211Pkt *af)
 {
+	if (simTime() >= simulation.getWarmupPeriod())
+		stats.receivedPackets++;
     EV << "handle broadcast\n";
     if((state == BUSY) && (!switching)) {
         error("logic error: node is currently transmitting, can not receive "
@@ -920,6 +935,12 @@ void Mac80211p::sendBROADCASTframe()
     frame->setControlInfo(pco);
     frame->setKind(BROADCAST);
 
+    //stats
+    if (simTime() >= simulation.getWarmupPeriod())
+    	stats.sentPackets++;
+
+    stats.latencyVec.record(simTime()-((CCWSApplPkt*)inner->getEncapsulatedPacket())->getUtc());
+
     sendDown(frame);
     // update state and display
     setState(BUSY);
@@ -1266,6 +1287,7 @@ Mac80211p::~Mac80211p() {
 }
 
 void Mac80211p::finish() {
+	stats.recordScalars(*this);
     BaseMacLayer::finish();
 }
 

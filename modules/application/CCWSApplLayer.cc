@@ -13,7 +13,6 @@ void CCWSApplLayer::Statistics::initialize()
 {
 	sentUpdates = 0;
 	receivedUpdates = 0;
-	shortDelay = 0;
 
 	// setup vector staticis
 	speErrorVec.setName("SPE Error");
@@ -32,7 +31,6 @@ void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
 {
 	module.recordScalar("Sent Updates", sentUpdates);
 	module.recordScalar("Received Updates", receivedUpdates);
-	module.recordScalar("Short Delay Intervals", shortDelay);
 }
 
 void CCWSApplLayer::finish()
@@ -122,7 +120,8 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 			if (debug) ev << "speed=" << m->getSpeed() << " | accel=" << m->getAccel() << "| angleX=" << m->getAngleX() << "| angleY=" << m->getAngleY() << " | x=" << m->getX() << " | y=" << m->getY() << endl;
 
 			// record packet as received
-			stats.receivedUpdates++;
+			if (simTime() >= simulation.getWarmupPeriod())
+				stats.receivedUpdates++;
 
 			distance = spe.getPosition().distance(Coord(m->getX(), m->getY()));
 			stats.nveDistanceVec.record(distance);
@@ -189,12 +188,10 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 			else if (errorSize > 0.5*thresholdSize)
 			{
 				delayTime /= 5;
-				stats.shortDelay++;
 			}
 			else if (errorSize > 0.75*thresholdSize)
 			{
 				delayTime /= 10;
-				stats.shortDelay++;
 			}
 
 			if (send)
@@ -256,7 +253,8 @@ void CCWSApplLayer::sendLocationUpdate()
 
 		if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
 
-		stats.sentUpdates++;
+		if (simTime() >= simulation.getWarmupPeriod())
+			stats.sentUpdates++;
 
 		// update remote rpe
 		rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());

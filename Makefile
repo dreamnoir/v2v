@@ -50,9 +50,9 @@ INCLUDE_PATH = \
     -Inetworks/manhattan \
     -Inetworks/small \
     -Inetworks/windows \
+    -Iresults \
     -Isim \
-    -Isim/bitmaps \
-    -Isim/results
+    -Isim/bitmaps
 
 # Additional object and library files to link with
 EXTRA_OBJS =
@@ -169,15 +169,15 @@ clean:
 	-rm -f networks/manhattan/*_m.cc networks/manhattan/*_m.h
 	-rm -f networks/small/*_m.cc networks/small/*_m.h
 	-rm -f networks/windows/*_m.cc networks/windows/*_m.h
+	-rm -f results/*_m.cc results/*_m.h
 	-rm -f sim/*_m.cc sim/*_m.h
 	-rm -f sim/bitmaps/*_m.cc sim/bitmaps/*_m.h
-	-rm -f sim/results/*_m.cc sim/results/*_m.h
 
 cleanall: clean
 	-rm -rf $(PROJECT_OUTPUT_DIR)
 
 depend:
-	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/linux/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc networks/windows/*.cc sim/*.cc sim/bitmaps/*.cc sim/results/*.cc
+	$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES)  ./*.cc messages/*.cc messages/application/*.cc messages/netw/*.cc modules/*.cc modules/application/*.cc modules/control/*.cc modules/mac/*.cc modules/mobility/*.cc modules/netw/*.cc modules/nic/*.cc modules/phy/*.cc modules/utils/*.cc modules/vision/*.cc networks/*.cc networks/highway/*.cc networks/linux/*.cc networks/london/*.cc networks/manhattan/*.cc networks/small/*.cc networks/windows/*.cc results/*.cc sim/*.cc sim/bitmaps/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/messages/application/CCWSApplPkt_m.o: messages/application/CCWSApplPkt_m.cc \
@@ -221,6 +221,7 @@ $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/MacToPhyInterface.h \
 	modules/mac/Mac80211p.h \
 	$(MIXIM_SOMMER_PROJ)/modules/phy/Decider80211.h \
+	messages/application/CCWSApplPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseLayer.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Coord.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/Blackboard.h \
@@ -256,6 +257,7 @@ $O/modules/mac/Mac80211p.o: modules/mac/Mac80211p.cc \
 	$(MIXIM_SOMMER_PROJ)/base/messages/ChannelSenseRequest_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/utils/Move.h \
 	$(MIXIM_SOMMER_PROJ)/base/modules/BaseModule.h \
+	$(MIXIM_SOMMER_PROJ)/base/messages/ApplPkt_m.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/BaseDecider.h \
 	$(MIXIM_SOMMER_PROJ)/base/phyLayer/Interpolation.h
 $O/modules/mobility/TraCIMobilityV.o: modules/mobility/TraCIMobilityV.cc \

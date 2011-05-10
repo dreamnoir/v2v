@@ -32,7 +32,6 @@ public:
 		public:
 			int sentUpdates;
 			int receivedUpdates;
-			int shortDelay;
 
 			cOutVector speErrorVec;			// SPE error between position updates
 
