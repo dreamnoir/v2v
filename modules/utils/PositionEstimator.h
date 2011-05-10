@@ -26,8 +26,8 @@ public:
 	Coord getCurrentPosition(simtime_t time);
 
 	//update position information
-	int updatePosition(const Coord& position, double speed, const Coord& angle);
-	int updatePosition(double x, double y, double speed, double angleX, double angleY, simtime_t time);
+	void updatePosition(const Coord& position, double speed, const Coord& angle);
+	void updatePosition(double x, double y, double speed, double angleX, double angleY, double accel, simtime_t time);
 
 	//get error between provided position and expected position
 	double positionError(const Coord& newPosition, simtime_t time);

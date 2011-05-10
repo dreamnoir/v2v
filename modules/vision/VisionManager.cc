@@ -14,7 +14,6 @@
 // 
 
 
-
 #include "VisionManager.h"
 #include "BaseWorldUtility.h"
 #include "CCWSApplLayer.h"
@@ -418,17 +417,12 @@ int VisionManager::maybeVisible(int vehicleID)
 
 Coord VisionManager::getVehiclePos(int vehicleID)
 {
-	CCWSApplLayer* v = (CCWSApplLayer*)nics[vehicleID];
-
-	if (v != 0)
-		return ((CCWSApplLayer*)nics[vehicleID]->appPtr)->getCurrentPos();
-	else
-		return new Coord();
+	return ((CCWSApplLayer*)nics[vehicleID]->appPtr)->getCurrentPos();
 }
 
 bool VisionManager::vehicleExists(int vehicleID)
 {
-	return !((CCWSApplLayer*)nics[vehicleID] == 0);
+	return (nics[vehicleID] != 0);
 }
 
 VisionManager::~VisionManager()

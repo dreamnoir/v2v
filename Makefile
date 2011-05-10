@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for v2v
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -o v2v -O out -I../mixim-sommer/base/utils -I../mixim-sommer/base -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -lmiximbase -lmiximmodules -lmiximtestUtils -KMIXIM_SOMMER_PROJ=../mixim-sommer
+#  opp_makemake -f --deep -o v2v -O out -I../mixim-sommer/base/utils -I../mixim-sommer/base -I../mixim-sommer/base/messages -I../mixim-sommer/base/modules -I../mixim-sommer/base/connectionManager -I../mixim-sommer/base/phyLayer -I../mixim-sommer/modules/analogueModel -I../mixim-sommer/modules/phy -I../mixim-sommer/modules/mac -I../mixim-sommer/modules/obstacle -I../mixim-sommer/modules/messages -I../mixim-sommer/modules -I../mixim-sommer/modules/utility -I../mixim-sommer/modules/mobility/traci -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -L../mixim-sommer/out/$(CONFIGNAME)/modules -lmixim-sommer -lmiximbase -lmiximtestUtils -lmiximmodules -KMIXIM_SOMMER_PROJ=../mixim-sommer
 #
 
 # Name of target to be created (-o option)
@@ -58,8 +58,8 @@ INCLUDE_PATH = \
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/modules -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils  -lmiximbase -lmiximmodules -lmiximtestUtils
-LIBS += -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/base` -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/modules` -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils`
+LIBS = -L../mixim-sommer/out/$(CONFIGNAME) -L../mixim-sommer/out/$(CONFIGNAME)/base -L../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils -L../mixim-sommer/out/$(CONFIGNAME)/modules  -lmixim-sommer -lmiximbase -lmiximtestUtils -lmiximmodules
+LIBS += -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)` -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/base` -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/tests/testUtils` -Wl,-rpath,`abspath ../mixim-sommer/out/$(CONFIGNAME)/modules`
 
 # Output directory
 PROJECT_OUTPUT_DIR = out

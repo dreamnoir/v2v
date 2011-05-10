@@ -123,18 +123,20 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 			if (simTime() >= simulation.getWarmupPeriod())
 				stats.receivedUpdates++;
 
+			// record distance to tracked vehicle
 			distance = spe.getPosition().distance(Coord(m->getX(), m->getY()));
 			stats.nveDistanceVec.record(distance);
+
+			// record latency to receive packet
+			stats.nveLatencyVec.record(simTime() - m->getUtc());
 
 			// if no NVE exists create one
 			from = m->getSrcAddr();
 			if (nve[from] == 0)
 				nve[from] = new PositionEstimator();
 
-			stats.nveLatencyVec.record(simTime() - m->getUtc());
-
 			// update nve position
-			nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getCreationTime());
+			nve[from]->updatePosition(m->getX(), m->getY(), m->getSpeed(), m->getAngleX(), m->getAngleY(), m->getAccel(), m->getCreationTime());
 
 			break;
 
@@ -282,20 +284,20 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				// update SPE
 				spe.updatePosition(m->getStartPos(), m->getSpeed(), m->getDirection());
 
-				if (visionOn)
+				// vision updates
+				if (isRegistered)
 				{
-					// vision updates
-					if (isRegistered)
+					if (visionOn)
 					{
 						vm->updateVehiclePos(myApplAddr(), &(m->getStartPos()), &(m->getDirection()));
+						stats.visibleVec.record(vm->visible(myApplAddr()));
+						stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
 					}
-					else
-					{
-						vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
-						isRegistered = true;
-					}
-					stats.visibleVec.record(vm->visible(myApplAddr()));
-					stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
+				}
+				else
+				{
+					vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
+					isRegistered = true;
 				}
 
 				int count = 0;
@@ -304,22 +306,20 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				{
 					if (nve[i] != 0)
 					{
-						if (simTime() - nve[i]->getLastUpdated() < nveTimeout && vm->vehicleExists(i))
+						if ((simTime() - nve[i]->getLastUpdated()) < nveTimeout && vm->vehicleExists(i))
 						{
-							count++;
-
 							// make sure this isn't the first update and record position error if not
 							if (nve[i]->getNumberUpdates() > 1)
 							{
 								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
 								stats.nveErrorVec.record(diff);
 							}
+							count++;
 						}
 						else
 						{
-							PositionEstimator* temp = nve[i];
-							nve[i] = (PositionEstimator*) 0;
-							delete (temp);
+							delete nve[i];
+							nve[i] = 0;
 							deleted++;
 						}
 					}

@@ -38,7 +38,7 @@ Coord PositionEstimator::getCurrentPosition(simtime_t time)
 	return this->position + this->angle*distance;
 }
 
-int PositionEstimator::updatePosition(const Coord& position, double speed, const Coord& angle)
+void PositionEstimator::updatePosition(const Coord& position, double speed, const Coord& angle)
 {
 	if (updates == 0)
 	{
@@ -53,30 +53,20 @@ int PositionEstimator::updatePosition(const Coord& position, double speed, const
 	this->speed = speed;
 	this->angle = angle;
 	this->lastUpdated = simTime();
-
-	return ++updates;
+	this->updates++;
 }
 
-int PositionEstimator::updatePosition(double x, double y, double speed, double angleX, double angleY, simtime_t time)
+void PositionEstimator::updatePosition(double x, double y, double speed, double angleX, double angleY, double accel, simtime_t time)
 {
 
-	if (updates == 0)
-	{
-		this->acceleration = 0;
-	}
-	else
-	{
-		simtime_t updateInterval = simTime() - this->lastUpdated;
-		this->acceleration = (speed - this->speed) / updateInterval;
-	}
+	this->acceleration = accel;
 	this->position.setX(x);
 	this->position.setY(y);
 	this->speed = speed;
 	this->angle.setX(angleX);
 	this->angle.setY(angleY);
 	this->lastUpdated = time;
-
-	return ++updates;
+	this->updates++;
 }
 
 double PositionEstimator::positionError(const Coord& newPosition, simtime_t time)

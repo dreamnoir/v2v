@@ -1,4 +1,5 @@
 out/
 results/
 *.exe
+v2v.exe
 Makefile
