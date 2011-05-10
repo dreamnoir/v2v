@@ -33,7 +33,12 @@ public:
 			int sentUpdates;
 			int receivedUpdates;
 
+			int thresholdViolations;
+			int timeViolations;
+
 			cOutVector speErrorVec;			// SPE error between position updates
+
+			cOutVector rpeTransmitVec;
 
 			cOutVector nveErrorVec;			// NVE error between position updates
 			cOutVector nveDistanceVec;		// NVE distance to other vehicle

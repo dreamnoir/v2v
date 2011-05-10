@@ -13,9 +13,12 @@ void CCWSApplLayer::Statistics::initialize()
 {
 	sentUpdates = 0;
 	receivedUpdates = 0;
+	thresholdViolations = 0;
+	timeViolations = 0;
 
 	// setup vector staticis
 	speErrorVec.setName("SPE Error");
+	rpeTransmitVec.setName("RPE Transmit Interval");
 	nveErrorVec.setName("NVE Error");
 	nveDistanceVec.setName("NVE Received Distance");
 	nveLatencyVec.setName("NVE Latency");
@@ -31,6 +34,8 @@ void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
 {
 	module.recordScalar("Sent Updates", sentUpdates);
 	module.recordScalar("Received Updates", receivedUpdates);
+	module.recordScalar("Threshold Violations", thresholdViolations);
+	module.recordScalar("Time Violations", timeViolations);
 }
 
 void CCWSApplLayer::finish()
@@ -179,12 +184,16 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 	    	errorSize = rpe.positionError(current, simTime());
 
 	    	// if error larger than threshold or update time longer than update time
-	    	if (simTime() - spe.getLastUpdated() > autoRetransmitTime)
+	    	if ((simTime() - rpe.getLastUpdated()) >= autoRetransmitTime)
 	    	{
+	    		if (simTime() >= simulation.getWarmupPeriod())
+	    			stats.timeViolations++;
 	    		send = true;
 	    	}
 	    	else if (errorSize > thresholdSize)
 			{
+	    		if (simTime() >= simulation.getWarmupPeriod())
+	    			stats.thresholdViolations++;
 				send = true;
 			}
 			else if (errorSize > 0.5*thresholdSize)
@@ -257,6 +266,9 @@ void CCWSApplLayer::sendLocationUpdate()
 
 		if (simTime() >= simulation.getWarmupPeriod())
 			stats.sentUpdates++;
+
+		if (rpe.getNumberUpdates() > 1)
+			stats.rpeTransmitVec.record(simTime() - rpe.getLastUpdated());
 
 		// update remote rpe
 		rpe.updatePosition(spe.getCurrentPosition(simTime()), spe.getSpeed(), spe.getAngle());
