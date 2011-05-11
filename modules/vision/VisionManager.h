@@ -253,6 +253,10 @@ protected:
     // percentage of vehicle required to be visible
     double visionCutoff;
 
+    // number of vehicles being tracked currently
+    int vehiclesTracked;
+    cOutVector trackedVec;
+
 private:
 	/** @brief Manages the connections of a registered nic. */
     void updateVehicleVision(VisionEntries& nmap, VisionEntry* nic);

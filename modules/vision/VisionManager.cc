@@ -29,6 +29,10 @@ void VisionManager::initialize(int stage)
 		maxDistance = par("maxDistance").doubleValue();
 		visionCutoff = par("visionCutoff").doubleValue();
 		debug = par("debug").boolValue();
+
+		trackedVec.setName("Vehicles Tracked");
+
+		vehiclesTracked = 0;
 	}
 	else if (stage == 1)
 	{
@@ -354,6 +358,8 @@ bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const
 
 	updateConnections(nicID, vehiclePos, vehiclePos);
 
+	trackedVec.record(++vehiclesTracked);
+
 	return true;
 }
 
@@ -388,6 +394,8 @@ bool VisionManager::unregisterVehicle(cModule* nicModule)
 
 	// delete the object
 	delete visionEntry;
+
+	trackedVec.record(--vehiclesTracked);
 
 	return true;
 }
