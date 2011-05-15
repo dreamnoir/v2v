@@ -24,7 +24,7 @@ void CCWSApplLayer::Statistics::initialize()
 	nveLatencyVec.setName("nve-latency");
 	visibleVec.setName("visible");
 	mvisibleVec.setName("in-range");
-	thresholdVec.setName("threshold-rrror");
+	thresholdVec.setName("threshold-error");
 	nveVec.setName("nve-tracked");
 	ndeletecVec.setName("nve-deleted");
 
