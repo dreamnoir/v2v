@@ -17,23 +17,17 @@ void CCWSApplLayer::Statistics::initialize()
 	timeViolations = 0;
 
 	// setup vector staticis
-	speErrorVec.setName("spe-error");
-	rpeTransmitVec.setName("rpe-interval");
-	nveErrorVec.setName("nve-error");
-	nveDistanceVec.setName("nve-distance");
-	nveLatencyVec.setName("nve-latency");
-	visibleVec.setName("visible");
-	mvisibleVec.setName("in-range");
-	thresholdVec.setName("threshold-error");
-	nveVec.setName("nve-tracked");
-	nvedeletedVec.setName("nve-deleted");
+	speErrorVec.setName("SPE Error");
+	rpeTransmitVec.setName("RPE Transmit Interval");
+	nveErrorVec.setName("NVE Error");
+	nveDistanceVec.setName("NVE Received Distance");
+	nveLatencyVec.setName("NVE Latency");
+	visibleVec.setName("Visible");
+	mvisibleVec.setName("Potentially Visible");
+	thresholdVec.setName("Threshold Error");
+	nveVec.setName("NVE Tracked");
+	ndeletecVec.setName("NVE Deleted");
 
-	/*nveErrorVec1.setName("NVE Error1");
-	nveErrorVec3.setName("NVE Error3");
-	nveErrorVec5.setName("NVE Error5");
-	nveVec1.setName("NVE Tracked1");
-	nveVec3.setName("NVE Tracked3");
-	nveVec5.setName("NVE Tracked5");*/
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -319,41 +313,20 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				}
 
 				int count = 0;
-				//int count1 = 0;
-				//int count3 = 0;
-				//int count5 = 0;
 				int deleted = 0;
 				for (int i=0; i<maxVehicles; i++)
 				{
 					if (nve[i] != 0)
 					{
-						double dormant = SIMTIME_DBL(simTime() - nve[i]->getLastUpdated());
-						if (dormant <= nveTimeout && vm->vehicleExists(i))
+						if ((simTime() - nve[i]->getLastUpdated()) < nveTimeout && vm->vehicleExists(i))
 						{
 							// make sure this isn't the first update and record position error if not
 							if (nve[i]->getNumberUpdates() > 1)
 							{
 								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
 								stats.nveErrorVec.record(diff);
-
-								/*if (dormant <= 1.0)
-									stats.nveErrorVec1.record(diff);
-								if (dormant <= 2.0)
-									stats.nveErrorVec.record(diff);
-								if (dormant <= 3.0)
-									stats.nveErrorVec3.record(diff);
-								if (dormant <= 5.0)
-									stats.nveErrorVec5.record(diff);*/
 							}
 							count++;
-							/*if (dormant <= 1.0)
-								count1++;
-							if (dormant <= 2.0)
-								count++;
-							if (dormant <= 3.0)
-								count3++;
-							if (dormant <= 5.0)
-								count5++;*/
 						}
 						else
 						{
@@ -363,12 +336,8 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						}
 					}
 				}
-				stats.nvedeletedVec.record(deleted);
+				stats.ndeletecVec.record(deleted);
 				stats.nveVec.record(count);
-				//stats.nveVec1.record(count1);
-				//stats.nveVec3.record(count3);
-				//stats.nveVec5.record(count5);
-
 
 			}
 		}
@@ -385,11 +354,6 @@ CCWSApplLayer::~CCWSApplLayer()
 	// unregister from VisionManager
 	if (isRegistered)
 		vm->unregisterVehicle(this);
-
-	// delete existing NVEs
-	for (int i=0; i<maxVehicles; i++)
-		if (nve[i] != 0)
-			delete nve[i];
 
 	// delete array of NVEs
 	delete [] nve;

@@ -30,7 +30,7 @@ void VisionManager::initialize(int stage)
 		visionCutoff = par("visionCutoff").doubleValue();
 		debug = par("debug").boolValue();
 
-		trackedVec.setName("vehicles-tracked");
+		trackedVec.setName("Vehicles Tracked");
 
 		vehiclesTracked = 0;
 	}

@@ -27,7 +27,7 @@ void Mac80211p::Statistics::initialize()
 	sentPackets = 0;
 	receivedPackets = 0;
 	errorPackets = 0;
-	latencyVec.setName("sender-latency");
+	latencyVec.setName("Sender Latency");
 }
 
 void Mac80211p::Statistics::recordScalars(cSimpleModule& module)
