@@ -11,6 +11,7 @@
 #include "BaseApplLayer.h"
 #include "PositionEstimator.h"
 #include "VisionManager.h"
+#include "AutoregModel.h"
 
 struct PositionInformation
 {
@@ -35,6 +36,9 @@ public:
 
 			int thresholdViolations;
 			int timeViolations;
+
+
+			cOutVector bigVec;
 
 			cOutVector speErrorVec;			// SPE error between position updates
 
@@ -141,6 +145,13 @@ protected:
 	int txPower;
 
 	bool visionOn;
+
+	int transmitPower;
+
+	AutoregModel xModel;
+	AutoregModel yModel;
+	AutoregModel speedModel;
+	AutoregModel angleModel;
 
 };
 

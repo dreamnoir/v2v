@@ -17,17 +17,18 @@ void CCWSApplLayer::Statistics::initialize()
 	timeViolations = 0;
 
 	// setup vector staticis
-	speErrorVec.setName("SPE Error");
-	rpeTransmitVec.setName("RPE Transmit Interval");
-	nveErrorVec.setName("NVE Error");
-	nveDistanceVec.setName("NVE Received Distance");
-	nveLatencyVec.setName("NVE Latency");
-	visibleVec.setName("Visible");
-	mvisibleVec.setName("Potentially Visible");
-	thresholdVec.setName("Threshold Error");
-	nveVec.setName("NVE Tracked");
-	ndeletecVec.setName("NVE Deleted");
+	speErrorVec.setName("spe-error");
+	rpeTransmitVec.setName("rpe-interval");
+	nveErrorVec.setName("nve-error");
+	nveDistanceVec.setName("nve-distance");
+	nveLatencyVec.setName("nve-latency");
+	visibleVec.setName("visible");
+	mvisibleVec.setName("in-range");
+	thresholdVec.setName("threshold-rrror");
+	nveVec.setName("nve-tracked");
+	ndeletecVec.setName("nve-deleted");
 
+	bigVec.setName("big-error");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -50,6 +51,12 @@ void CCWSApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
+		// set autoregressive model parameters
+		xModel.set(0.9, 0.436, 0.2);
+		yModel.set(0.9, 0.436, 0.2);
+		speedModel.set(0.9, 0.436, 0.2);
+		angleModel.set(0.9, 0.436, 0.0174532925);
+
 		// get parameters
 		delay = par("delay").doubleValue();
 		maxVehicles = (int) par("maxVehicles").doubleValue();
@@ -240,8 +247,17 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 
 void CCWSApplLayer::sendLocationUpdate()
 {
+	double x, y, speed;
+
 	if (simTime() >= runUp)
 	{
+		x = spe.getCurrentPosition(simTime()).getX() + xModel.getValue();
+		y = spe.getCurrentPosition(simTime()).getY() + yModel.getValue();
+		speed = spe.getSpeed() + speedModel.getValue();
+
+		double newX = spe.getAngle().getX() * cos(angleModel.getValue()) - spe.getAngle().getY() * sin(angleModel.getValue());
+		double newY = spe.getAngle().getY() * sin(angleModel.getValue()) + spe.getAngle().getY() * cos(angleModel.getValue());
+
 		CCWSApplPkt *pkt = new CCWSApplPkt("CCWS_MESSAGE", CCWS_MESSAGE);
 		pkt->setDestAddr(-1);
 
@@ -250,11 +266,11 @@ void CCWSApplLayer::sendLocationUpdate()
 		pkt->setBitLength(headerLength);
 
 		pkt->setAccel(spe.getAcceleration());
-		pkt->setX(spe.getCurrentPosition(simTime()).getX());
-		pkt->setY(spe.getCurrentPosition(simTime()).getY());
-		pkt->setSpeed(spe.getSpeed());
-		pkt->setAngleX(spe.getAngle().getX());
-		pkt->setAngleY(spe.getAngle().getY());
+		pkt->setX(x);
+		pkt->setY(y);
+		pkt->setSpeed(speed);
+		pkt->setAngleX(newX);
+		pkt->setAngleY(newY);
 		pkt->setBitLength(headerLength);
 		pkt->setUtc(simTime());
 
@@ -312,6 +328,12 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 					isRegistered = true;
 				}
 
+				// update autoregressive model
+				xModel.nextValue();
+				yModel.nextValue();
+				speedModel.nextValue();
+				angleModel.nextValue();
+
 				int count = 0;
 				int deleted = 0;
 				for (int i=0; i<maxVehicles; i++)
@@ -325,6 +347,8 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 							{
 								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
 								stats.nveErrorVec.record(diff);
+								if (diff > 5)
+									stats.bigVec.record(i);
 							}
 							count++;
 						}
