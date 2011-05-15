@@ -37,9 +37,6 @@ public:
 			int thresholdViolations;
 			int timeViolations;
 
-
-			cOutVector bigVec;
-
 			cOutVector speErrorVec;			// SPE error between position updates
 
 			cOutVector rpeTransmitVec;

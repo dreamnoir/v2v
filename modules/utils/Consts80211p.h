@@ -35,20 +35,7 @@ const double CENTER_FREQUENCIES[] = {
  * packet.
  */
 const double RED_PHY_HEADER_DURATION = 0.000020;
-/** @brief Preambule transmision delay */
-const double PLCP_PREAMBLE_DELAY = 20E-6;
-/** @brief Length of PLCP deader without SERVICE and Tail */
-const int PLCP_HEADER_LENGTH = 4 + 1 + 12 + 1 + 6;
-/** @brief SIGNAL delay */
-const double PLCP_SIGNAL_DELAY = 4E-6;
-/** @brief SYMBOL delay */
-const double T_SYM = 4E-6;
 
-// frame lengths in bits
-// XXX this is duplicate, it's already in Ieee80211Frame.msg
-
-/** @brief BasicBitrate with which the header is send */
-const double HEADER_BITRATE=3E+6;
 //const double PHY_HEADER_LENGTH_G = 26E-6;
 const int HEADER_WITHOUT_PREAMBLE = 48;
 const double BITRATE_HEADER = 3E+6;

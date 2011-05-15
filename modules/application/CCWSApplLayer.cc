@@ -28,7 +28,6 @@ void CCWSApplLayer::Statistics::initialize()
 	nveVec.setName("nve-tracked");
 	ndeletecVec.setName("nve-deleted");
 
-	bigVec.setName("big-error");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -340,16 +339,11 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				{
 					if (nve[i] != 0)
 					{
-						if ((simTime() - nve[i]->getLastUpdated()) < nveTimeout && vm->vehicleExists(i))
+						if ((simTime() - nve[i]->getLastUpdated()) <= nveTimeout && vm->vehicleExists(i))
 						{
-							// make sure this isn't the first update and record position error if not
-							if (nve[i]->getNumberUpdates() > 1)
-							{
-								double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
-								stats.nveErrorVec.record(diff);
-								if (diff > 5)
-									stats.bigVec.record(i);
-							}
+							double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
+							stats.nveErrorVec.record(diff);
+
 							count++;
 						}
 						else
