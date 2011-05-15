@@ -8,10 +8,10 @@
 	    
 	   	<AnalogueModel type="LogNormalShadowing">
 	    	<!-- Mean attenuation in dB -->
-	    	<parameter name="mean" type="double" value="0"/>
+	    	<parameter name="mean" type="double" value="0.5"/>
 	    	
 	    	<!-- Standart deviation of the attenuation in dB -->
-	    	<parameter name="stdDev" type="double" value="4"/>
+	    	<parameter name="stdDev" type="double" value="0.25"/>
 	    	
 	    	<!-- Interval in which to define attenuation for in seconds -->
 	    	<parameter name="interval" type="double" value="0.001"/>

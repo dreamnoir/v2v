@@ -231,7 +231,7 @@ DeciderResult* Decider80211p::checkIfSignalOk(AirFrame* frame)
 
 	double snirMin = MappingUtils::findMin(*snrMap, min, max);
 
-	EV << " snrMin: " << fraction2dB(snirMin) << endl;
+	EV << " snrMin: " << snirMin << endl;
 
 	ConstMappingIterator* bitrateIt = s.getBitrate()->createConstIterator();
 	bitrateIt->next(); //iterate to payload bitrate indicator

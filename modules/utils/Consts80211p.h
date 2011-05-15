@@ -49,6 +49,8 @@ const double T_SYM = 4E-6;
 
 /** @brief BasicBitrate with which the header is send */
 const double HEADER_BITRATE=3E+6;
+const int PHY_HEADER_LENGTH_A = 4 + 1 + 12 + 1 + 6 + 16 + 6;
+const int PHY_HEADER_LENGTH_B = 192;
 //const double PHY_HEADER_LENGTH_G = 26E-6;
 const int HEADER_WITHOUT_PREAMBLE = 48;
 const double BITRATE_HEADER = 3E+6;
