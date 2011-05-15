@@ -949,12 +949,6 @@
     <vehicle id="t46_2" type="city_vehicles" depart="243.00">
         <route edges="G1G2 G2G3 G3H3 H3I3"/>
     </vehicle>
-    <vehicle id="t90_2" type="city_vehicles" depart="243.00">
-        <route edges="I6J6 J6I6 I6H6 H6G6 G6F6 F6E6 E6D6 D6C6"/>
-    </vehicle>
-    <vehicle id="t139_0" type="city_vehicles" depart="244.00">
-        <route edges="D7C7 C7D7 D7E7 E7F7 F7G7 G7G6"/>
-    </vehicle>
     <vehicle id="t4_1" type="city_vehicles" depart="244.00">
         <route edges="G1G0 G0H0 H0I0 I0H0"/>
     </vehicle>
@@ -964,26 +958,11 @@
     <vehicle id="t146_2" type="city_vehicles" depart="246.00">
         <route edges="A4A5 A5A4 A4A3 A3B3 B3C3 C3D3 D3D2 D2D1 D1D0 D0E0 E0F0 F0G0 G0G1"/>
     </vehicle>
-    <vehicle id="t53_2" type="city_vehicles" depart="248.00">
-        <route edges="I7I6 I6H6 H6G6 G6F6 F6E6 E6D6 D6D5 D5D4 D4D3 D3D2 D2D1 D1D0 D0C0 C0B0"/>
-    </vehicle>
-    <vehicle id="t145_2" type="city_vehicles" depart="249.00">
-        <route edges="D1D0 D0D1 D1D2 D2D3 D3D4 D4D5 D5D6 D6E6 E6F6 F6G6 G6G5"/>
-    </vehicle>
     <vehicle id="t35_1" type="city_vehicles" depart="249.00">
         <route edges="F3G3 G3F3 F3E3 E3D3 D3D4 D4E4"/>
     </vehicle>
     <vehicle id="t78_1" type="city_vehicles" depart="251.00">
         <route edges="A1A0 A0A1 A1A2 A2A3 A3A4"/>
-    </vehicle>
-    <vehicle id="t26_2" type="city_vehicles" depart="253.00">
-        <route edges="F6F7 F7F6 F6E6 E6D6 D6D5 D5D4 D4D3 D3D2 D2D1 D1D0"/>
-    </vehicle>
-    <vehicle id="t89_0" type="city_vehicles" depart="254.00">
-        <route edges="D6D7 D7D6 D6E6 E6F6 F6G6 G6H6 H6I6 I6I5 I5I4"/>
-    </vehicle>
-    <vehicle id="t129_1" type="city_vehicles" depart="255.00">
-        <route edges="D0D1 D1D0 D0C0 C0B0"/>
     </vehicle>
     <vehicle id="t127_1" type="city_vehicles" depart="256.00">
         <route edges="B0A0 A0A1 A1A2 A2A3 A3A4 A4A5 A5A6 A6B6 B6C6 C6D6 D6D7 D7D8 D8D9 D9E9 E9F9 F9F8"/>
@@ -993,18 +972,6 @@
     </vehicle>
     <vehicle id="t117_1" type="city_vehicles" depart="259.00">
         <route edges="I7I8 I8H8 H8G8 G8G7 G7F7 F7E7 E7D7 D7C7"/>
-    </vehicle>
-    <vehicle id="t139_1" type="city_vehicles" depart="259.00">
-        <route edges="D7C7 C7D7 D7E7 E7F7 F7G7 G7G6"/>
-    </vehicle>
-    <vehicle id="t20_1" type="city_vehicles" depart="260.00">
-        <route edges="G6G7 G7G6 G6G5 G5G4 G4G3 G3H3 H3G3"/>
-    </vehicle>
-    <vehicle id="t83_2" type="city_vehicles" depart="261.00">
-        <route edges="H6G6 G6F6 F6E6 E6D6 D6C6 C6D6"/>
-    </vehicle>
-    <vehicle id="t31_1" type="city_vehicles" depart="262.00">
-        <route edges="J2J3 J3I3 I3H3 H3H2"/>
     </vehicle>
     <vehicle id="t76_2" type="city_vehicles" depart="262.00">
         <route edges="C8C7 C7C6 C6B6 B6C6"/>
@@ -1023,18 +990,6 @@
     </vehicle>
     <vehicle id="t30_0" type="city_vehicles" depart="267.00">
         <route edges="B6C6 C6D6 D6D5 D5D4 D4D3 D3E3 E3F3 F3E3"/>
-    </vehicle>
-    <vehicle id="t96_2" type="city_vehicles" depart="267.00">
-        <route edges="I7H7 H7H6 H6I6 I6I5 I5I4 I4I3"/>
-    </vehicle>
-    <vehicle id="t20_2" type="city_vehicles" depart="269.00">
-        <route edges="G6G7 G7G6 G6G5 G5G4 G4G3 G3H3 H3G3"/>
-    </vehicle>
-    <vehicle id="t103_1" type="city_vehicles" depart="270.00">
-        <route edges="A3A4 A4A5 A5A6 A6B6 B6C6 C6D6 D6E6 E6F6 F6G6 G6G5"/>
-    </vehicle>
-    <vehicle id="t54_2" type="city_vehicles" depart="271.00">
-        <route edges="I4I5 I5H5 H5G5 G5G4 G4G3 G3G2 G2G1 G1G0 G0F0"/>
     </vehicle>
     <vehicle id="t1_2" type="city_vehicles" depart="274.00">
         <route edges="B7B8 B8B9 B9C9 C9D9 D9E9 E9F9"/>
@@ -1057,15 +1012,6 @@
     <vehicle id="t85_1" type="city_vehicles" depart="278.00">
         <route edges="I0J0 J0I0 I0H0 H0G0 G0G1 G1G2 G2G3 G3G4 G4G5 G5G6 G6F6 F6E6 E6D6"/>
     </vehicle>
-    <vehicle id="t39_2" type="city_vehicles" depart="279.00">
-        <route edges="E0F0 F0G0 G0G1 G1G2 G2G3 G3F3"/>
-    </vehicle>
-    <vehicle id="t136_1" type="city_vehicles" depart="280.00">
-        <route edges="E5F5 F5F6 F6E6 E6E7"/>
-    </vehicle>
-    <vehicle id="t8_2" type="city_vehicles" depart="280.00">
-        <route edges="C4C3 C3D3 D3D4 D4D5 D5D6 D6D7 D7D8 D8E8 E8F8 F8E8"/>
-    </vehicle>
     <vehicle id="t134_1" type="city_vehicles" depart="282.00">
         <route edges="G2G1 G1G2 G2G3 G3H3 H3I3 I3I4 I4H4"/>
     </vehicle>
@@ -1077,15 +1023,6 @@
     </vehicle>
     <vehicle id="t112_1" type="city_vehicles" depart="285.00">
         <route edges="H0I0 I0H0 H0G0 G0G1 G1G2 G2G3 G3G4 G4G5 G5G6 G6G7 G7G8 G8G9 G9F9 F9E9 E9D9"/>
-    </vehicle>
-    <vehicle id="t80_2" type="city_vehicles" depart="285.00">
-        <route edges="D9D8"/>
-    </vehicle>
-    <vehicle id="t56_2" type="city_vehicles" depart="287.00">
-        <route edges="C6D6 D6D5 D5D4 D4D3 D3E3 E3F3 F3G3 G3H3 H3I3 I3J3 J3J2 J2J1 J1I1"/>
-    </vehicle>
-    <vehicle id="t108_1" type="city_vehicles" depart="288.00">
-        <route edges="H7G7 G7G6 G6G5 G5G4 G4G3 G3H3 H3I3 I3J3 J3J2"/>
     </vehicle>
     <vehicle id="t122_2" type="city_vehicles" depart="289.00">
         <route edges="H4I4 I4I3 I3H3 H3G3 G3G2 G2G1 G1G0 G0F0"/>
@@ -1111,15 +1048,6 @@
     <vehicle id="t6_2" type="city_vehicles" depart="295.00">
         <route edges="I0J0 J0I0 I0H0 H0H1 H1H2 H2H1"/>
     </vehicle>
-    <vehicle id="t0_2" type="city_vehicles" depart="297.00">
-        <route edges="H0I0 I0J0 J0J1 J1J2 J2J3 J3J4 J4I4"/>
-    </vehicle>
-    <vehicle id="t124_2" type="city_vehicles" depart="297.00">
-        <route edges="G0H0 H0G0 G0F0 F0E0 E0D0 D0D1 D1D2 D2D3 D3C3 C3B3 B3B4"/>
-    </vehicle>
-    <vehicle id="t24_2" type="city_vehicles" depart="297.00">
-        <route edges="C6C5 C5C6 C6D6 D6D7 D7D6"/>
-    </vehicle>
     <vehicle id="t36_1" type="city_vehicles" depart="299.00">
         <route edges="A3A4 A4A5 A5A6 A6A7 A7A8 A8A9 A9B9 B9A9"/>
     </vehicle>
@@ -1134,15 +1062,6 @@
     </vehicle>
     <vehicle id="t66_2" type="city_vehicles" depart="304.00">
         <route edges="G5G6 G6F6 F6F7 F7E7"/>
-    </vehicle>
-    <vehicle id="t12_2" type="city_vehicles" depart="305.00">
-        <route edges="J0I0 I0H0 H0H1 H1H2 H2H3 H3H4 H4H5 H5H6 H6H7 H7H8 H8H9"/>
-    </vehicle>
-    <vehicle id="t35_2" type="city_vehicles" depart="305.00">
-        <route edges="F3G3 G3F3 F3E3 E3D3 D3D4 D4E4"/>
-    </vehicle>
-    <vehicle id="t138_1" type="city_vehicles" depart="307.00">
-        <route edges="I7J7 J7J6 J6I6 I6H6 H6G6 G6F6 F6F5"/>
     </vehicle>
     <vehicle id="t58_2" type="city_vehicles" depart="307.00">
         <route edges="G4G5 G5G4 G4G3 G3G2 G2G1 G1G0 G0H0 H0I0 I0J0 J0J1"/>
@@ -1165,15 +1084,6 @@
     <vehicle id="t89_1" type="city_vehicles" depart="311.00">
         <route edges="D6D7 D7D6 D6E6 E6F6 F6G6 G6H6 H6I6 I6I5 I5I4"/>
     </vehicle>
-    <vehicle id="t97_0" type="city_vehicles" depart="311.00">
-        <route edges="G3F3 F3G3 G3H3 H3I3 I3J3 J3I3"/>
-    </vehicle>
-    <vehicle id="t98_2" type="city_vehicles" depart="311.00">
-        <route edges="A7B7 B7B6 B6C6 C6D6 D6C6"/>
-    </vehicle>
-    <vehicle id="t95_2" type="city_vehicles" depart="312.00">
-        <route edges="I2J2 J2J3 J3I3 I3H3 H3G3 G3F3 F3E3 E3D3 D3C3 C3B3 B3B4 B4B5 B5B4"/>
-    </vehicle>
     <vehicle id="t148_2" type="city_vehicles" depart="313.00">
         <route edges="B3C3 C3D3 D3D2 D2D1 D1D0 D0E0"/>
     </vehicle>
@@ -1189,15 +1099,6 @@
     <vehicle id="t61_2" type="city_vehicles" depart="316.00">
         <route edges="C8D8 D8D7 D7C7 C7B7 B7A7 A7B7"/>
     </vehicle>
-    <vehicle id="t18_2" type="city_vehicles" depart="318.00">
-        <route edges="A3A4 A4A5 A5A6 A6B6 B6C6 C6D6 D6E6 E6D6"/>
-    </vehicle>
-    <vehicle id="t30_2" type="city_vehicles" depart="318.00">
-        <route edges="B6C6 C6D6 D6D5 D5D4 D4D3 D3E3 E3F3 F3E3"/>
-    </vehicle>
-    <vehicle id="t4_2" type="city_vehicles" depart="318.00">
-        <route edges="G1G0 G0H0 H0I0 I0H0"/>
-    </vehicle>
     <vehicle id="t130_2" type="city_vehicles" depart="319.00">
         <route edges="H5H4 H4G4 G4G3 G3F3 F3E3 E3D3 D3C3 C3B3 B3A3 A3A2 A2A1 A1A0 A0A1"/>
     </vehicle>
@@ -1209,15 +1110,6 @@
     </vehicle>
     <vehicle id="t108_2" type="city_vehicles" depart="321.00">
         <route edges="H7G7 G7G6 G6G5 G5G4 G4G3 G3H3 H3I3 I3J3 J3J2"/>
-    </vehicle>
-    <vehicle id="t116_2" type="city_vehicles" depart="321.00">
-        <route edges="C3C2 C2D2 D2E2 E2F2 F2G2 G2H2 H2I2 I2J2 J2I2"/>
-    </vehicle>
-    <vehicle id="t117_2" type="city_vehicles" depart="321.00">
-        <route edges="I7I8 I8H8 H8G8 G8G7 G7F7 F7E7 E7D7 D7C7"/>
-    </vehicle>
-    <vehicle id="t144_2" type="city_vehicles" depart="321.00">
-        <route edges="F8G8 G8G7 G7G6 G6G5 G5G4 G4G3 G3H3 H3I3 I3J3"/>
     </vehicle>
     <vehicle id="t25_1" type="city_vehicles" depart="321.00">
         <route edges="I3J3 J3J4 J4J5 J5J6 J6J7 J7J8 J8I8 I8H8"/>
@@ -1237,15 +1129,6 @@
     <vehicle id="t107_2" type="city_vehicles" depart="325.00">
         <route edges="I4I5 I5H5 H5G5 G5G4 G4G3 G3F3 F3E3 E3D3 D3C3 C3B3 B3A3 A3A2 A2A1 A1A0 A0B0"/>
     </vehicle>
-    <vehicle id="t50_2" type="city_vehicles" depart="325.00">
-        <route edges="E0D0 D0E0 E0F0 F0G0 G0H0 H0I0 I0I1 I1I2"/>
-    </vehicle>
-    <vehicle id="t129_2" type="city_vehicles" depart="326.00">
-        <route edges="D0D1 D1D0 D0C0 C0B0"/>
-    </vehicle>
-    <vehicle id="t141_2" type="city_vehicles" depart="326.00">
-        <route edges="A1A2 A2A3 A3A4 A4A5 A5A6 A6B6 B6C6 C6C7 C7D7"/>
-    </vehicle>
     <vehicle id="t88_1" type="city_vehicles" depart="326.00">
         <route edges="B6A6 A6A5 A5A4 A4A3 A3A2 A2A1 A1A0 A0B0 B0C0 C0D0"/>
     </vehicle>
@@ -1257,18 +1140,6 @@
     </vehicle>
     <vehicle id="t136_2" type="city_vehicles" depart="329.00">
         <route edges="E5F5 F5F6 F6E6 E6E7"/>
-    </vehicle>
-    <vehicle id="t85_2" type="city_vehicles" depart="330.00">
-        <route edges="I0J0 J0I0 I0H0 H0G0 G0G1 G1G2 G2G3 G3G4 G4G5 G5G6 G6F6 F6E6 E6D6"/>
-    </vehicle>
-    <vehicle id="t135_1" type="city_vehicles" depart="331.00">
-        <route edges="F9G9 G9G8 G8G7 G7G6 G6G5 G5G4 G4G3 G3H3"/>
-    </vehicle>
-    <vehicle id="t118_2" type="city_vehicles" depart="333.00">
-        <route edges="J9J8 J8J7 J7J6 J6I6 I6H6 H6G6 G6G5 G5G4 G4G3 G3G2 G2G1 G1G0"/>
-    </vehicle>
-    <vehicle id="t133_2" type="city_vehicles" depart="334.00">
-        <route edges="B0A0 A0A1 A1A2 A2A3 A3B3 B3C3 C3D3 D3E3 E3F3 F3G3 G3G4 G4H4 H4H3"/>
     </vehicle>
     <vehicle id="t89_2" type="city_vehicles" depart="334.00">
         <route edges="D6D7 D7D6 D6E6 E6F6 F6G6 G6H6 H6I6 I6I5 I5I4"/>
@@ -1282,18 +1153,6 @@
     <vehicle id="t138_2" type="city_vehicles" depart="336.00">
         <route edges="I7J7 J7J6 J6I6 I6H6 H6G6 G6F6 F6F5"/>
     </vehicle>
-    <vehicle id="t25_2" type="city_vehicles" depart="337.00">
-        <route edges="I3J3 J3J4 J4J5 J5J6 J6J7 J7J8 J8I8 I8H8"/>
-    </vehicle>
-    <vehicle id="t64_2" type="city_vehicles" depart="337.00">
-        <route edges="C3C4 C4D4 D4D5 D5D6 D6E6 E6F6 F6G6 G6H6 H6I6 I6J6 J6I6"/>
-    </vehicle>
-    <vehicle id="t15_1" type="city_vehicles" depart="339.00">
-        <route edges="G0F0 F0E0 E0D0 D0D1 D1D2 D2D3 D3C3 C3B3 B3A3 A3A2"/>
-    </vehicle>
-    <vehicle id="t137_2" type="city_vehicles" depart="340.00">
-        <route edges="E7E8 E8E7 E7E6 E6F6 F6G6 G6G5 G5G4 G4G3 G3G2 G2G1 G1G0 G0H0 H0I0 I0J0"/>
-    </vehicle>
     <vehicle id="t112_2" type="city_vehicles" depart="342.00">
         <route edges="H0I0 I0H0 H0G0 G0G1 G1G2 G2G3 G3G4 G4G5 G5G6 G6G7 G7G8 G8G9 G9F9 F9E9 E9D9"/>
     </vehicle>
@@ -1302,15 +1161,6 @@
     </vehicle>
     <vehicle id="t106_2" type="city_vehicles" depart="343.00">
         <route edges="F9G9 G9G8 G8G7 G7G6 G6G5 G5G4 G4F4 F4G4"/>
-    </vehicle>
-    <vehicle id="t57_2" type="city_vehicles" depart="343.00">
-        <route edges="G9F9 F9F8 F8F7 F7F6 F6F5 F5F4 F4E4"/>
-    </vehicle>
-    <vehicle id="t97_2" type="city_vehicles" depart="343.00">
-        <route edges="G3F3 F3G3 G3H3 H3I3 I3J3 J3I3"/>
-    </vehicle>
-    <vehicle id="t127_2" type="city_vehicles" depart="344.00">
-        <route edges="B0A0 A0A1 A1A2 A2A3 A3A4 A4A5 A5A6 A6B6 B6C6 C6D6 D6D7 D7D8 D8D9 D9E9 E9F9 F9F8"/>
     </vehicle>
     <vehicle id="t114_2" type="city_vehicles" depart="345.00">
         <route edges="H9I9 I9I8 I8I7 I7I6 I6I7"/>
@@ -1324,15 +1174,6 @@
     <vehicle id="t47_2" type="city_vehicles" depart="345.00">
         <route edges="G2H2 H2G2 G2G3 G3F3 F3E3 E3D3 D3C3 C3B3"/>
     </vehicle>
-    <vehicle id="t94_0" type="city_vehicles" depart="348.00">
-        <route edges="D0E0 E0E1 E1E2 E2D2"/>
-    </vehicle>
-    <vehicle id="t94_1" type="city_vehicles" depart="348.00">
-        <route edges="D0E0 E0E1 E1E2 E2D2"/>
-    </vehicle>
-    <vehicle id="t99_2" type="city_vehicles" depart="348.00">
-        <route edges="G2F2 F2F3 F3G3 G3G4 G4H4 H4H3"/>
-    </vehicle>
     <vehicle id="t121_2" type="city_vehicles" depart="349.00">
         <route edges="B3A3 A3B3 B3C3 C3D3 D3D2 D2D1 D1D0 D0E0 E0F0 F0G0 G0F0"/>
     </vehicle>
@@ -1345,12 +1186,6 @@
     <vehicle id="t94_2" type="city_vehicles" depart="350.00">
         <route edges="D0E0 E0E1 E1E2 E2D2"/>
     </vehicle>
-    <vehicle id="t126_2" type="city_vehicles" depart="351.00">
-        <route edges="E2D2 D2D3 D3C3 C3B3 B3B4 B4B5 B5C5"/>
-    </vehicle>
-    <vehicle id="t15_2" type="city_vehicles" depart="352.00">
-        <route edges="G0F0 F0E0 E0D0 D0D1 D1D2 D2D3 D3C3 C3B3 B3A3 A3A2"/>
-    </vehicle>
     <vehicle id="t84_2" type="city_vehicles" depart="352.00">
         <route edges="G9F9 F9G9 G9G8 G8G7 G7G6 G6H6 H6I6 I6J6 J6J5"/>
     </vehicle>
@@ -1362,14 +1197,5 @@
     </vehicle>
     <vehicle id="t109_2" type="city_vehicles" depart="357.00">
         <route edges="H4H3 H3G3 G3F3 F3E3 E3D3 D3D4 D4D5 D5D6 D6C6 C6C5"/>
-    </vehicle>
-    <vehicle id="t77_2" type="city_vehicles" depart="359.00">
-        <route edges="F9G9 G9F9 F9E9 E9D9 D9D8 D8D7 D7D6 D6D5 D5D4 D4D3 D3D2 D2D1 D1D0 D0C0 C0B0"/>
-    </vehicle>
-    <vehicle id="t86_2" type="city_vehicles" depart="359.00">
-        <route edges="D7C7 C7C6 C6B6 B6A6 A6A5 A5A4 A4A3 A3A2 A2A1 A1A0 A0B0"/>
-    </vehicle>
-    <vehicle id="t88_2" type="city_vehicles" depart="359.00">
-        <route edges="B6A6 A6A5 A5A4 A4A3 A3A2 A2A1 A1A0 A0B0 B0C0 C0D0"/>
     </vehicle>
 </routes>
