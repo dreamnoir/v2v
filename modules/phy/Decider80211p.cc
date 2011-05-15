@@ -194,10 +194,10 @@ double Decider80211p::calcChannelSenseRSSI(simtime_t start, simtime_t end) {
 
 	Argument min(DimensionSet::timeFreqDomain);
 	min.setTime(start);
-	min.setArgValue(Dimension::frequency_static(), centerFrequency - 11e6);
+	min.setArgValue(Dimension::frequency_static(), centerFrequency - 5e6);
 	Argument max(DimensionSet::timeFreqDomain);
 	max.setTime(end);
-	max.setArgValue(Dimension::frequency_static(), centerFrequency + 11e6);
+	max.setArgValue(Dimension::frequency_static(), centerFrequency + 5e6);
 
 	double rssi = MappingUtils::findMax(*rssiMap, min, max);
 
@@ -224,10 +224,10 @@ DeciderResult* Decider80211p::checkIfSignalOk(AirFrame* frame)
 											 //partly - TODO: maybe solve this nicer
 	Argument min(DimensionSet::timeFreqDomain);
 	min.setTime(start);
-	min.setArgValue(Dimension::frequency_static(), centerFrequency - 11e6);
+	min.setArgValue(Dimension::frequency_static(), centerFrequency - 5e6);
 	Argument max(DimensionSet::timeFreqDomain);
 	max.setTime(end);
-	max.setArgValue(Dimension::frequency_static(), centerFrequency + 11e6);
+	max.setArgValue(Dimension::frequency_static(), centerFrequency + 5e6);
 
 	double snirMin = MappingUtils::findMin(*snrMap, min, max);
 

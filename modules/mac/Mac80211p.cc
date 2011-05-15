@@ -1048,7 +1048,7 @@ Signal* Mac80211p::createSignal(	simtime_t start, simtime_t length,
 	//create and set tx power mapping
 	ConstMapping* txPowerMapping
 			= createSingleFrequencyMapping(	start, end,
-											centerFreq, 11.0e6,
+											centerFreq, 5.0e6,
 											power);
 	s->setTransmissionPower(txPowerMapping);
 
