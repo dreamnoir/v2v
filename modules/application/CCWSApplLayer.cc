@@ -349,31 +349,31 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				{
 					if (nve[i] != 0)
 					{
-						if ((simTime() - nve[i]->getLastUpdated()) <= nveTimeout && vm->vehicleExists(i))
+						double time = SIMTIME_DBL(simTime() - nve[i]->getLastUpdated());
+						if (time <= nveTimeout && vm->vehicleExists(i))
 						{
 							double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
-							stats.nveErrorVec.record(diff);
+							if (time <= 2.0)
+								stats.nveErrorVec.record(diff);
 
-							Coord pos = spe.getCurrentPosition();
-							double distance = nve[i]->positionError(pos);
-
-							if (distance < 20.0)
+							if (time <= 1.0)
 							{
 								count1++;
 								stats.nveErrorVec1.record(diff);
 							}
-							if (distance < 50.0)
+							if (time <= 3.0)
 							{
 								count2++;
 								stats.nveErrorVec2.record(diff);
 							}
-							else if (distance < 100.0)
+							if (time <= 5.0)
 							{
 								count3++;
 								stats.nveErrorVec3.record(diff);
 							}
 
-							count++;
+							if (time <= 2.0)
+								count++;
 						}
 						else
 						{
