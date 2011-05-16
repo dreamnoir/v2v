@@ -28,6 +28,12 @@ void CCWSApplLayer::Statistics::initialize()
 	nveVec.setName("nve-tracked");
 	ndeletecVec.setName("nve-deleted");
 
+	nveErrorVec1.setName("nve-error1");
+	nveVec1.setName("nve-tracked1");
+	nveErrorVec2.setName("nve-error2");
+	nveVec2.setName("nve-tracked2");
+	nveErrorVec3.setName("nve-error3");
+	nveVec3.setName("nve-tracked3");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -292,6 +298,7 @@ void CCWSApplLayer::sendLocationUpdate()
 	}
 }
 
+
 void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
 {
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
@@ -334,6 +341,9 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				angleModel.nextValue();
 
 				int count = 0;
+				int count1 = 0;
+				int count2 = 0;
+				int count3 = 0;
 				int deleted = 0;
 				for (int i=0; i<maxVehicles; i++)
 				{
@@ -343,6 +353,25 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						{
 							double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
 							stats.nveErrorVec.record(diff);
+
+							Coord pos = spe.getCurrentPosition();
+							double distance = nve[i]->positionError(pos);
+
+							if (distance < 20.0)
+							{
+								count1++;
+								stats.nveErrorVec1.record(diff);
+							}
+							if (distance < 50.0)
+							{
+								count2++;
+								stats.nveErrorVec2.record(diff);
+							}
+							else if (distance < 100.0)
+							{
+								count3++;
+								stats.nveErrorVec3.record(diff);
+							}
 
 							count++;
 						}
@@ -357,6 +386,9 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				stats.ndeletecVec.record(deleted);
 				stats.nveVec.record(count);
 
+				stats.nveVec1.record(count1);
+				stats.nveVec2.record(count2);
+				stats.nveVec3.record(count3);
 			}
 		}
 	}

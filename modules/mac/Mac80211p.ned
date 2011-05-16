@@ -47,7 +47,10 @@ simple Mac80211p extends BaseMacLayer
     	// consider information in cache outdate if older than (in seconds)
     	double neighborhoodCacheMaxAge @unit(s); 
     	//the power to transmit packets with [mW]
-    	double txPower @unit(mW);
+    	double txPowerMax @unit(mW);
+    	double txPowerMin @unit(mW);
+    	
+    	bool trackCCA = default(false);
     	
     	headerLength = default(272bit);
 }

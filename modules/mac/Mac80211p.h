@@ -14,6 +14,8 @@
 #include <Consts80211p.h>
 #include <ChannelSenseRequest_m.h>
 
+#define CCA_INTERVALS 100
+
 /**
  * @brief An implementation of the 802.11b MAC.
  *
@@ -31,8 +33,10 @@ public:
 				int sentPackets;
 				int receivedPackets;
 				int errorPackets;
+				int usedCCA;
 
 				cOutVector latencyVec;
+				cOutVector ccaVec;
 
 				void initialize();
 				//void watch(cSimpleModule& module);
@@ -55,7 +59,8 @@ protected:
     /** Definition of the timer types */
     enum timerType {
       TIMEOUT,
-      NAV
+      NAV,
+      CCA
     };
 
     /** Definition of the states*/
@@ -227,6 +232,8 @@ protected:
      */
     Signal* createSignal(simtime_t start, simtime_t length, double power, double bitrate);
 
+    void handleCCA();
+
 protected:
 
     // TIMERS:
@@ -261,7 +268,8 @@ protected:
     double defaultBitrate;
 
     /** @brief The power at which data is transmitted */
-    double txPower;
+    double txPowerMax;
+    double txPowerMin;
 
     /** @brief Stores the center frequency the Mac uses. */
     double centerFreq;
@@ -326,7 +334,17 @@ protected:
     /** sequence control -- to detect duplicates*/
     int fsc;
 
+    // handle collection of statistics
     Statistics stats;
+
+    int channelSlot;
+    bool channelFree[CCA_INTERVALS];
+    int countCCA;
+
+    cMessage* channelSenseCheck;
+
+    bool trackCCA;
+
 };
 
 #endif /* MAC80211P_H_ */

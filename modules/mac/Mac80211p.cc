@@ -27,7 +27,9 @@ void Mac80211p::Statistics::initialize()
 	sentPackets = 0;
 	receivedPackets = 0;
 	errorPackets = 0;
+	usedCCA = 0;
 	latencyVec.setName("sender-latency");
+	ccaVec.setName("cca");
 }
 
 void Mac80211p::Statistics::recordScalars(cSimpleModule& module)
@@ -35,6 +37,7 @@ void Mac80211p::Statistics::recordScalars(cSimpleModule& module)
 	module.recordScalar("Sent Packets", sentPackets);
 	module.recordScalar("Received Packets", receivedPackets);
 	module.recordScalar("Error Packets", errorPackets);
+	module.recordScalar("CCA Used", usedCCA);
 }
 
 void Mac80211p::initialize(int stage)
@@ -71,8 +74,8 @@ void Mac80211p::initialize(int stage)
 
         autoBitrate = hasPar("autoBitrate") ? par("autoBitrate").boolValue() : false;
 
-        txPower = hasPar("txPower") ? par("txPower").doubleValue() : 110.11;
-
+        txPowerMax = hasPar("txPowerMax") ? par("txPowerMax").doubleValue() : 110.11;
+        txPowerMin = hasPar("txPowerMin") ? par("txPowerMin").doubleValue() : 110.11;
 
         delta = 1E-9;
 
@@ -82,7 +85,7 @@ void Mac80211p::initialize(int stage)
     else if(stage == 1) {
     	BaseConnectionManager* cc = getConnectionManager();
 
-    	if(cc->hasPar("pMax") && txPower > cc->par("pMax").doubleValue())
+    	if(cc->hasPar("pMax") && txPowerMax > cc->par("pMax").doubleValue())
             opp_error("TranmitterPower can't be bigger than pMax in ConnectionManager! "
             	      "Please adjust your omnetpp.ini file accordingly.");
 
@@ -131,6 +134,25 @@ void Mac80211p::initialize(int stage)
 
         remainingBackoff = backoff();
         senseChannelWhileIdle(remainingBackoff + currentIFS);
+
+
+        // tracking channel CCA values for dynamic power adjustment
+        countCCA = 0;
+
+        trackCCA = par("trackCCA").boolValue();
+
+        if (trackCCA)
+        {
+        	for (int i = 0; i < CCA_INTERVALS; i++)
+				channelFree[i] = true;
+
+			channelSlot = 0;
+
+
+			channelSenseCheck = new cMessage("CCA", CCA);
+			scheduleAt(simTime() + 0.01, channelSenseCheck);
+        }
+
     }
 }
 
@@ -327,6 +349,10 @@ void Mac80211p::handleSelfMsg(cMessage * msg)
     case NAV:
         handleNavTimer();       // noch zu betrachten...
         break;
+
+    case CCA:
+    	handleCCA();
+    	break;
 
     default:
         error("unknown timer type");
@@ -779,7 +805,7 @@ void Mac80211p::sendDATAframe(Mac80211Pkt *af)
        if(shortRetryCounter) frame->setRetry(true);
     }
     simtime_t duration = packetDuration(frame->getBitLength(), br);
-    Signal* signal = createSignal(simTime(), duration, txPower, br);
+    Signal* signal = createSignal(simTime(), duration, txPowerMax, br);
     MacToPhyControlInfo *pco = new MacToPhyControlInfo(signal);
     // build a copy of the frame in front of the queue'
     frame->setControlInfo(pco);
@@ -812,7 +838,7 @@ void Mac80211p::sendACKframe(Mac80211Pkt * af)
 
     Signal* signal = createSignal(simTime(),
 								  packetDuration(LENGTH_ACK, br),
-								  txPower, br);
+								  txPowerMax, br);
 
     MacToPhyControlInfo *pco = new MacToPhyControlInfo(signal);
 
@@ -846,7 +872,7 @@ void Mac80211p::sendRTSframe()
 
     Signal* signal = createSignal(simTime(),
 								  packetDuration(LENGTH_RTS, br),
-								  txPower, br);
+								  txPowerMax, br);
 
     MacToPhyControlInfo *pco = new MacToPhyControlInfo(signal);
 
@@ -890,7 +916,7 @@ void Mac80211p::sendCTSframe(Mac80211Pkt * af)
 
 	Signal* signal = createSignal(simTime(),
 								  packetDuration(LENGTH_CTS, br),
-								  txPower, br);
+								  txPowerMax, br);
 
     MacToPhyControlInfo *pco = new MacToPhyControlInfo(signal);
     frame->setControlInfo(pco);
@@ -918,13 +944,31 @@ void Mac80211p::sendCTSframe(Mac80211Pkt * af)
  */
 void Mac80211p::sendBROADCASTframe()
 {
+	double txPowerPkt;
+
     // send a copy of the frame in front of the queue
     Mac80211Pkt *frame = static_cast<Mac80211Pkt *>(fromUpperLayer.front()->dup());
 
     //get inner packet for txPower
     WSMPkt* inner = (WSMPkt*) frame->getEncapsulatedPacket();
 
-    double txPowerPkt = inner->getTxPower();
+    if (trackCCA)
+    {
+    	double max = inner->getTxPower();
+    	if (countCCA > 75)
+    		txPowerPkt = txPowerMin;
+    	else if (countCCA < 25)
+    		txPowerPkt = max;
+    	else
+    	{
+    		stats.usedCCA++;
+    		txPowerPkt = txPowerMin + ((double)(75 - countCCA)/(double)50)*(max-txPowerMin);
+    	}
+    }
+    else
+    {
+    	txPowerPkt = inner->getTxPower();
+    }
     double br = retrieveBitrate(frame->getDestAddr());
 
     simtime_t duration = packetDuration(frame->getBitLength(), br);
@@ -940,6 +984,7 @@ void Mac80211p::sendBROADCASTframe()
     	stats.sentPackets++;
 
     stats.latencyVec.record(simTime()-((CCWSApplPkt*)inner->getEncapsulatedPacket())->getUtc());
+    stats.ccaVec.record(countCCA);
 
     sendDown(frame);
     // update state and display
@@ -1291,3 +1336,30 @@ void Mac80211p::finish() {
     BaseMacLayer::finish();
 }
 
+void Mac80211p::handleCCA()
+{
+	bool idle = false;
+	if (state == IDLE || state == CONTEND)
+	{
+		ev << "state is IDLE or contend check if channel is busy" << endl;
+		ChannelState channel = phy->getChannelState();
+		if(channel.isIdle())
+			idle = true;
+	}
+
+	if (idle != channelFree[channelSlot])
+	{
+		channelFree[channelSlot] = idle;
+		if (idle)
+			countCCA--;
+		else
+			countCCA++;
+
+		if (countCCA < 0 || countCCA >= CCA_INTERVALS)
+			error("CCA out of bounds");
+	}
+
+	if (++channelSlot == CCA_INTERVALS)
+		channelSlot = 0;
+	scheduleAt(simTime() + 0.01, channelSenseCheck);
+}

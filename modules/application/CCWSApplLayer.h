@@ -42,14 +42,25 @@ public:
 			cOutVector rpeTransmitVec;
 
 			cOutVector nveErrorVec;			// NVE error between position updates
+			cOutVector nveVec;				// vehicles tracked by nve
 			cOutVector nveDistanceVec;		// NVE distance to other vehicle
 			cOutVector nveLatencyVec;		// NVE latency to other vehicle
 
 			cOutVector visibleVec;			// vehicles in range of vision
 			cOutVector mvisibleVec;
-			cOutVector nveVec;				// vehicles tracked by nve
+
 			cOutVector thresholdVec;		// time between threshold communication
 			cOutVector ndeletecVec;
+
+			cOutVector nveErrorVec1;			// NVE error between position updates
+			cOutVector nveVec1;				// vehicles tracked by nve
+
+			cOutVector nveErrorVec2;			// NVE error between position updates
+			cOutVector nveVec2;				// vehicles tracked by nve
+
+			cOutVector nveErrorVec3;			// NVE error between position updates
+			cOutVector nveVec3;				// vehicles tracked by nve
+
 
 			void initialize();
 			//void watch(cSimpleModule& module);

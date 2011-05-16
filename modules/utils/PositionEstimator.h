@@ -23,6 +23,7 @@ public:
 	PositionEstimator();
 
 	//gets estimate of current position
+	Coord getCurrentPosition() {return getCurrentPosition(simTime());}
 	Coord getCurrentPosition(simtime_t time);
 
 	//update position information
@@ -30,6 +31,7 @@ public:
 	void updatePosition(double x, double y, double speed, double angleX, double angleY, double accel, simtime_t time);
 
 	//get error between provided position and expected position
+	double positionError(const Coord& newPosition) {return positionError(newPosition, simTime());}
 	double positionError(const Coord& newPosition, simtime_t time);
 
 	//get current estimated speed
