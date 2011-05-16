@@ -28,7 +28,7 @@ void VisionManager::initialize(int stage)
 	{
 		maxDistance = par("maxDistance").doubleValue();
 		visionCutoff = par("visionCutoff").doubleValue();
-		debug = par("debug").boolValue();
+		debug = false;
 
 		trackedVec.setName("vehicles-tracked");
 
@@ -187,9 +187,6 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
 	// clear out vehicles in range
 	nic->withinRange.clear();
 
-	// clear number of vehicles maybe visible
-	nic->maybeVisible = 0;
-
 	// update all vehicles in nearby grids to check for range
     GridCoord* c = gridUnion.next();
     while(c != 0) {
@@ -320,7 +317,7 @@ void VisionManager::updateVehicleVision(VisionEntries& nmap, VisionEntry* nic)
             	if (debug) ev << "Vehicle ID(" << nic->vehicleId << " can see ID" << nic_i->vehicleId << " at distance " << distance << " and at angle " << angle << " with angles to corners (" << angles.min << ", " << angles.max << ")" << endl;
 
             	// create new visible vehicle holder
-            	VisibleVehicle v = {nic_i, distance, false, angles};
+            	VisibleVehicle v = {nic_i->vehicleId, nic_i, distance, true, angles};
 
             	// find correct position based on distance and insert into list
             	VehicleList::iterator ci = nic->withinRange.begin();
@@ -328,13 +325,12 @@ void VisionManager::updateVehicleVision(VisionEntries& nmap, VisionEntry* nic)
             		ci++;
             	nic->withinRange.insert(ci, v);
 
-            	nic->maybeVisible++;
             }
         }
     }
 }
 
-bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle)
+bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle, double length, double width)
 {
 	assert(nic != 0);
 
@@ -343,7 +339,9 @@ bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const
 	// create new VisionEntry
 	VisionEntry *visionEntry;
 
-	visionEntry = new VisionEntry();
+	ev << "vision added vehicle with length=" << length << " and width=" << width << endl;
+
+	visionEntry = new VisionEntry(length, width);
 
 	// fill VisionEntry
 	visionEntry->appPtr = nic;
@@ -431,6 +429,11 @@ Coord VisionManager::getVehiclePos(int vehicleID)
 bool VisionManager::vehicleExists(int vehicleID)
 {
 	return (nics[vehicleID] != 0);
+}
+
+VehicleList VisionManager::getVisible(int vehicleID)
+{
+	return nics[vehicleID]->withinRange;
 }
 
 VisionManager::~VisionManager()

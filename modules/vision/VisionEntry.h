@@ -18,6 +18,7 @@ class VisionEntry;
 
 struct VisibleVehicle
 {
+	int id;
 	VisionEntry* vehicle;
 	double distance;
 	bool visible;
@@ -25,11 +26,12 @@ struct VisibleVehicle
 };
 
 typedef std::list<VisibleVehicle> VehicleList;
+typedef std::list<int, VisibleVehicle> VehicleMapList;
 
 class VisionEntry
 {
 public:
-	VisionEntry();
+	VisionEntry(int length, int width);
 
 	double getAngleTo(VisionEntry* other);
 	double getAngleTo(const Coord& second);
@@ -42,19 +44,23 @@ public:
 
 	VehicleList withinRange;
 
-	/** @brief module id of the nic for which information is stored*/
+	/** id of the node this entry represents */
 	int vehicleId;
 
-	/** @brief Pointer to the application module */
+	/** Pointer to the application module */
 	cModule *appPtr;
 
 	int maybeVisible;
 	int visible;
 
-	/** @brief Geographic location of the nic*/
+	/** Geographic location of the node */
 	Coord pos;
 
+	// unit vector the node is pointing in
 	Coord angle;
+
+	double getWidth() {return width;}
+	double getLength() {return length;}
 
 protected:
 

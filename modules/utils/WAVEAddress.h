@@ -24,12 +24,4 @@ enum
 	SCH6 = 184,
 };
 
-enum
-{
-	THREEMBS = 3000000,
-	SIXMBS = 6000000,
-	NINEMBS = 9000000,
-	TWENTYSEVENMPS = 27000000,
-};
-
 #endif

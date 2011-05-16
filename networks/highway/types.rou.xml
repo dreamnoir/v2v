@@ -8,6 +8,6 @@
     <vtype id="p6" accel="0.9" decel="5.5" sigma="0.4" length="7" maxspeed="90" color="1,0,0" probability="0.125" />
     <vtype id="p7" accel="0.7" decel="4.5" sigma="0.8" length="7" maxspeed="70" color="1,0,0" probability="0.1" />
     <vtype id="p8" accel="0.7" decel="4.5" sigma="0.4" length="7" maxspeed="70" color="1,0,0" probability="0.1" />
-    <vtype id="t1" accel="0.6" decel="4" sigma="0.5" length="21" maxspeed="50" color="0,1,0" probability="0.1" />
+    <vtype id="t2" accel="0.6" decel="4" sigma="0.5" length="21" maxspeed="50" color="0,1,0" probability="0.1" />
   </vtypeDistribution>
 </routes>

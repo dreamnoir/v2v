@@ -34,6 +34,9 @@ public:
 			int sentUpdates;
 			int receivedUpdates;
 
+			double length;
+			double width;
+
 			int thresholdViolations;
 			int timeViolations;
 
@@ -47,20 +50,31 @@ public:
 			cOutVector nveLatencyVec;		// NVE latency to other vehicle
 
 			cOutVector visibleVec;			// vehicles in range of vision
-			cOutVector mvisibleVec;
+			cOutVector occludedVec;
+			cOutVector visibleTrackedVec;
+			cOutVector visibleNotTrackedVec;
+
+			cOutVector unifiedMinError;
+			cOutVector unifiedMaxError;
+			cOutVector unifiedDistanceError;
+
+			cOutVector unifiedMinError1;
+			cOutVector unifiedMaxError1;
+			cOutVector unifiedDistanceError1;
+
+			cOutVector unifiedMinError2;
+			cOutVector unifiedMaxError2;
+			cOutVector unifiedDistanceError2;
 
 			cOutVector thresholdVec;		// time between threshold communication
 			cOutVector ndeletecVec;
 
-			cOutVector nveErrorVec1;			// NVE error between position updates
-			cOutVector nveVec1;				// vehicles tracked by nve
-
-			cOutVector nveErrorVec2;			// NVE error between position updates
-			cOutVector nveVec2;				// vehicles tracked by nve
-
-			cOutVector nveErrorVec3;			// NVE error between position updates
-			cOutVector nveVec3;				// vehicles tracked by nve
-
+			//cOutVector nveErrorVec1;			// NVE error between position updates
+			//cOutVector nveVec1;				// vehicles tracked by nve
+			//cOutVector nveErrorVec2;			// NVE error between position updates
+			//cOutVector nveVec2;				// vehicles tracked by nve
+			//cOutVector nveErrorVec3;			// NVE error between position updates
+			//cOutVector nveVec3;				// vehicles tracked by nve
 
 			void initialize();
 			//void watch(cSimpleModule& module);
@@ -97,6 +111,9 @@ protected:
     void sendLocationUpdate();
 
     virtual void receiveBBItem(int category, const BBItem *details, int scopeModuleId);
+
+    MinMax getMinMaxAngles(PositionEstimate estimate, double length, double width);
+    double getDistanceTo(PositionEstimate estimate, double length, double width);
 
 	// General purpose timer
 	cMessage *timer;
@@ -155,6 +172,11 @@ protected:
 	bool visionOn;
 
 	int transmitPower;
+
+	int bitrate;
+
+	double length;
+	double width;
 
 	AutoregModel xModel;
 	AutoregModel yModel;

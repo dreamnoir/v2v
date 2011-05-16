@@ -56,6 +56,19 @@ void PositionEstimator::updatePosition(const Coord& position, double speed, cons
 	this->updates++;
 }
 
+PositionEstimate PositionEstimator::getPositionEstimate()
+{
+	PositionEstimate result;
+
+	result.pos = getCurrentPosition();
+	result.angle = getAngle();
+	result.speed = getSpeed();
+	result.acceleration = getAcceleration();
+	result.time = simTime();
+
+	return result;
+}
+
 void PositionEstimator::updatePosition(double x, double y, double speed, double angleX, double angleY, double accel, simtime_t time)
 {
 

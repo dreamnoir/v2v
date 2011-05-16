@@ -18,6 +18,15 @@
 
 #include "Coord.h"
 
+struct PositionEstimate
+{
+	Coord pos;
+	Coord angle;
+	double speed;
+	double acceleration;
+	simtime_t time;
+};
+
 class PositionEstimator : public cObject{
 public:
 	PositionEstimator();
@@ -25,6 +34,8 @@ public:
 	//gets estimate of current position
 	Coord getCurrentPosition() {return getCurrentPosition(simTime());}
 	Coord getCurrentPosition(simtime_t time);
+
+	PositionEstimate getPositionEstimate();
 
 	//update position information
 	void updatePosition(const Coord& position, double speed, const Coord& angle);

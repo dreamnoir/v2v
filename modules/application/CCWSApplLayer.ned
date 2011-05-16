@@ -32,13 +32,15 @@ simple CCWSApplLayer like IBaseApplLayer
     	bool vision = default(true);
     	
     	int txPower @unit(mW) = default(15000mW);
-    	int bitrate @unit(bps) = default(3000000bps);
     	
     	bool retransmit = default(true); // retransmit second time in threshold mode
     	double retransmitTime @unit("s") = default(0.05s); // time before second retransmit
     	
     	double runUp @unit(s) = default(0s); // how long before network and vision simulation starts
-    	   
+    	
+    	int bitrate @unit(bps) = default(3000000bps);
+    	double adoptionRate = default(1.0);   
+    	
     gates:
     	input lowerGateIn; // from network layer
         output lowerGateOut; // to network layer

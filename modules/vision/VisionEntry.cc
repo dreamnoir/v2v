@@ -9,11 +9,11 @@
 
 #define RAD_TO_DEGREE 57.2957795
 
-VisionEntry::VisionEntry()
+VisionEntry::VisionEntry(int length, int width)
 {
-	visible = 0;
-	width = 2;
-	length = 5;
+	this->visible = 0;
+	this->width = width;
+	this->length = length;
 }
 
 double VisionEntry::getAngleTo(const Coord& second)
@@ -34,7 +34,7 @@ double VisionEntry::getDistanceTo(VisionEntry* other)
 {
 	Coord widthVec(other->angle.getY(), other->angle.getX());
 	widthVec *= (other->width/2);
-	Coord lengthVec = other->angle*(length/2);
+	Coord lengthVec = other->angle*(other->length/2);
 
 	double distances [] =  {this->pos.distance(other->pos+lengthVec),
 							this->pos.distance(other->pos-lengthVec),
@@ -62,9 +62,12 @@ MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 
 	Coord widthVec(other->angle.getY(), other->angle.getX());
 	widthVec *= (other->width/2);
-	Coord lengthVec = other->angle*(length/2);
+	Coord lengthVec = other->angle*(other->length/2);
 
-	double angles [] = {getAngleTo(other->pos+lengthVec+widthVec), getAngleTo(other->pos+lengthVec-widthVec), getAngleTo(other->pos-lengthVec+widthVec), getAngleTo(other->pos-lengthVec-widthVec)};
+	double angles [] = {getAngleTo(other->pos+lengthVec+widthVec),
+						getAngleTo(other->pos+lengthVec-widthVec),
+						getAngleTo(other->pos-lengthVec+widthVec),
+						getAngleTo(other->pos-lengthVec-widthVec)};
 
 	for (int i=0; i<4; i++)
 	{
@@ -86,13 +89,14 @@ MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 
 void VisionEntry::pruneVisible(int cutoff)
 {
+	maybeVisible = withinRange.size();
 	visible = 0;
-	VisionMap m(cutoff, true);
+	VisionMap m(cutoff, false);
 
 	for (VehicleList::iterator ci = withinRange.begin(); ci != withinRange.end(); ci++)
 	{
 
-		ev << "Visible: " << (*ci).vehicle->vehicleId << " at d=" << (*ci).distance << " and angle (" << (*ci).angles.min << "," << (*ci).angles.max << ")" << endl;
+		//ev << "Visible: " << (*ci).vehicle->vehicleId << " at d=" << (*ci).distance << " and angle (" << (*ci).angles.min << "," << (*ci).angles.max << ")" << endl;
 
 		if (!m.visible((*ci).angles))
 		{
@@ -100,7 +104,10 @@ void VisionEntry::pruneVisible(int cutoff)
 			ev << "Not actually visible" << endl;
 		}
 		else
+		{
 			visible++;
+		}
+
 
 		m.add((*ci).angles);
 	}

@@ -340,7 +340,7 @@ public:
 	 * If you want to do your own stuff at the registration of a nic see
 	 * "registerNicExt()".
 	 */
-	bool registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle);
+	bool registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle, double length, double width);
 
 	/**
 	 * @brief Unregisters a NIC such that its connections aren't managed by the CM
@@ -362,6 +362,8 @@ public:
 	Coord getVehiclePos(int vehicleID);
 
 	bool vehicleExists(int vehicleID);
+
+	VehicleList getVisible(int vehicleID);
 
 };
 #endif /* VISIONMANAGER_H_ */

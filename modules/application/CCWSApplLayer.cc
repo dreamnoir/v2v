@@ -7,7 +7,87 @@
 #include "CCWSApplPkt_m.h"
 #include "Coord.h"
 
+#include "TraCIMobilityV.h"
+#include "TraCIScenarioManager.h"
+#include "FindModule.h"
+
+#include "MinMax.h"
+#include "VisionManager.h"
+
+#define RAD_TO_DEGREE 57.2957795
+
 Define_Module(CCWSApplLayer);
+
+double getAngleTo(const Coord& pos, const Coord& angle, const Coord& to)
+{
+	// get vector from this vehicle to other one, make into unit length and
+	// find angle between it and direction of this vehicle
+	Coord v1v2 = to - pos;
+	v1v2 /= v1v2.length();
+	return acos(angle.getX()*v1v2.getX() + angle.getY()*v1v2.getY()) * RAD_TO_DEGREE;
+}
+
+MinMax CCWSApplLayer::getMinMaxAngles(PositionEstimate estimate, double length, double width)
+{
+	MinMax result = {10000, - 10000};
+
+	Coord widthVec(estimate.angle.getY(), estimate.angle.getX());
+	widthVec *= (width/2);
+	Coord lengthVec = estimate.angle*(length/2);
+
+	Coord pos = spe.getCurrentPosition();
+	Coord angle = spe.getAngle();
+
+	double angles [] = {getAngleTo(pos, angle, estimate.pos+lengthVec+widthVec),
+						getAngleTo(pos, angle, estimate.pos+lengthVec-widthVec),
+						getAngleTo(pos, angle, estimate.pos-lengthVec+widthVec),
+						getAngleTo(pos, angle, estimate.pos-lengthVec-widthVec)};
+
+	for (int i=0; i<4; i++)
+	{
+		if (angles[i] < result.min)
+			result.min = angles[i];
+		if (angles[i] > result.max)
+			result.max = angles[i];
+	}
+
+	if (result.max-result.min > 180)
+	{
+		double temp = result.max;
+		result.max = result.min;
+		result.min = temp;
+	}
+
+	return result;
+}
+
+double CCWSApplLayer::getDistanceTo(PositionEstimate estimate, double length, double width)
+{
+	Coord widthVec(estimate.angle.getY(), estimate.angle.getX());
+	widthVec *= (width/2);
+	Coord lengthVec = estimate.angle*(length/2);
+
+	Coord pos = spe.getCurrentPosition();
+
+	double distances [] =  {pos.distance(estimate.pos+lengthVec),
+							pos.distance(estimate.pos-lengthVec),
+							pos.distance(estimate.pos+widthVec),
+							pos.distance(estimate.pos+widthVec),
+							pos.distance(estimate.pos+lengthVec+widthVec),
+							pos.distance(estimate.pos+lengthVec-widthVec),
+							pos.distance(estimate.pos-lengthVec+widthVec),
+							pos.distance(estimate.pos-length-widthVec)};
+
+	double min = 1000000;
+
+	for (int i=0; i<8; i++)
+	{
+		if (distances[i] < min)
+			min = distances[i];
+	}
+
+	return min;
+}
 
 void CCWSApplLayer::Statistics::initialize()
 {
@@ -15,6 +95,8 @@ void CCWSApplLayer::Statistics::initialize()
 	receivedUpdates = 0;
 	thresholdViolations = 0;
 	timeViolations = 0;
+	length = 0;
+	width = 0;
 
 	// setup vector staticis
 	speErrorVec.setName("spe-error");
@@ -23,17 +105,31 @@ void CCWSApplLayer::Statistics::initialize()
 	nveDistanceVec.setName("nve-distance");
 	nveLatencyVec.setName("nve-latency");
 	visibleVec.setName("visible");
-	mvisibleVec.setName("in-range");
+	occludedVec.setName("occluded");
 	thresholdVec.setName("threshold-error");
 	nveVec.setName("nve-tracked");
 	ndeletecVec.setName("nve-deleted");
+	visibleTrackedVec.setName("visible-tracked");
+	visibleNotTrackedVec.setName("visible-not-tracked");
 
-	nveErrorVec1.setName("nve-error1");
-	nveVec1.setName("nve-tracked1");
-	nveErrorVec2.setName("nve-error2");
-	nveVec2.setName("nve-tracked2");
-	nveErrorVec3.setName("nve-error3");
-	nveVec3.setName("nve-tracked3");
+	unifiedMinError.setName("unified-min-error");
+	unifiedMaxError.setName("unified-max-error");
+	unifiedDistanceError.setName("unified-distance-error");
+
+	unifiedMinError1.setName("unified-min-error1");
+	unifiedMaxError1.setName("unified-max-error1");
+	unifiedDistanceError1.setName("unified-distance-error1");
+
+	unifiedMinError2.setName("unified-min-error2");
+	unifiedMaxError2.setName("unified-max-error2");
+	unifiedDistanceError2.setName("unified-distance-error2");
+
+	//nveErrorVec1.setName("nve-error1");
+	//nveVec1.setName("nve-tracked1");
+	//nveErrorVec2.setName("nve-error2");
+	//nveVec2.setName("nve-tracked2");
+	//nveErrorVec3.setName("nve-error3");
+	//nveVec3.setName("nve-tracked3");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -42,6 +138,8 @@ void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
 	module.recordScalar("Received Updates", receivedUpdates);
 	module.recordScalar("Threshold Violations", thresholdViolations);
 	module.recordScalar("Time Violations", timeViolations);
+	module.recordScalar("Length", length);
+	module.recordScalar("Width", width);
 }
 
 void CCWSApplLayer::finish()
@@ -56,6 +154,9 @@ void CCWSApplLayer::initialize(int stage)
 
 	if(stage == 0)
 	{
+		length = 0;
+		width = 0;
+
 		// set autoregressive model parameters
 		xModel.set(0.9, 0.436, 0.2);
 		yModel.set(0.9, 0.436, 0.2);
@@ -74,6 +175,7 @@ void CCWSApplLayer::initialize(int stage)
 		txPower = (int) par("txPower").doubleValue();
 		runUp = par("runUp").doubleValue();
 		visionOn = par("vision").boolValue();
+		bitrate = (int) par("bitrate").doubleValue();
 
 		// find vision manager
 		vm = dynamic_cast<VisionManager*>(simulation.getModuleByPath("vision"));
@@ -91,15 +193,15 @@ void CCWSApplLayer::initialize(int stage)
 	}
 	else if(stage==1)
 	{
+		// how long to wait before startin any simulation
 		double add = 0;
+		if (runUp > SIMTIME_DBL(simTime()))
+					add = runUp - SIMTIME_DBL(simTime());
 
 		// create and initialise empty array of NVE
 		nve = new PositionEstimator*[maxVehicles];
 		for (int i=0; i<maxVehicles; i++)
 			nve[i] = 0;
-
-		if (runUp > SIMTIME_DBL(simTime()))
-			add = runUp - SIMTIME_DBL(simTime());
 
 		// start position update timer if in threshold mode otherwise start broadcast timer
 		if (!thresholdMode)
@@ -252,24 +354,24 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 
 void CCWSApplLayer::sendLocationUpdate()
 {
-	double x, y, speed;
+	double x, y, speed, newX, newY;
 
 	if (simTime() >= runUp)
 	{
+		// get GPS position with GPS error added
 		x = spe.getCurrentPosition(simTime()).getX() + xModel.getValue();
 		y = spe.getCurrentPosition(simTime()).getY() + yModel.getValue();
 		speed = spe.getSpeed() + speedModel.getValue();
+		newX = spe.getAngle().getX() * cos(angleModel.getValue()) - spe.getAngle().getY() * sin(angleModel.getValue());
+		newY = spe.getAngle().getY() * sin(angleModel.getValue()) + spe.getAngle().getY() * cos(angleModel.getValue());
 
-		double newX = spe.getAngle().getX() * cos(angleModel.getValue()) - spe.getAngle().getY() * sin(angleModel.getValue());
-		double newY = spe.getAngle().getY() * sin(angleModel.getValue()) + spe.getAngle().getY() * cos(angleModel.getValue());
-
+		// create new CCWS packet
 		CCWSApplPkt *pkt = new CCWSApplPkt("CCWS_MESSAGE", CCWS_MESSAGE);
 		pkt->setDestAddr(-1);
-
-		// we use the host modules getIndex() as a appl address
 		pkt->setSrcAddr(myApplAddr());
 		pkt->setBitLength(headerLength);
 
+		//set fields relating to vehicle position and trajectory
 		pkt->setAccel(spe.getAcceleration());
 		pkt->setX(x);
 		pkt->setY(y);
@@ -281,13 +383,13 @@ void CCWSApplLayer::sendLocationUpdate()
 
 		// set the control info to tell the network layer the layer 3
 		// address;
-		pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, SIXMBS, txPower) );
+		pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, bitrate, txPower) );
 
-		if (debug) EV << "Sending broadcast location packet!   " << simTime() << endl ;
-
+		// record location update as sent
 		if (simTime() >= simulation.getWarmupPeriod())
 			stats.sentUpdates++;
 
+		// record time between updates
 		if (rpe.getNumberUpdates() > 1)
 			stats.rpeTransmitVec.record(simTime() - rpe.getLastUpdated());
 
@@ -301,6 +403,9 @@ void CCWSApplLayer::sendLocationUpdate()
 
 void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
 {
+	double diff;
+	int appAddress = myApplAddr();
+
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
 	if(category == catMove)
 	{
@@ -311,7 +416,8 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 
 			if (m->getStartPos().getX() != 0 && m->getStartPos().getY() != 0)
 			{
-				double diff = spe.positionError(m->getStartPos(), simTime());
+				// how far off was our SPE estimate
+				diff = spe.positionError(m->getStartPos(), simTime());
 				if (spe.getNumberUpdates() > 1)
 					stats.speErrorVec.record(diff);
 
@@ -323,14 +429,48 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				{
 					if (visionOn)
 					{
-						vm->updateVehiclePos(myApplAddr(), &(m->getStartPos()), &(m->getDirection()));
-						stats.visibleVec.record(vm->visible(myApplAddr()));
-						stats.mvisibleVec.record(vm->maybeVisible(myApplAddr()));
+						vm->updateVehiclePos(appAddress, &(m->getStartPos()), &(m->getDirection()));
+						stats.visibleVec.record(vm->visible(appAddress));
+						stats.occludedVec.record(vm->maybeVisible(appAddress)-vm->visible(appAddress));
 					}
 				}
 				else
 				{
-					vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()));
+					TraCIMobilityV* mobility = FindModule<TraCIMobilityV*>::findSubModule(this->getParentModule());
+					TraCIScenarioManager* manager = mobility->getManager();
+
+					std::string id = manager->commandGetVehicleTypeId(mobility->getExternalId());
+
+				    if (id == "p1" || id == "p2" || id == "p3" || id == "p4")
+				    {
+				    	length = 3.5;
+				    	width = 1.8;
+				    }
+				    else if (id == "p5" || id == "p6")
+				    {
+				    	length = 5;
+				    	width = 1.8;
+				    }
+				    else if (id == "p7" || id == "p8")
+				    {
+				    	length = 5;
+				    	width = 2;
+				    }
+				    else if (id == "t1")
+				    {
+				    	length = 14;
+				    	width = 2.5;
+				    }
+				    else
+				    {
+				    	length = 19;
+				    	width = 2.5;
+				    }
+
+				    stats.length = length;
+				    stats.width = width;
+
+					vm->registerVehicle(this, &(m->getStartPos()), &(m->getDirection()), length, width);
 					isRegistered = true;
 				}
 
@@ -340,11 +480,10 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				speedModel.nextValue();
 				angleModel.nextValue();
 
-				int count = 0;
-				int count1 = 0;
-				int count2 = 0;
-				int count3 = 0;
+				// counters for tracked and deleted NVEs
+				int tracked = 0;
 				int deleted = 0;
+
 				for (int i=0; i<maxVehicles; i++)
 				{
 					if (nve[i] != 0)
@@ -352,28 +491,9 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						double time = SIMTIME_DBL(simTime() - nve[i]->getLastUpdated());
 						if (time <= nveTimeout && vm->vehicleExists(i))
 						{
-							double diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
-							if (time <= 2.0)
-								stats.nveErrorVec.record(diff);
-
-							if (time <= 1.0)
-							{
-								count1++;
-								stats.nveErrorVec1.record(diff);
-							}
-							if (time <= 3.0)
-							{
-								count2++;
-								stats.nveErrorVec2.record(diff);
-							}
-							if (time <= 5.0)
-							{
-								count3++;
-								stats.nveErrorVec3.record(diff);
-							}
-
-							if (time <= 2.0)
-								count++;
+							diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
+							stats.nveErrorVec.record(diff);
+							tracked++;
 						}
 						else
 						{
@@ -384,11 +504,64 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 					}
 				}
 				stats.ndeletecVec.record(deleted);
-				stats.nveVec.record(count);
+				stats.nveVec.record(tracked);
 
-				stats.nveVec1.record(count1);
-				stats.nveVec2.record(count2);
-				stats.nveVec3.record(count3);
+				int visibleTracked = 0;
+				int visibleNotTracked = 0;
+
+				// get visible
+				VehicleList vis = vm->getVisible(appAddress);
+				for (VehicleList::iterator ci = vis.begin(); ci != vis.end(); ci++)
+				{
+					VisibleVehicle v = (*ci);
+
+					if (v.visible)
+					{
+						ev << "vehicle with id= " << v.id << " and angles (" << v.angles.min << ", " << v.angles.max << ") at d=" << v.distance << endl;
+
+						if (nve[v.id] != 0)
+						{
+							visibleTracked++;
+
+							PositionEstimate e = nve[v.id]->getPositionEstimate();
+							MinMax a = getMinMaxAngles(e, v.vehicle->getLength(), v.vehicle->getWidth());
+							double distance = getDistanceTo(e, v.vehicle->getLength(), v.vehicle->getWidth())-v.distance;
+							double max = a.max-v.angles.max;
+							double min = a.min-v.angles.min;
+
+							ev << "estimate angles (" << min << ", " << max << ") at d=" << distance << endl;
+
+							double time = SIMTIME_DBL(simTime() - nve[v.id]->getLastUpdated());
+
+							if (time < 0.66)
+							{
+								stats.unifiedDistanceError.record(fabs(distance));
+								stats.unifiedMinError.record(fabs(min));
+								stats.unifiedMaxError.record(fabs(max));
+							}
+							else if (time >= 0.66 && time < 1.33)
+							{
+								stats.unifiedDistanceError1.record(fabs(distance));
+								stats.unifiedMinError1.record(fabs(min));
+								stats.unifiedMaxError1.record(fabs(max));
+							}
+							else
+							{
+								stats.unifiedDistanceError2.record(fabs(distance));
+								stats.unifiedMinError2.record(fabs(min));
+								stats.unifiedMaxError2.record(fabs(max));
+							}
+						}
+						else
+						{
+							visibleNotTracked++;
+						}
+
+					}
+				}
+
+				stats.visibleTrackedVec.record(visibleTracked);
+				stats.visibleNotTrackedVec.record(visibleNotTracked);
 			}
 		}
 	}
