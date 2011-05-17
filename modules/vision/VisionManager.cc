@@ -184,21 +184,23 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
         }
     }
 
-	// clear out vehicles in range
-	nic->withinRange.clear();
+	if (nic->isVisionOn())
+	{
+		// clear out vehicles in range
+		nic->withinRange.clear();
 
-	// update all vehicles in nearby grids to check for range
-    GridCoord* c = gridUnion.next();
-    while(c != 0) {
-		if (debug) ev << "Update cons in [" << c->info() << "]" << endl;
-		updateVehicleVision(getCellEntries(*c), nic);
-		c = gridUnion.next();
-    }
+		// update all vehicles in nearby grids to check for range
+	    GridCoord* c = gridUnion.next();
+	    while(c != 0) {
+			updateVehicleVision(getCellEntries(*c), nic);
+			c = gridUnion.next();
+	    }
 
-    // prune list of maybe visible vehicles
-    nic->pruneVisible(visionCutoff);
+	    // prune list of maybe visible vehicles
+	    nic->pruneVisible(visionCutoff);
 
-    if (debug) ev << "visible by " << id << " are " << nic->visible << " of " << nic->maybeVisible << " vehicles." << endl;
+	    if (debug) ev << "visible by " << id << " are " << nic->visible << " of " << nic->possible << " vehicles." << endl;
+	}
 }
 
 int VisionManager::wrapIfTorus(int value, int max) {
@@ -330,7 +332,7 @@ void VisionManager::updateVehicleVision(VisionEntries& nmap, VisionEntry* nic)
     }
 }
 
-bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle, double length, double width)
+bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const Coord* vehicleAngle, double length, double width, bool vision)
 {
 	assert(nic != 0);
 
@@ -341,7 +343,7 @@ bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const
 
 	ev << "vision added vehicle with length=" << length << " and width=" << width << endl;
 
-	visionEntry = new VisionEntry(length, width);
+	visionEntry = new VisionEntry(length, width, vision);
 
 	// fill VisionEntry
 	visionEntry->appPtr = nic;
@@ -418,12 +420,21 @@ int VisionManager::visible(int vehicleID)
 
 int VisionManager::maybeVisible(int vehicleID)
 {
-	return nics[vehicleID]->maybeVisible;
+	return nics[vehicleID]->possible;
 }
 
 Coord VisionManager::getVehiclePos(int vehicleID)
 {
 	return ((CCWSApplLayer*)nics[vehicleID]->appPtr)->getCurrentPos();
+}
+
+double VisionManager::getWidth(int vehicleID)
+{
+	return nics[vehicleID]->getWidth();
+}
+double VisionManager::getLength(int vehicleID)
+{
+	return nics[vehicleID]->getLength();
 }
 
 bool VisionManager::vehicleExists(int vehicleID)

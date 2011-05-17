@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 #ifndef _CCWSAPPLPKT_M_H_
@@ -20,7 +20,7 @@
 
 
 /**
- * Class generated from <tt>messages/application/CCWSApplPkt.msg</tt> by opp_msgc.
+ * Class generated from <tt>CCWSApplPkt.msg</tt> by opp_msgc.
  * <pre>
  * packet CCWSApplPkt extends ApplPkt {
  *     int id;
@@ -33,6 +33,10 @@
  *     double width;
  *     double length;
  *     simtime_t utc;
+ *     int id1;
+ *     int id2;
+ *     int id3;
+ *     int id4;
  * }
  * </pre>
  */
@@ -49,6 +53,10 @@ class CCWSApplPkt : public ::ApplPkt
     double width_var;
     double length_var;
     simtime_t utc_var;
+    int id1_var;
+    int id2_var;
+    int id3_var;
+    int id4_var;
 
     // protected and unimplemented operator==(), to prevent accidental usage
     bool operator==(const CCWSApplPkt&);
@@ -83,6 +91,14 @@ class CCWSApplPkt : public ::ApplPkt
     virtual void setLength(double length_var);
     virtual simtime_t getUtc() const;
     virtual void setUtc(simtime_t utc_var);
+    virtual int getId1() const;
+    virtual void setId1(int id1_var);
+    virtual int getId2() const;
+    virtual void setId2(int id2_var);
+    virtual int getId3() const;
+    virtual void setId3(int id3_var);
+    virtual int getId4() const;
+    virtual void setId4(int id4_var);
 };
 
 inline void doPacking(cCommBuffer *b, CCWSApplPkt& obj) {obj.parsimPack(b);}

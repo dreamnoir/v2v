@@ -13,18 +13,32 @@
 #include "VisionManager.h"
 #include "AutoregModel.h"
 
-struct PositionInformation
+struct VehicleInfo
 {
-	double x;
-	double y;
-	double angleX;
-	double angley;
-	double speed;
-	double acceleration;
-	double time;
-	int txPower;
-	int dataRate;
+	VisibleVehicle vehicle;
+	int trackAs;
 };
+
+class VisionPositionEstimator
+{
+public:
+	VisionPositionEstimator()
+	{
+		this->updated = simTime();
+	}
+	void updatePosition()
+	{
+		this->updated = simTime();
+	}
+	simtime_t getLastUpdated()
+	{
+		return updated;
+	}
+protected:
+	simtime_t updated;
+};
+
+typedef std::list<VehicleInfo> VehicleTrackingList;
 
 class CCWSApplLayer  : public BaseApplLayer
 {
@@ -40,8 +54,6 @@ public:
 			int thresholdViolations;
 			int timeViolations;
 
-			cOutVector speErrorVec;			// SPE error between position updates
-
 			cOutVector rpeTransmitVec;
 
 			cOutVector nveErrorVec;			// NVE error between position updates
@@ -54,22 +66,22 @@ public:
 			cOutVector visibleTrackedVec;
 			cOutVector visibleNotTrackedVec;
 
-			cOutVector unifiedMinError;
-			cOutVector unifiedMaxError;
-			cOutVector unifiedDistanceError;
+			cOutVector unifiedError;
+			cOutVector trackedWrong;
+			cOutVector visibleMissed;
 
-			cOutVector unifiedMinError1;
-			cOutVector unifiedMaxError1;
-			cOutVector unifiedDistanceError1;
+			cOutVector netwVision;
+			cOutVector allTracked;
+			//cOutVector unifiedDistanceError1;
 
-			cOutVector unifiedMinError2;
-			cOutVector unifiedMaxError2;
-			cOutVector unifiedDistanceError2;
+			//cOutVector unifiedMinError2;
+			//cOutVector unifiedMaxError2;
+			//cOutVector unifiedDistanceError2;
 
 			cOutVector thresholdVec;		// time between threshold communication
 			cOutVector ndeletecVec;
 
-			//cOutVector nveErrorVec1;			// NVE error between position updates
+			cOutVector extraCCWS;			// NVE error between position updates
 			//cOutVector nveVec1;				// vehicles tracked by nve
 			//cOutVector nveErrorVec2;			// NVE error between position updates
 			//cOutVector nveVec2;				// vehicles tracked by nve
@@ -115,6 +127,10 @@ protected:
     MinMax getMinMaxAngles(PositionEstimate estimate, double length, double width);
     double getDistanceTo(PositionEstimate estimate, double length, double width);
 
+    Coord getPositionGPS();
+    double getSpeedGPS();
+    Coord getHeadingGPS();
+
 	// General purpose timer
 	cMessage *timer;
 
@@ -135,6 +151,8 @@ protected:
 
 	// array of NVE for any neighbours that come within range
 	PositionEstimator** nve;
+
+	VisionPositionEstimator** vpe;
 
 	// how long before auto retransmit
 	double autoRetransmitTime;
@@ -178,11 +196,17 @@ protected:
 	double length;
 	double width;
 
+	double adoptionRate;
+	bool driverAssistance;
+
 	AutoregModel xModel;
 	AutoregModel yModel;
 	AutoregModel speedModel;
 	AutoregModel angleModel;
 
+	VehicleTrackingList visible;
+
+	bool extraCCWS;
 };
 
 #endif /* CCWSAPPLLAYER_H_ */

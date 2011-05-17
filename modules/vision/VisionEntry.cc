@@ -9,8 +9,10 @@
 
 #define RAD_TO_DEGREE 57.2957795
 
-VisionEntry::VisionEntry(int length, int width)
+VisionEntry::VisionEntry(int length, int width, bool visionOn)
 {
+	this->visionOn = visionOn;
+	this->possible = 0;
 	this->visible = 0;
 	this->width = width;
 	this->length = length;
@@ -89,7 +91,7 @@ MinMax VisionEntry::getMinMaxAngles(VisionEntry* other)
 
 void VisionEntry::pruneVisible(int cutoff)
 {
-	maybeVisible = withinRange.size();
+	possible = withinRange.size();
 	visible = 0;
 	VisionMap m(cutoff, false);
 

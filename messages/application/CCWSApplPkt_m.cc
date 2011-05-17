@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by opp_msgc 4.1 from messages/application/CCWSApplPkt.msg.
+// Generated file, do not edit! Created by opp_msgc 4.1 from CCWSApplPkt.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -44,6 +44,10 @@ CCWSApplPkt::CCWSApplPkt(const char *name, int kind) : ApplPkt(name,kind)
     this->width_var = 0;
     this->length_var = 0;
     this->utc_var = 0;
+    this->id1_var = 0;
+    this->id2_var = 0;
+    this->id3_var = 0;
+    this->id4_var = 0;
 }
 
 CCWSApplPkt::CCWSApplPkt(const CCWSApplPkt& other) : ApplPkt()
@@ -70,6 +74,10 @@ CCWSApplPkt& CCWSApplPkt::operator=(const CCWSApplPkt& other)
     this->width_var = other.width_var;
     this->length_var = other.length_var;
     this->utc_var = other.utc_var;
+    this->id1_var = other.id1_var;
+    this->id2_var = other.id2_var;
+    this->id3_var = other.id3_var;
+    this->id4_var = other.id4_var;
     return *this;
 }
 
@@ -86,6 +94,10 @@ void CCWSApplPkt::parsimPack(cCommBuffer *b)
     doPacking(b,this->width_var);
     doPacking(b,this->length_var);
     doPacking(b,this->utc_var);
+    doPacking(b,this->id1_var);
+    doPacking(b,this->id2_var);
+    doPacking(b,this->id3_var);
+    doPacking(b,this->id4_var);
 }
 
 void CCWSApplPkt::parsimUnpack(cCommBuffer *b)
@@ -101,6 +113,10 @@ void CCWSApplPkt::parsimUnpack(cCommBuffer *b)
     doUnpacking(b,this->width_var);
     doUnpacking(b,this->length_var);
     doUnpacking(b,this->utc_var);
+    doUnpacking(b,this->id1_var);
+    doUnpacking(b,this->id2_var);
+    doUnpacking(b,this->id3_var);
+    doUnpacking(b,this->id4_var);
 }
 
 int CCWSApplPkt::getId() const
@@ -203,6 +219,46 @@ void CCWSApplPkt::setUtc(simtime_t utc_var)
     this->utc_var = utc_var;
 }
 
+int CCWSApplPkt::getId1() const
+{
+    return id1_var;
+}
+
+void CCWSApplPkt::setId1(int id1_var)
+{
+    this->id1_var = id1_var;
+}
+
+int CCWSApplPkt::getId2() const
+{
+    return id2_var;
+}
+
+void CCWSApplPkt::setId2(int id2_var)
+{
+    this->id2_var = id2_var;
+}
+
+int CCWSApplPkt::getId3() const
+{
+    return id3_var;
+}
+
+void CCWSApplPkt::setId3(int id3_var)
+{
+    this->id3_var = id3_var;
+}
+
+int CCWSApplPkt::getId4() const
+{
+    return id4_var;
+}
+
+void CCWSApplPkt::setId4(int id4_var)
+{
+    this->id4_var = id4_var;
+}
+
 class CCWSApplPktDescriptor : public cClassDescriptor
 {
   public:
@@ -250,7 +306,7 @@ const char *CCWSApplPktDescriptor::getProperty(const char *propertyname) const
 int CCWSApplPktDescriptor::getFieldCount(void *object) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 10+basedesc->getFieldCount(object) : 10;
+    return basedesc ? 14+basedesc->getFieldCount(object) : 14;
 }
 
 unsigned int CCWSApplPktDescriptor::getFieldTypeFlags(void *object, int field) const
@@ -272,8 +328,12 @@ unsigned int CCWSApplPktDescriptor::getFieldTypeFlags(void *object, int field) c
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<10) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<14) ? fieldTypeFlags[field] : 0;
 }
 
 const char *CCWSApplPktDescriptor::getFieldName(void *object, int field) const
@@ -295,8 +355,12 @@ const char *CCWSApplPktDescriptor::getFieldName(void *object, int field) const
         "width",
         "length",
         "utc",
+        "id1",
+        "id2",
+        "id3",
+        "id4",
     };
-    return (field>=0 && field<10) ? fieldNames[field] : NULL;
+    return (field>=0 && field<14) ? fieldNames[field] : NULL;
 }
 
 int CCWSApplPktDescriptor::findField(void *object, const char *fieldName) const
@@ -313,6 +377,10 @@ int CCWSApplPktDescriptor::findField(void *object, const char *fieldName) const
     if (fieldName[0]=='w' && strcmp(fieldName, "width")==0) return base+7;
     if (fieldName[0]=='l' && strcmp(fieldName, "length")==0) return base+8;
     if (fieldName[0]=='u' && strcmp(fieldName, "utc")==0) return base+9;
+    if (fieldName[0]=='i' && strcmp(fieldName, "id1")==0) return base+10;
+    if (fieldName[0]=='i' && strcmp(fieldName, "id2")==0) return base+11;
+    if (fieldName[0]=='i' && strcmp(fieldName, "id3")==0) return base+12;
+    if (fieldName[0]=='i' && strcmp(fieldName, "id4")==0) return base+13;
     return basedesc ? basedesc->findField(object, fieldName) : -1;
 }
 
@@ -335,8 +403,12 @@ const char *CCWSApplPktDescriptor::getFieldTypeString(void *object, int field) c
         "double",
         "double",
         "simtime_t",
+        "int",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<10) ? fieldTypeStrings[field] : NULL;
+    return (field>=0 && field<14) ? fieldTypeStrings[field] : NULL;
 }
 
 const char *CCWSApplPktDescriptor::getFieldProperty(void *object, int field, const char *propertyname) const
@@ -386,6 +458,10 @@ std::string CCWSApplPktDescriptor::getFieldAsString(void *object, int field, int
         case 7: return double2string(pp->getWidth());
         case 8: return double2string(pp->getLength());
         case 9: return double2string(pp->getUtc());
+        case 10: return long2string(pp->getId1());
+        case 11: return long2string(pp->getId2());
+        case 12: return long2string(pp->getId3());
+        case 13: return long2string(pp->getId4());
         default: return "";
     }
 }
@@ -410,6 +486,10 @@ bool CCWSApplPktDescriptor::setFieldAsString(void *object, int field, int i, con
         case 7: pp->setWidth(string2double(value)); return true;
         case 8: pp->setLength(string2double(value)); return true;
         case 9: pp->setUtc(string2double(value)); return true;
+        case 10: pp->setId1(string2long(value)); return true;
+        case 11: pp->setId2(string2long(value)); return true;
+        case 12: pp->setId3(string2long(value)); return true;
+        case 13: pp->setId4(string2long(value)); return true;
         default: return false;
     }
 }
@@ -433,8 +513,12 @@ const char *CCWSApplPktDescriptor::getFieldStructName(void *object, int field) c
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     };
-    return (field>=0 && field<10) ? fieldStructNames[field] : NULL;
+    return (field>=0 && field<14) ? fieldStructNames[field] : NULL;
 }
 
 void *CCWSApplPktDescriptor::getFieldStructPointer(void *object, int field, int i) const

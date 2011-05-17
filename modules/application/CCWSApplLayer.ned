@@ -41,6 +41,8 @@ simple CCWSApplLayer like IBaseApplLayer
     	int bitrate @unit(bps) = default(3000000bps);
     	double adoptionRate = default(1.0);   
     	
+    	bool extraCCWS = default(false);
+    	
     gates:
     	input lowerGateIn; // from network layer
         output lowerGateOut; // to network layer
