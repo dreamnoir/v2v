@@ -43,6 +43,15 @@ simple CCWSApplLayer like IBaseApplLayer
     	
     	bool extraCCWS = default(false);
     	
+    	double sendEWS @unit(s) = default(0s);
+    	double sendHWS @unit(s) = default(0s);
+    	
+    	double hwsInterval @unit(s) = default(1s);
+    	double ewsRepeat @unit(s) = default(0.1s);
+    	double ewsRepeatCount = default(0);
+    	
+    	bool ewsToHws = default(false);
+    	
     gates:
     	input lowerGateIn; // from network layer
         output lowerGateOut; // to network layer

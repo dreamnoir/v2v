@@ -36,6 +36,9 @@ void CCWSApplLayer::Statistics::initialize()
 	length = 0;
 	width = 0;
 
+	vehicleIdentified = -1;
+	receivedMessage = -1;
+
 	// setup vector staticis
 	rpeTransmitVec.setName("rpe-interval");
 	nveErrorVec.setName("nve-error");
@@ -57,6 +60,9 @@ void CCWSApplLayer::Statistics::initialize()
 	allTracked.setName("all-tracked");
 	extraCCWS.setName("extra-ccws");
 
+	vehicleIdentifiedVec.setName("vehicle-identified");
+	wsSentVec.setName("ws-sent");
+
 	//unifiedMinError2.setName("unified-min-error2");
 	//unifiedMaxError2.setName("unified-max-error2");
 	//unifiedDistanceError2.setName("unified-distance-error2");
@@ -77,10 +83,14 @@ void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
 	module.recordScalar("Time Violations", timeViolations);
 	module.recordScalar("Length", length);
 	module.recordScalar("Width", width);
+	module.recordScalar("Received EWS/HWS Message", receivedMessage);
+	module.recordScalar("Identified EWS/HWS Vehicle", vehicleIdentified);
 }
 
 void CCWSApplLayer::finish()
 {
+	stats.receivedMessage = SIMTIME_DBL(receivedMessage);
+	stats.vehicleIdentified = SIMTIME_DBL(vehicleIdentified);
 	stats.recordScalars(*this);
 }
 
@@ -115,6 +125,17 @@ void CCWSApplLayer::initialize(int stage)
 		bitrate = (int) par("bitrate").doubleValue();
 		adoptionRate = par("adoptionRate").doubleValue();
 		extraCCWS = par("extraCCWS").boolValue();
+		sendEWS = par("sendEWS").doubleValue();
+		sendHWS = par("sendHWS").doubleValue();
+		hwsInterval = par("hwsInterval").doubleValue();
+		ewsRepeat = par("ewsRepeat").doubleValue();
+		ewsRepeatCount = par("ewsRepeatCount").doubleValue();
+		ewsToHws = par("ewsToHws").boolValue();
+
+		watchFor = -1;
+
+		receivedMessage = 0;
+		vehicleIdentified = 0;
 
 		// make sure adoption rate is a percentage
 		if (adoptionRate < 0)
@@ -132,10 +153,13 @@ void CCWSApplLayer::initialize(int stage)
 		stats.initialize();
 
 
-
 		// subscribe to movement updates
 		Move moveBBItem;
 		catMove = utility->subscribe(this, &moveBBItem, findHost()->getId());
+
+		hwsTimer = 0;
+		ewsTimer = 0;
+		timer = 0;
 
 	}
 	else if(stage==1)
@@ -173,10 +197,17 @@ void CCWSApplLayer::initialize(int stage)
 				timer = new cMessage( "update-timer", CHECK_POSITION_UPDATE);
 				scheduleAt(simTime() + delay + dblrand() + add, timer);
 			}
-		}
-		else
-		{
-			timer = 0;
+
+			if (sendEWS != 0)
+			{
+				ewsTimer = new cMessage( "ews-timer", SEND_EWS_MESSAGE);
+				scheduleAt(sendEWS, ewsTimer);
+			}
+			if (sendHWS != 0)
+			{
+				hwsTimer = new cMessage( "hws-timer", SEND_HWS_MESSAGE);
+				scheduleAt(sendHWS, hwsTimer);
+			}
 		}
 	}
 }
@@ -301,6 +332,17 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 				}
 				break;
 
+			case HWS_MESSAGE:
+			case EWS_MESSAGE:
+
+				if (watchFor == -1)
+				{
+					m = static_cast<CCWSApplPkt *>(msg);
+					watchFor = m->getId();
+					receivedMessage = simTime();
+				}
+
+				break;
 			default:
 				if (debug) EV <<"Error! got packet with unknown kind: " << msg->getKind()<<endl;
 
@@ -319,6 +361,37 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 	{
 		switch(msg->getKind())
 		{
+			case SEND_HWS_MESSAGE:
+				if (timer != 0)
+				{
+					cancelAndDelete(timer);
+					timer = 0;
+				}
+
+				sendPacketHWS();
+
+				hwsTimer = new cMessage( "hws-timer", SEND_HWS_MESSAGE);
+				scheduleAt(simTime() + hwsInterval, hwsTimer);
+
+				break;
+
+			case SEND_EWS_MESSAGE:
+				if (timer != 0)
+				{
+					cancelAndDelete(timer);
+					timer = 0;
+				}
+				sendPacketEWS();
+
+				if (ewsRepeatCount > 0)
+				{
+					ewsTimer = new cMessage( "ews-timer", SEND_EWS_MESSAGE);
+					scheduleAt(simTime() + ewsRepeat, ewsTimer);
+					ewsRepeatCount--;
+				}
+
+				break;
+
 			case SEND_BROADCAST_TIMER:
 				sendLocationUpdate();
 				timer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
@@ -415,6 +488,28 @@ Coord CCWSApplLayer::getHeadingGPS()
 double CCWSApplLayer::getSpeedGPS()
 {
 	return spe.getSpeed() + speedModel.getValue();
+}
+
+void CCWSApplLayer::sendPacketEWS()
+{
+	stats.wsSentVec.record(2);
+	CCWSApplPkt *pkt = new CCWSApplPkt("EWS_MESSAGE", EWS_MESSAGE);
+	pkt->setDestAddr(-1);
+	pkt->setSrcAddr(myApplAddr());
+	pkt->setBitLength(headerLength);
+	pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, bitrate, txPower) );
+	sendDown(pkt);
+}
+
+void CCWSApplLayer::sendPacketHWS()
+{
+	stats.wsSentVec.record(1);
+	CCWSApplPkt *pkt = new CCWSApplPkt("HWS_MESSAGE", HWS_MESSAGE);
+	pkt->setDestAddr(-1);
+	pkt->setSrcAddr(myApplAddr());
+	pkt->setBitLength(headerLength);
+	pkt->setControlInfo(new WAVEControlInfo(L2BROADCAST, CCH, bitrate, txPower) );
+	sendDown(pkt);
 }
 
 void CCWSApplLayer::sendLocationUpdate()
@@ -574,6 +669,15 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						add.vehicle = (*ci);
 						add.trackAs = -1;
 						visible.push_back(add);
+						if (watchFor != -1)
+						{
+							if ((*ci).id == watchFor)
+							{
+								if (vehicleIdentified == 0)
+									vehicleIdentified = simTime();
+								stats.vehicleIdentifiedVec.record(vehicleIdentified - receivedMessage);
+							}
+						}
 					}
 				}
 				vis.clear();
@@ -716,4 +820,8 @@ CCWSApplLayer::~CCWSApplLayer()
 	// cancel any timers
 	if (timer != 0)
 		cancelAndDelete(timer);
+	if (hwsTimer != 0)
+		cancelAndDelete(hwsTimer);
+	if (ewsTimer != 0)
+		cancelAndDelete(ewsTimer);
 }

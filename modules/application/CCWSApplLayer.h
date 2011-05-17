@@ -54,6 +54,9 @@ public:
 			int thresholdViolations;
 			int timeViolations;
 
+			double vehicleIdentified;
+			double receivedMessage;
+
 			cOutVector rpeTransmitVec;
 
 			cOutVector nveErrorVec;			// NVE error between position updates
@@ -72,11 +75,9 @@ public:
 
 			cOutVector netwVision;
 			cOutVector allTracked;
-			//cOutVector unifiedDistanceError1;
 
-			//cOutVector unifiedMinError2;
-			//cOutVector unifiedMaxError2;
-			//cOutVector unifiedDistanceError2;
+			cOutVector vehicleIdentifiedVec;
+			cOutVector wsSentVec;
 
 			cOutVector thresholdVec;		// time between threshold communication
 			cOutVector ndeletecVec;
@@ -109,7 +110,9 @@ public:
 		RETRANSMIT_POSITION_UPDATE,
 		CCWS_MESSAGE,
 		EWS_MESSAGE,
-		HWS_MESSAGE
+		HWS_MESSAGE,
+		SEND_EWS_MESSAGE,
+		SEND_HWS_MESSAGE
     };
 
 protected:
@@ -121,6 +124,8 @@ protected:
 
     /** @brief send a broadcast packet to all connected neighbors */
     void sendLocationUpdate();
+    void sendPacketHWS();
+    void sendPacketEWS();
 
     virtual void receiveBBItem(int category, const BBItem *details, int scopeModuleId);
 
@@ -207,6 +212,22 @@ protected:
 	VehicleTrackingList visible;
 
 	bool extraCCWS;
+
+	double watchFor;
+	simtime_t receivedMessage;
+	simtime_t vehicleIdentified;
+
+	bool ewsToHws;
+
+	double sendEWS;
+	double sendHWS;
+
+	double hwsInterval;
+	double ewsRepeat;
+	double ewsRepeatCount;
+
+	cMessage *hwsTimer;
+	cMessage *ewsTimer;
 };
 
 #endif /* CCWSAPPLLAYER_H_ */
