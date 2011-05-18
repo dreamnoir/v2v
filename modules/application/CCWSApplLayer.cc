@@ -89,8 +89,6 @@ void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
 
 void CCWSApplLayer::finish()
 {
-	stats.receivedMessage = SIMTIME_DBL(receivedMessage);
-	stats.vehicleIdentified = SIMTIME_DBL(vehicleIdentified);
 	stats.recordScalars(*this);
 }
 
@@ -338,8 +336,9 @@ void CCWSApplLayer::handleLowerMsg(cMessage* msg)
 				if (watchFor == -1)
 				{
 					m = static_cast<CCWSApplPkt *>(msg);
-					watchFor = m->getId();
+					watchFor = m->getSrcAddr();
 					receivedMessage = simTime();
+					stats.receivedMessage = SIMTIME_DBL(simTime());
 				}
 
 				break;
@@ -677,10 +676,15 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						visible.push_back(add);
 						if (watchFor != -1)
 						{
+							ev << "Is " << (*ci).id << " the same as " << watchFor << endl;
 							if ((*ci).id == watchFor)
 							{
 								if (vehicleIdentified == 0)
+								{
 									vehicleIdentified = simTime();
+									stats.vehicleIdentified = SIMTIME_DBL(simTime());
+								}
+
 								stats.vehicleIdentifiedVec.record(vehicleIdentified - receivedMessage);
 							}
 						}
