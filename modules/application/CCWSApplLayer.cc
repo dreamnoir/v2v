@@ -383,11 +383,17 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 				}
 				sendPacketEWS();
 
+				ewsTimer = 0;
 				if (ewsRepeatCount > 0)
 				{
 					ewsTimer = new cMessage( "ews-timer", SEND_EWS_MESSAGE);
 					scheduleAt(simTime() + ewsRepeat, ewsTimer);
 					ewsRepeatCount--;
+				}
+				else if(ewsToHws)
+				{
+					hwsTimer = new cMessage( "hws-timer", SEND_HWS_MESSAGE);
+					scheduleAt(simTime() + hwsInterval, hwsTimer);
 				}
 
 				break;
