@@ -715,7 +715,7 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 									VisibleVehicle v = (*ci).vehicle;
 
 									double distance = fabs(getDistanceTo(estimate, vLength, vWidth)-v.distance);
-									if (distance < 2.5)
+									if (distance < 1.0)
 									{
 										// this allows for 1m of movement at 15m distance scaled
 										double angleError = 57.0/distance;
