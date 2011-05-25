@@ -33,12 +33,12 @@ void VisionMap::addAngle(MinMax angles)
 	{
 		if (debug) ev << "checking angles (" << angles.min << "," << angles.max << ") against (" << (*li).min << "," << (*li).max  << ")" << endl;
 
+		// check if there is any intersection
 		if (angles.intersection(*li))
 		{
 			if (debug) ev << "intersection" << endl;
 			intersections.push_back(li);
 		}
-
 		li++;
 	}
 

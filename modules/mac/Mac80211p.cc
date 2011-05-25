@@ -1054,8 +1054,8 @@ void Mac80211p::beginNewCycle()
  */
 simtime_t Mac80211p::backoff(bool rtscts) {
     unsigned rc = (rtscts) ?  longRetryCounter : shortRetryCounter;
-    unsigned cw = ((CW_MIN + 1) << rc) - 1;
-    if(cw > CW_MAX) cw = CW_MAX;
+    unsigned cw = ((CW_MIN[2] + 1) << rc) - 1;
+    if(cw > CW_MAX[2]) cw = CW_MAX[2];
 
     simtime_t value = ((double) intrand(cw + 1)) * ST;
     EV << simTime() << " random backoff = " << value << endl;

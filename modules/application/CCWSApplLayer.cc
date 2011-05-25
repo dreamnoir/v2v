@@ -52,6 +52,7 @@ void CCWSApplLayer::Statistics::initialize()
 	visibleTrackedVec.setName("visible-tracked");
 	visibleNotTrackedVec.setName("visible-not-tracked");
 
+
 	unifiedError.setName("unified-error");
 	trackedWrong.setName("tracked-wrong");
 	visibleMissed.setName("visible-missed");
@@ -62,6 +63,8 @@ void CCWSApplLayer::Statistics::initialize()
 
 	vehicleIdentifiedVec.setName("vehicle-identified");
 	wsSentVec.setName("ws-sent");
+
+	changedMatch.setName("changed-match");
 
 	//unifiedMinError2.setName("unified-min-error2");
 	//unifiedMaxError2.setName("unified-max-error2");
@@ -673,6 +676,7 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 						VehicleInfo add;
 						add.vehicle = (*ci);
 						add.trackAs = -1;
+						add.error = 0;
 						visible.push_back(add);
 						if (watchFor != -1)
 						{
@@ -714,32 +718,42 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 
 							for (VehicleTrackingList::iterator ci = visible.begin(); ci != visible.end(); ci++)
 							{
-								if ((*ci).trackAs == -1)
+								VisibleVehicle v = (*ci).vehicle;
+
+								double distance = getDistanceTo(estimate, vLength, vWidth);
+								double ddiff = fabs(distance-v.distance);
+
+								if (ddiff < 1.0)
 								{
-									VisibleVehicle v = (*ci).vehicle;
+									// this allows for 1m of movement at 15m distance scaled
+									double angleError = 57/distance;
 
-									double distance = fabs(getDistanceTo(estimate, vLength, vWidth)-v.distance);
-									if (distance < 1.0)
+
+									MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
+									double max = fabs(a.max-v.angles.max);
+									double min = fabs(a.min-v.angles.min);
+
+									if (max < angleError && min < angleError)
 									{
-										// this allows for 1m of movement at 15m distance scaled
-										double angleError = 57.0/distance;
-
-										MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
-										double max = fabs(a.max-v.angles.max);
-										double min = fabs(a.min-v.angles.min);
-
-										if (max < angleError && min < angleError)
+										if ((*ci).trackAs == -1 || max+min+ddiff < (*ci).error)
 										{
+											if ((*ci).trackAs != -1)
+											{
+												ev << "FOUND BETTER MATCH with error of " << max+min+ddiff << " < "<< (*ci).error << endl;
+												stats.changedMatch.record(i);
+												if ((*ci).trackAs != v.id)
+													trackedWrong--;
+											}
 											isVisible = true;
 											visibleTracked++;
 											if (v.id != i)
 												trackedWrong++;
 											(*ci).trackAs = i;
+											(*ci).error = max+min+ddiff;
 											stats.unifiedError.record(0);
 										}
 									}
 								}
-
 							}
 
 							// nve stuff
@@ -797,6 +811,7 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				stats.visibleTrackedVec.record(visibleTracked);
 				stats.visibleNotTrackedVec.record(visibleNotTracked);
 				stats.trackedWrong.record(trackedWrong);
+				stats.visibleMissed.record(visibleMissed);
 				if (extraCCWS)
 				{
 					stats.netwVision.record(trackedVisionNetw);

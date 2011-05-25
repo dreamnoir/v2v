@@ -80,7 +80,7 @@ void VisionManager::initialize(int stage)
 			matrix.push_back(row);					//the RowVector.
 		}
 		for (int i = 0; i < gridDim.x; ++i) {	//fill the grid with copies of
-			nicGrid.push_back(matrix);				//the matrix.
+			vehicleGrid.push_back(matrix);				//the matrix.
 		}
 		if (debug) ev << " using " << gridDim.x << "x" <<
 							 gridDim.y << "x" <<
@@ -134,12 +134,12 @@ void VisionManager::updateConnections(int nicID, const Coord* oldPos, const Coor
 }
 
 VisionManager::VisionEntries& VisionManager::getCellEntries(VisionManager::GridCoord& cell) {
-    return nicGrid[cell.x][cell.y][cell.z];
+    return vehicleGrid[cell.x][cell.y][cell.z];
 }
 
 void VisionManager::registerVehicleExt(int nicID)
 {
-	VisionEntry* VisionEntry = nics[nicID];
+	VisionEntry* VisionEntry = vehicles[nicID];
 
 	GridCoord cell = getCellForCoordinate(VisionEntry->pos);
 
@@ -352,7 +352,7 @@ bool VisionManager::registerVehicle(cModule* nic, const Coord* vehiclePos, const
 	visionEntry->angle = vehicleAngle;
 
 	// add to map
-	nics[nicID] = visionEntry;
+	vehicles[nicID] = visionEntry;
 
 	registerVehicleExt(nicID);
 
@@ -373,8 +373,8 @@ bool VisionManager::unregisterVehicle(cModule* nicModule)
 
 	//we assume that the module was previously registered with this CM
 	//TODO: maybe change this to an omnet-error instead of an assertion
-	assert(nics.find(nicID) != nics.end());
-	VisionEntry* visionEntry = nics[nicID];
+	assert(vehicles.find(nicID) != vehicles.end());
+	VisionEntry* visionEntry = vehicles[nicID];
 
 	// get all affected grid squares
 	CoordSet gridUnion(74);
@@ -390,7 +390,7 @@ bool VisionManager::unregisterVehicle(cModule* nicModule)
 	cellEntries.erase(nicID);
 
 	// erase from list of known nics
-	nics[nicID] = (VisionEntry*)0;
+	vehicles[nicID] = (VisionEntry*)0;
 
 	// delete the object
 	delete visionEntry;
@@ -402,7 +402,7 @@ bool VisionManager::unregisterVehicle(cModule* nicModule)
 
 void VisionManager::updateVehiclePos(int nicID, const Coord* newPos, const Coord* newAngle)
 {
-	VisionEntry* VisionEntry = nics[nicID];
+	VisionEntry* VisionEntry = vehicles[nicID];
 	if(VisionEntry == 0)
 		error("No nic with this ID is registered with this ConnectionManager.");
 
@@ -415,41 +415,41 @@ void VisionManager::updateVehiclePos(int nicID, const Coord* newPos, const Coord
 
 int VisionManager::visible(int vehicleID)
 {
-	return nics[vehicleID]->visible;
+	return vehicles[vehicleID]->visible;
 }
 
 int VisionManager::maybeVisible(int vehicleID)
 {
-	return nics[vehicleID]->possible;
+	return vehicles[vehicleID]->possible;
 }
 
 Coord VisionManager::getVehiclePos(int vehicleID)
 {
-	return ((CCWSApplLayer*)nics[vehicleID]->appPtr)->getCurrentPos();
+	return ((CCWSApplLayer*)vehicles[vehicleID]->appPtr)->getCurrentPos();
 }
 
 double VisionManager::getWidth(int vehicleID)
 {
-	return nics[vehicleID]->getWidth();
+	return vehicles[vehicleID]->getWidth();
 }
 double VisionManager::getLength(int vehicleID)
 {
-	return nics[vehicleID]->getLength();
+	return vehicles[vehicleID]->getLength();
 }
 
 bool VisionManager::vehicleExists(int vehicleID)
 {
-	return (nics[vehicleID] != 0);
+	return (vehicles[vehicleID] != 0);
 }
 
 VehicleList VisionManager::getVisible(int vehicleID)
 {
-	return nics[vehicleID]->withinRange;
+	return vehicles[vehicleID]->withinRange;
 }
 
 VisionManager::~VisionManager()
 {
-	for (VisionEntries::iterator ne = nics.begin(); ne != nics.end(); ne++)
+	for (VisionEntries::iterator ne = vehicles.begin(); ne != vehicles.end(); ne++)
 	{
 		delete ne->second;
 	}

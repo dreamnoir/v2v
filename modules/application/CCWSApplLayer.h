@@ -17,6 +17,7 @@ struct VehicleInfo
 {
 	VisibleVehicle vehicle;
 	int trackAs;
+	double error;
 };
 
 class VisionPositionEstimator
@@ -75,6 +76,8 @@ public:
 
 			cOutVector netwVision;
 			cOutVector allTracked;
+
+			cOutVector changedMatch;
 
 			cOutVector vehicleIdentifiedVec;
 			cOutVector wsSentVec;

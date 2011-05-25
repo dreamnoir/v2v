@@ -205,7 +205,7 @@ protected:
 	typedef std::map<int, VisionEntry*> VisionEntries;
 
 	/** @brief Map from nic-module ids to nic-module pointers.*/
-	VisionEntries nics;
+	VisionEntries vehicles;
 
 	/** @brief Stores the size of the playground.*/
 	const Coord* playgroundSize;
@@ -233,7 +233,7 @@ protected:
      * This matrix keeps all nics according to their position.  It
      * allows to restrict the position update to a subset of all nics.
      */
-    VisionCube nicGrid;
+    VisionCube vehicleGrid;
 
     /**
      * @brief Distance that helps to find a node under a certain
@@ -255,6 +255,8 @@ protected:
 
     // number of vehicles being tracked currently
     int vehiclesTracked;
+
+    // to record number of vehicles being tracked
     cOutVector trackedVec;
 
 private:
@@ -326,9 +328,6 @@ public:
 
 	void initialize(int stage);
 
-	int visible(int vehicleID);
-	int maybeVisible(int vehicleID);
-
 	/** @brief Needs two initialization stages.*/
 	virtual int numInitStages() const {
 		return 2;
@@ -362,10 +361,10 @@ public:
 	Coord getVehiclePos(int vehicleID);
 	double getWidth(int vehicleID);
 	double getLength(int vehicleID);
-
 	bool vehicleExists(int vehicleID);
-
 	VehicleList getVisible(int vehicleID);
+	int visible(int vehicleID);
+	int maybeVisible(int vehicleID);
 
 };
 #endif /* VISIONMANAGER_H_ */

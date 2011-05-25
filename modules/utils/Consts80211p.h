@@ -90,10 +90,20 @@ const unsigned SHORT_RETRY_LIMIT = 7;
 /**
  * Minimum size (initial size) of contention window, assuming DS PHY
  */
-const unsigned CW_MIN = 7;
+const unsigned CW_MIN[4] = {3, 3, 7, 15};
 
 /** Maximum size of contention window, assuming DS PHY */
-const unsigned CW_MAX = 225;
+const unsigned CW_MAX[4] = {7, 7, 225, 1023};
+
+const unsigned AIFS[4] = {2*ST+SIFS, 3*ST+SIFS, 6*ST+SIFS, 9*ST+SIFS};
+
+enum
+{
+	A3 = 0,
+	A2 = 1,
+	A1 = 2,
+	A0 = 3
+};
 
 #endif
 
