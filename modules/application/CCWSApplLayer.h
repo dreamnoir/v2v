@@ -214,6 +214,8 @@ protected:
 
 	VehicleTrackingList visible;
 
+	double unifiedCutoff;
+
 	bool extraCCWS;
 
 	double watchFor;

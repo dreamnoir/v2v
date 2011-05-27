@@ -125,6 +125,7 @@ void CCWSApplLayer::initialize(int stage)
 		visionOn = par("vision").boolValue();
 		bitrate = (int) par("bitrate").doubleValue();
 		adoptionRate = par("adoptionRate").doubleValue();
+		unifiedCutoff = par("unifiedCutoff").doubleValue();
 		extraCCWS = par("extraCCWS").boolValue();
 		sendEWS = par("sendEWS").doubleValue();
 		sendHWS = par("sendHWS").doubleValue();
@@ -723,11 +724,10 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 								double distance = getDistanceTo(estimate, vLength, vWidth);
 								double ddiff = fabs(distance-v.distance);
 
-								if (ddiff < 1.0)
+								if (ddiff < unifiedCutoff)
 								{
 									// this allows for 1m of movement at 15m distance scaled
-									double angleError = 57/distance;
-
+									double angleError = atan(unifiedCutoff/distance)*RAD_TO_DEGREE;
 
 									MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
 									double max = fabs(a.max-v.angles.max);

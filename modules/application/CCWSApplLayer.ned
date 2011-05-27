@@ -52,6 +52,7 @@ simple CCWSApplLayer like IBaseApplLayer
     	
     	bool ewsToHws = default(false);
     	
+    	double unifiedCutoff @unit("m") = default(1m);
     gates:
     	input lowerGateIn; // from network layer
         output lowerGateOut; // to network layer
