@@ -739,6 +739,7 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 										{
 											if ((*ci).trackAs != -1)
 											{
+												visibleTracked--;
 												ev << "FOUND BETTER MATCH with error of " << max+min+ddiff << " < "<< (*ci).error << endl;
 												stats.changedMatch.record(i);
 												if ((*ci).trackAs != v.id)
