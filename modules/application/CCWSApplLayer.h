@@ -115,10 +115,14 @@ public:
 		EWS_MESSAGE,
 		HWS_MESSAGE,
 		SEND_EWS_MESSAGE,
-		SEND_HWS_MESSAGE
+		SEND_HWS_MESSAGE,
+		UPDATE_STATS
     };
 
 protected:
+
+    void collectStats();
+
     /** @brief Handle self messages such as timer... */
     virtual void handleSelfMsg(cMessage*);
 
@@ -233,6 +237,8 @@ protected:
 
 	cMessage *hwsTimer;
 	cMessage *ewsTimer;
+
+	cMessage *statsTimer;
 };
 
 #endif /* CCWSAPPLLAYER_H_ */

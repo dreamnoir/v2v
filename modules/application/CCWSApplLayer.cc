@@ -188,6 +188,9 @@ void CCWSApplLayer::initialize(int stage)
 			for (int i=0; i<maxVehicles; i++)
 				vpe[i] = 0;
 
+			statsTimer = new cMessage( "stats-timer", UPDATE_STATS);
+			scheduleAt(simTime()+ add + 0.1000000011, statsTimer);
+
 			// start position update timer if in threshold mode otherwise start broadcast timer
 			if (!thresholdMode)
 			{
@@ -415,6 +418,15 @@ void CCWSApplLayer::handleSelfMsg(cMessage *msg)
 
 				break;
 
+			case UPDATE_STATS:
+
+				collectStats();
+
+				statsTimer = new cMessage( "stats-timer", UPDATE_STATS);
+				scheduleAt(simTime() + 0.1, statsTimer);
+
+				break;
+
 			case CHECK_POSITION_UPDATE:
 
 				// delay until next check
@@ -593,7 +605,6 @@ void CCWSApplLayer::sendLocationUpdate()
 
 void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
 {
-	double diff;
 	int appAddress = myApplAddr();
 
 	BaseModule::receiveBBItem(category, details, scopeModuleId);
@@ -659,168 +670,164 @@ void CCWSApplLayer::receiveBBItem(int category, const BBItem *details, int scope
 				isRegistered = true;
 			}
 
-			if (driverAssistance && simTime() > runUp)
+			// update autoregressive model
+			xModel.nextValue();
+			yModel.nextValue();
+			speedModel.nextValue();
+			angleModel.nextValue();
+
+		}
+	}
+}
+
+void CCWSApplLayer::collectStats()
+{
+	double diff;
+	int appAddress = myApplAddr();
+
+	if (driverAssistance && simTime() > runUp)
+	{
+
+		//get list
+		visible.clear();
+		VehicleList vis = vm->getVisible(appAddress);
+		for (VehicleList::iterator ci = vis.begin(); ci != vis.end(); ci++)
+		{
+			if ((*ci).visible)
 			{
-				// update autoregressive model
-				xModel.nextValue();
-				yModel.nextValue();
-				speedModel.nextValue();
-				angleModel.nextValue();
-
-				//get list
-				visible.clear();
-				VehicleList vis = vm->getVisible(appAddress);
-				for (VehicleList::iterator ci = vis.begin(); ci != vis.end(); ci++)
-				{
-					if ((*ci).visible)
-					{
-						VehicleInfo add;
-						add.vehicle = (*ci);
-						add.trackAs = -1;
-						add.error = 0;
-						visible.push_back(add);
-						if (watchFor != -1)
-						{
-							ev << "Is " << (*ci).id << " the same as " << watchFor << endl;
-							if ((*ci).id == watchFor)
-							{
-								if (vehicleIdentified == 0)
-								{
-									vehicleIdentified = simTime();
-									stats.vehicleIdentified = SIMTIME_DBL(simTime());
-								}
-
-								stats.vehicleIdentifiedVec.record(vehicleIdentified - receivedMessage);
-							}
-						}
-					}
-				}
-				vis.clear();
-
-				// counters for tracked and deleted NVEs
-				int tracked = 0;
-				int deleted = 0;
-				int visibleTracked = 0;
-				int visibleNotTracked = 0;
-				int visibleMissed = 0;
-				int trackedWrong = 0;
-
-				for (int i=0; i<maxVehicles; i++)
-				{
-					if (nve[i] != 0)
-					{
-						double time = SIMTIME_DBL(simTime() - nve[i]->getLastUpdated());
-						if (time <= nveTimeout && vm->vehicleExists(i))
-						{
-							PositionEstimate estimate = nve[i]->getPositionEstimate();
-							bool isVisible = false;
-							double vLength = vm->getLength(i);
-							double vWidth = vm->getWidth(i);
-
-							for (VehicleTrackingList::iterator ci = visible.begin(); ci != visible.end(); ci++)
-							{
-								VisibleVehicle v = (*ci).vehicle;
-
-								double distance = getDistanceTo(estimate, vLength, vWidth);
-								double ddiff = fabs(distance-v.distance);
-
-								if (ddiff < unifiedCutoff)
-								{
-									// this allows for 1m of movement at 15m distance scaled
-									double angleError = atan(unifiedCutoff/distance)*RAD_TO_DEGREE;
-
-									MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
-									double max = fabs(a.max-v.angles.max);
-									double min = fabs(a.min-v.angles.min);
-
-									if (max < angleError && min < angleError)
-									{
-										if ((*ci).trackAs == -1 || max+min+ddiff < (*ci).error)
-										{
-											if ((*ci).trackAs != -1)
-											{
-												visibleTracked--;
-												ev << "FOUND BETTER MATCH with error of " << max+min+ddiff << " < "<< (*ci).error << endl;
-												stats.changedMatch.record(i);
-												if ((*ci).trackAs != v.id)
-													trackedWrong--;
-											}
-											isVisible = true;
-											visibleTracked++;
-											if (v.id != i)
-												trackedWrong++;
-											(*ci).trackAs = i;
-											(*ci).error = max+min+ddiff;
-											stats.unifiedError.record(0);
-										}
-									}
-								}
-							}
-
-							// nve stuff
-							if (!isVisible)
-							{
-								diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
-								stats.nveErrorVec.record(diff);
-								stats.unifiedError.record(diff);
-							}
-							tracked++;
-						}
-						else
-						{
-							delete nve[i];
-							nve[i] = 0;
-							deleted++;
-						}
-					}
-				}
-
-				int trackedVisionNetw = 0;
-				if (extraCCWS)
-				{
-					for (int i=0; i<maxVehicles; i++)
-					{
-						if (vpe[i] != 0)
-						{
-							if (simTime() - vpe[i]->getLastUpdated() <= nveTimeout && nve[i] == 0)
-							{
-								trackedVisionNetw++;
-							}
-							else
-							{
-								delete vpe[i];
-								vpe[i] = 0;
-							}
-						}
-					}
-				}
-
-
-				for (VehicleTrackingList::iterator ci = visible.begin(); ci != visible.end(); ci++)
-				{
-					if ((*ci).trackAs == -1)
-					{
-						if (nve[(*ci).vehicle.id] == 0)
-							visibleNotTracked++;
-						else
-							visibleMissed++;
-					}
-				}
-
-				stats.ndeletecVec.record(deleted);
-				stats.nveVec.record(tracked);
-				stats.visibleTrackedVec.record(visibleTracked);
-				stats.visibleNotTrackedVec.record(visibleNotTracked);
-				stats.trackedWrong.record(trackedWrong);
-				stats.visibleMissed.record(visibleMissed);
-				if (extraCCWS)
-				{
-					stats.netwVision.record(trackedVisionNetw);
-					stats.allTracked.record(trackedVisionNetw+tracked);
-				}
-
+				VehicleInfo add;
+				add.vehicle = (*ci);
+				add.trackAs = -1;
+				add.error = 0;
+				visible.push_back(add);
 			}
 		}
+		vis.clear();
+
+		// counters for tracked and deleted NVEs
+		int tracked = 0;
+		int deleted = 0;
+		int visibleTracked = 0;
+		int visibleNotTracked = 0;
+		int visibleMissed = 0;
+		int trackedWrong = 0;
+
+		for (int i=0; i<maxVehicles; i++)
+		{
+			if (nve[i] != 0)
+			{
+				double time = SIMTIME_DBL(simTime() - nve[i]->getLastUpdated());
+				if (time <= nveTimeout && vm->vehicleExists(i))
+				{
+
+
+					PositionEstimate estimate = nve[i]->getPositionEstimate();
+					bool isVisible = false;
+					double vLength = vm->getLength(i);
+					double vWidth = vm->getWidth(i);
+
+					for (VehicleTrackingList::iterator ci = visible.begin(); ci != visible.end(); ci++)
+					{
+						VisibleVehicle v = (*ci).vehicle;
+
+						double distance = getDistanceTo(estimate, vLength, vWidth);
+						double ddiff = fabs(distance-v.distance);
+
+						if (ddiff < unifiedCutoff)
+						{
+							// this allows for 1m of movement at 15m distance scaled
+							double angleError = atan(unifiedCutoff/distance)*RAD_TO_DEGREE;
+
+							MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
+							double max = fabs(a.max-v.angles.max);
+							double min = fabs(a.min-v.angles.min);
+
+							if (max < angleError && min < angleError)
+							{
+								if ((*ci).trackAs == -1 || distance*tan(max+min)+ddiff < (*ci).error)
+								{
+									if ((*ci).trackAs != -1)
+									{
+										visibleTracked--;
+										ev << "FOUND BETTER MATCH with error of " << distance*tan(max+min)+ddiff << " < "<< (*ci).error << endl;
+										stats.changedMatch.record(i);
+										if ((*ci).trackAs != v.id)
+											trackedWrong--;
+									}
+									isVisible = true;
+									visibleTracked++;
+									if (v.id != i)
+										trackedWrong++;
+									(*ci).trackAs = i;
+									(*ci).error = distance*tan(max+min)+ddiff;
+									stats.unifiedError.record(0);
+								}
+							}
+						}
+					}
+
+					// nve stuff
+					if (!isVisible)
+					{
+						diff = nve[i]->positionError(vm->getVehiclePos(i), simTime());
+						stats.nveErrorVec.record(diff);
+						stats.unifiedError.record(diff);
+					}
+					tracked++;
+				}
+				else
+				{
+					delete nve[i];
+					nve[i] = 0;
+					deleted++;
+				}
+			}
+		}
+
+		int trackedVisionNetw = 0;
+		if (extraCCWS)
+		{
+			for (int i=0; i<maxVehicles; i++)
+			{
+				if (vpe[i] != 0)
+				{
+					if (simTime() - vpe[i]->getLastUpdated() <= nveTimeout && nve[i] == 0)
+					{
+						trackedVisionNetw++;
+					}
+					else
+					{
+						delete vpe[i];
+						vpe[i] = 0;
+					}
+				}
+			}
+		}
+
+
+		for (VehicleTrackingList::iterator ci = visible.begin(); ci != visible.end(); ci++)
+		{
+			if ((*ci).trackAs == -1)
+			{
+				if (nve[(*ci).vehicle.id] == 0)
+					visibleNotTracked++;
+				else
+					visibleMissed++;
+			}
+		}
+
+		stats.ndeletecVec.record(deleted);
+		stats.nveVec.record(tracked);
+		stats.visibleTrackedVec.record(visibleTracked);
+		stats.visibleNotTrackedVec.record(visibleNotTracked);
+		stats.trackedWrong.record(trackedWrong);
+		stats.visibleMissed.record(visibleMissed);
+		if (extraCCWS)
+		{
+			stats.netwVision.record(trackedVisionNetw);
+			stats.allTracked.record(trackedVisionNetw+tracked);
+		}
+
 	}
 }
 
@@ -850,4 +857,6 @@ CCWSApplLayer::~CCWSApplLayer()
 		cancelAndDelete(hwsTimer);
 	if (ewsTimer != 0)
 		cancelAndDelete(ewsTimer);
+	if (statsTimer != 0)
+		cancelAndDelete(statsTimer);
 }

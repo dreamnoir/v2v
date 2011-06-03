@@ -118,6 +118,9 @@ void VisionManager::initialize(int stage)
 		assert(GridCoord(*playgroundSize, findDistance).y == gridDim.y - 1);
 		assert(GridCoord(*playgroundSize, findDistance).z == gridDim.z - 1);
 		if (debug) ev << "findDistance is " << findDistance.info() << endl;
+
+		timer = new cMessage( "vision-timer", VISION_UPDATE);
+		scheduleAt(simTime() + 0.100000001, timer);
 	}
 }
 
@@ -125,12 +128,60 @@ VisionManager::GridCoord VisionManager::getCellForCoordinate(const Coord& c) {
     return GridCoord(c, findDistance);
 }
 
+void VisionManager::handleMessage(cMessage* msg)
+{
+	switch(msg->getKind())
+	{
+		case VISION_UPDATE:
+
+			ev << "updating vision..." << simTime() << endl;
+
+			visionUpdate();
+
+
+			if (vehiclesTracked != 0)
+			{
+				timer = new cMessage( "vision-timer", VISION_UPDATE);
+				scheduleAt(simTime() + 0.1, timer);
+			}
+			break;
+	}
+
+	delete msg;
+}
+
+void VisionManager::visionUpdate()
+{
+
+	VisionEntries::iterator it = vehicles.begin();
+	while (it != vehicles.end())
+	{
+		if ((*it).second != 0)
+		{
+			GridCoord cell = getCellForCoordinate(((*it).second)->pos);
+			checkGrid(cell, it, (*it).first);
+		}
+		it++;
+	}
+}
+
 void VisionManager::updateConnections(int nicID, const Coord* oldPos, const Coord* newPos)
 {
 	GridCoord oldCell = getCellForCoordinate(*oldPos);
     GridCoord newCell = getCellForCoordinate(*newPos);
 
-	checkGrid(oldCell, newCell, nicID );
+	//checkGrid(oldCell, newCell, nicID );
+
+    // find nic at old position
+    VisionEntries& oldCellEntries = getCellEntries(oldCell);
+    VisionEntries::iterator it = oldCellEntries.find(nicID);
+    VisionEntry *nic = it->second;
+
+    // move nic to a new position in matrix
+    if(oldCell != newCell) {
+    	oldCellEntries.erase(it);
+    	getCellEntries(newCell)[nicID] = nic;
+    }
 }
 
 VisionManager::VisionEntries& VisionManager::getCellEntries(VisionManager::GridCoord& cell) {
@@ -150,8 +201,8 @@ void VisionManager::registerVehicleExt(int nicID)
     cellEntries[nicID] = VisionEntry;
 }
 
-void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
-                                      VisionManager::GridCoord& newCell,
+void VisionManager::checkGrid(VisionManager::GridCoord& cell,
+									VisionEntries::iterator& it,
                                       int id)
 
 {
@@ -159,47 +210,30 @@ void VisionManager::checkGrid(VisionManager::GridCoord& oldCell,
     // structure to find union of grid squares
     CoordSet gridUnion(74);
 
-    // find nic at old position
-    VisionEntries& oldCellEntries = getCellEntries(oldCell);
-    VisionEntries::iterator it = oldCellEntries.find(id);
-    VisionEntry *nic = it->second;
-
-
-    // move nic to a new position in matrix
-    if(oldCell != newCell) {
-    	oldCellEntries.erase(it);
-    	getCellEntries(newCell)[id] = nic;
-    }
+    VisionEntry* vehicle = vehicles[id];
 
 	if((gridDim.x == 1) && (gridDim.y == 1) && (gridDim.z == 1)) {
-		gridUnion.add(oldCell);
+		gridUnion.add(cell);
     } else {
-		//add grid around oldPos
-		fillUnionWithNeighbors(gridUnion, oldCell);
-
-
-        if(oldCell != newCell) {
-            //add grid around newPos
-            fillUnionWithNeighbors(gridUnion, newCell);
-        }
+		fillUnionWithNeighbors(gridUnion, cell);
     }
 
-	if (nic->isVisionOn())
+	if (vehicle->isVisionOn())
 	{
 		// clear out vehicles in range
-		nic->withinRange.clear();
+		vehicle->withinRange.clear();
 
 		// update all vehicles in nearby grids to check for range
 	    GridCoord* c = gridUnion.next();
 	    while(c != 0) {
-			updateVehicleVision(getCellEntries(*c), nic);
+			updateVehicleVision(getCellEntries(*c), vehicle);
 			c = gridUnion.next();
 	    }
 
 	    // prune list of maybe visible vehicles
-	    nic->pruneVisible(visionCutoff);
+	    vehicle->pruneVisible(visionCutoff);
 
-	    if (debug) ev << "visible by " << id << " are " << nic->visible << " of " << nic->possible << " vehicles." << endl;
+	    if (debug) ev << "visible by " << id << " are " << vehicle->visible << " of " << vehicle->possible << " vehicles." << endl;
 	}
 }
 

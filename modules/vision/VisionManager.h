@@ -213,6 +213,9 @@ protected:
 	/** @brief the biggest vision distance for any camera*/
 	double maxDistance;
 
+	// timer for vision updates
+	cMessage *timer;
+
 	/** @brief Square of maxInterferenceDistance cache a value that
 	 * is often used */
 	double maxDistSquared;
@@ -266,8 +269,8 @@ private:
     /**
      * @brief Check connections of a nic in the grid
      */
-    void checkGrid(GridCoord& oldCell,
-                   GridCoord& newCell,
+    void checkGrid(GridCoord& cell,
+				   VisionEntries::iterator& it,
                    int id);
 
     /**
@@ -322,7 +325,16 @@ protected:
 	 */
 	virtual void updateConnections(int nicID, const Coord* oldPos, const Coord* newPos);
 
+	virtual void handleMessage( cMessage* );
+
+	void visionUpdate();
+
 public:
+
+	enum
+	{
+		VISION_UPDATE = 1
+	};
 
 	virtual ~VisionManager();
 
