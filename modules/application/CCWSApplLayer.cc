@@ -162,6 +162,7 @@ void CCWSApplLayer::initialize(int stage)
 		hwsTimer = 0;
 		ewsTimer = 0;
 		timer = 0;
+		statsTimer = 0;
 
 	}
 	else if(stage==1)
