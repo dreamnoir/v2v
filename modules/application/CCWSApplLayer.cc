@@ -73,9 +73,10 @@ void CCWSApplLayer::Statistics::initialize()
 	//nveErrorVec1.setName("nve-error1");
 	//nveVec1.setName("nve-tracked1");
 	//nveErrorVec2.setName("nve-error2");
-	//nveVec2.setName("nve-tracked2");
-	//nveErrorVec3.setName("nve-error3");
-	//nveVec3.setName("nve-tracked3");
+
+	distanceError.setName("distance-error");
+	minError.setName("min-error");
+	maxError.setName("max-error");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -762,6 +763,9 @@ void CCWSApplLayer::collectStats()
 									(*ci).trackAs = i;
 									(*ci).error = distance*tan(max+min)+ddiff;
 									stats.unifiedError.record(0);
+									stats.distanceError.record(distance);
+									stats.minError.record(a.min-v.angles.min);
+									stats.maxError.record(a.max-v.angles.max);
 								}
 							}
 						}
