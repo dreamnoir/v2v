@@ -89,9 +89,15 @@ public:
 			//cOutVector nveVec1;				// vehicles tracked by nve
 			//cOutVector nveErrorVec2;			// NVE error between position updates
 
-			cOutVector distanceError;				// vehicles tracked by nve
-			cOutVector minError;			// NVE error between position updates
-			cOutVector maxError;				// vehicles tracked by nve
+			cOutVector distanceError1;
+			cOutVector minError1;
+			cOutVector maxError1;
+			cOutVector distanceError2;
+			cOutVector minError2;
+			cOutVector maxError2;
+			cOutVector distanceError3;
+			cOutVector minError3;
+			cOutVector maxError3;
 
 			void initialize();
 			//void watch(cSimpleModule& module);

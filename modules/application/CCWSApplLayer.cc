@@ -74,9 +74,15 @@ void CCWSApplLayer::Statistics::initialize()
 	//nveVec1.setName("nve-tracked1");
 	//nveErrorVec2.setName("nve-error2");
 
-	distanceError.setName("distance-error");
-	minError.setName("min-error");
-	maxError.setName("max-error");
+	distanceError1.setName("distance-error1");
+	minError1.setName("min-error1");
+	maxError1.setName("max-error1");
+	distanceError2.setName("distance-error2");
+	minError2.setName("min-error2");
+	maxError2.setName("max-error2");
+	distanceError3.setName("distance-error3");
+	minError3.setName("min-error3");
+	maxError3.setName("max-error3");
 }
 
 void CCWSApplLayer::Statistics::recordScalars(cSimpleModule& module)
@@ -763,9 +769,6 @@ void CCWSApplLayer::collectStats()
 									(*ci).trackAs = i;
 									(*ci).error = distance*tan(max+min)+ddiff;
 									stats.unifiedError.record(0);
-									stats.distanceError.record(distance);
-									stats.minError.record(a.min-v.angles.min);
-									stats.maxError.record(a.max-v.angles.max);
 								}
 							}
 						}
@@ -818,6 +821,45 @@ void CCWSApplLayer::collectStats()
 					visibleNotTracked++;
 				else
 					visibleMissed++;
+			}
+
+			int id = (*ci).vehicle.id;
+			if (nve[id] != 0)
+			{
+				VisibleVehicle v = (*ci).vehicle;
+				PositionEstimate estimate = nve[id]->getPositionEstimate();
+
+				double vLength = vm->getLength(id);
+				double vWidth = vm->getWidth(id);
+
+				double distance = getDistanceTo(estimate, vLength, vWidth);
+				double ddiff = distance-v.distance;
+
+				MinMax a = getMinMaxAngles(estimate, vLength, vWidth);
+				double max = a.max-v.angles.max;
+				double min = a.min-v.angles.min;
+
+				double updated = SIMTIME_DBL(simTime() - nve[id]->getLastUpdated());
+
+				if (updated < 0.66)
+				{
+					stats.distanceError1.record(ddiff);
+					stats.minError1.record(a.min-v.angles.min);
+					stats.maxError1.record(a.max-v.angles.max);
+				}
+				else if (updated >= 0.66 && updated < 1.33)
+				{
+					stats.distanceError2.record(ddiff);
+					stats.minError2.record(a.min-v.angles.min);
+					stats.maxError2.record(a.max-v.angles.max);
+				}
+				else
+				{
+					stats.distanceError3.record(ddiff);
+					stats.minError3.record(a.min-v.angles.min);
+					stats.maxError3.record(a.max-v.angles.max);
+				}
+
 			}
 		}
 
